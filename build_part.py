@@ -218,19 +218,19 @@ def create_arch_wall_poly():
     return Polygon(wall_polygon_pts)
 
 def get_exact_base_polygon():
-    # Align bottom exterior wall notch to exactly match the bottom central arch walls (X = ±3.70mm)
+    # Config 1: Align bottom exterior wall notch outer walls with Arch INNER walls (X = ±2.50mm)
     pts = outer_pts.copy()
     for idx, (x, y) in enumerate(pts):
         if abs(y - (-18.539)) < 0.05:
-            if abs(x - 1.382) < 0.05:
-                pts[idx] = [3.70, -18.539]
-            elif abs(x - (-2.291)) < 0.05:
-                pts[idx] = [-3.70, -18.539]
+            if abs(x - 1.382) < 0.05 or abs(x - 3.70) < 0.05:
+                pts[idx] = [2.50, -18.539]
+            elif abs(x - (-2.291)) < 0.05 or abs(x - (-3.70)) < 0.05:
+                pts[idx] = [-2.50, -18.539]
         elif abs(y - (-16.650)) < 0.05:
-            if abs(x - 1.382) < 0.05:
-                pts[idx] = [3.70, -16.650]
-            elif abs(x - (-2.291)) < 0.05:
-                pts[idx] = [-3.70, -16.650]
+            if abs(x - 1.382) < 0.05 or abs(x - 3.70) < 0.05:
+                pts[idx] = [2.50, -16.650]
+            elif abs(x - (-2.291)) < 0.05 or abs(x - (-3.70)) < 0.05:
+                pts[idx] = [-2.50, -16.650]
                 
     raw_poly = Polygon(pts)
     if not raw_poly.is_valid:
