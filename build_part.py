@@ -455,18 +455,28 @@ def build_clean_shaft_towers_mesh():
     r_shaft = 1.00  # 2mm diameter shaft -> 1mm radius
     z_cradle_center = z_top - r_shaft  # 12.59mm
     
-    # Semicircular arc for bottom of U-cradle from right (a=0) to left (a=pi)
-    angles = np.linspace(0, np.pi, 32)
-    arc_pts = [(y_shaft + r_shaft * np.cos(a), z_cradle_center - r_shaft * np.sin(a)) for a in angles]
+    # Shaft Retention Wrap-Around Cradle:
+    # Circle continues up and around above equator to a retention throat width of 1.65mm
+    throat_w = 1.65
+    half_w = throat_w / 2.0  # 0.825mm
+    alpha = np.arcsin(half_w / r_shaft)  # 55.59 deg from vertical
     
-    # 2D profile in (Y, Z) with smooth vertical walls and semicircular cradle bottom
+    # Circular arc around shaft cavity from right retention tip to left retention tip
+    phi = np.linspace(np.pi/2 - alpha, -np.pi - (np.pi/2 - alpha), 64)
+    cradle_arc_pts = [(y_shaft + r_shaft * np.cos(p), z_cradle_center + r_shaft * np.sin(p)) for p in phi]
+    
+    # Lead-in bevel from retention tips up to top edge (Z = z_top)
+    y_left_top = y_shaft - half_w - 0.30
+    y_right_top = y_shaft + half_w + 0.30
+    
+    # 2D profile in (Y, Z)
     profile_yz = [
         (y_min, z_base),
         (y_max, z_base),
         (y_max, z_top),
-        (y_shaft + r_shaft, z_top),
-    ] + arc_pts + [
-        (y_shaft - r_shaft, z_top),
+        (y_right_top, z_top),
+    ] + cradle_arc_pts + [
+        (y_left_top, z_top),
         (y_min, z_top)
     ]
     poly_yz = Polygon(profile_yz)
