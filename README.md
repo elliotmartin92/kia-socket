@@ -19,8 +19,10 @@ py -3 generate_labeled_preview.py
 ### Generated Output Files
 | File | Description |
 | :--- | :--- |
-| **`part.stl`** | 3D Binary/ASCII STL mesh ready for 3D printing / slicers. |
-| **`part.obj`** | Standard 3D Wavefront mesh with vertex normals. |
+| **`part.stl`** / **`part.obj`** | Main baseplate with **100% planar flat bottom ($Z = 0.00\text{ mm}$)** for support-free 3D printing. |
+| **`slit_insert.stl`** / **`slit_insert.obj`** | Separate 3D-printable backside slit wall insert with integrated indexing registration key. |
+| **`slit_inserts_pair.stl`** | Two inserts pre-arranged side-by-side on a single build plate for 1-click 3D printing. |
+| **`complete_assembly.stl`** | Complete mated assembly showing both inserts keyed into the main baseplate. |
 | **`part.scad`** | OpenSCAD source file representing the exact geometry. |
 | **`labeled_part_preview.png`** | 2-panel blueprint showing top-down dimensioned feature map and 3D isometric perspective. |
 | **`part_preview.png`** | 3-panel multi-angle view (Top-Down, 3D Perspective, Bottom View). |
@@ -33,14 +35,17 @@ py -3 generate_labeled_preview.py
 - **Origin $(0, 0, 0)$**: Geometric center of the main body circle/profile.
 - **Scale Factor**: Calibrated from SVG pixel coordinates:
   $$\text{SCALE} = 0.349787\text{ mm/pixel}, \quad X_0 = 128.65\text{ px}, \quad Y_0 = 128.65\text{ px}$$
-- **$Z$-Axis Elevations**:
-  - $Z \in [-2.47, 0.00]\text{ mm}$: Backside protruding slit boss walls.
+- **$Z$-Axis Elevations (Main Part)**:
+  - $Z = 0.00\text{ mm}$: 100% Flat build-plate datum (zero support needed under main floor).
   - $Z \in [0.00, 1.00]\text{ mm}$: Solid base floor plate ($1.00\text{ mm}$ thick).
   - $Z \in [1.00, 1.50]\text{ mm}$: Internal floor stiffener grid ribs ($0.50\text{ mm}$ tall).
   - $Z \in [1.00, 4.60]\text{ mm}$: Guide brackets ($4.60\text{ mm}$ total height).
   - $Z \in [1.00, 6.77]\text{ mm}$: Outer perimeter wall, snap clip stems, bottom arch wall, and bridge rib ($6.77\text{ mm}$ height).
   - $Z \in [1.00, 10.50]\text{ mm}$: Center curved feature with internal rib ($10.50\text{ mm}$ total height).
   - $Z \in [1.00, 13.59]\text{ mm}$: Shaft support towers ($12.59\text{ mm}$ height above floor, total $13.59\text{ mm}$).
+- **Separate Slit Insert Dimensions**:
+  - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.50\text{ mm} \times 5.40\text{ mm}$ outer, $1.10\text{ mm} \times 3.00\text{ mm}$ inner core).
+  - $Z \in [2.47, 3.32]\text{ mm}$: Indexing registration key ($0.95\text{ mm} \times 2.85\text{ mm} \times 0.85\text{ mm}$) that plugs into the through-slit.
 
 ---
 

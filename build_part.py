@@ -664,8 +664,46 @@ def build_exact_3d_model():
     mesh_curved_feat = extrude_shapely_geom(curved_feat_poly, height=10.50 - BASE_THICK)
     mesh_curved_feat.apply_translation([0, 0, BASE_THICK])
     
-    full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_bosses, mesh_towers_assembly, mesh_curved_feat] + hook_meshes)
+    # Main part is 100% planar at Z = 0.00mm for direct support-free 3D printing
+    full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_towers_assembly, mesh_curved_feat] + hook_meshes)
     return full_part, base_poly
+
+def build_slit_insert_mesh():
+    """Builds a single separate 3D-printable backside slit wall insert with indexing key.
+    - Flat print bed face at Z = 0
+    - Wall body: 3.50mm x 5.40mm outer, 1.10mm x 3.00mm inner, height = 2.47mm (Z: 0 to 2.47mm)
+    - Indexing registration key: 0.95mm x 2.85mm outer, 0.65mm x 2.55mm inner, height = 0.85mm (Z: 2.47 to 3.32mm)
+    - Mating shoulder at Z = 2.47mm sits flush against main plate bottom.
+    """
+    # 1. Main Wall Body (Z: 0.0 to 2.47mm)
+    outer_box = box(-3.50/2, -5.40/2, 3.50/2, 5.40/2)
+    inner_box = box(-1.10/2, -3.00/2, 1.10/2, 3.00/2)
+    body_poly = outer_box.difference(inner_box)
+    m_body = extrude_shapely_geom(body_poly, height=SLIT_BOSS_HEIGHT)
+    
+    # 2. Indexing Registration Key (Z: 2.47 to 3.32mm)
+    key_outer = box(-0.95/2, -2.85/2, 0.95/2, 2.85/2)
+    key_inner = box(-0.65/2, -2.55/2, 0.65/2, 2.55/2)
+    key_poly = key_outer.difference(key_inner)
+    m_key = extrude_shapely_geom(key_poly, height=0.85)
+    m_key.apply_translation([0, 0, SLIT_BOSS_HEIGHT])
+    
+    m_insert = trimesh.util.concatenate([m_body, m_key])
+    m_insert = trimesh.Trimesh(vertices=m_insert.vertices, faces=m_insert.faces, process=True)
+    return m_insert
+
+def build_indexed_assembly_mesh(main_mesh, insert_mesh):
+    """Creates the full mated 3D assembly mesh with both inserts indexed into the main part."""
+    # Left slit position: X = -8.403mm, Y = -14.839mm
+    # Right slit position: X = +8.403mm, Y = -14.839mm
+    # When mated, insert shoulder (Z = 2.47mm) touches main part bottom (Z = 0.00mm) -> translation in Z = -2.47mm
+    ins_left = insert_mesh.copy()
+    ins_left.apply_translation([-8.403, -14.839, -SLIT_BOSS_HEIGHT])
+    
+    ins_right = insert_mesh.copy()
+    ins_right.apply_translation([8.403, -14.839, -SLIT_BOSS_HEIGHT])
+    
+    return trimesh.util.concatenate([main_mesh, ins_left, ins_right])
 
 # ==============================================================================
 # RENDER PLOTS & EXPORT OPENSCAD
@@ -845,11 +883,33 @@ complete_part();
     print("Exported exact geometry to part.scad!")
 
 if __name__ == '__main__':
-    print("Building 3D Mesh with EXACT SVG non-circular geometry...")
+    print("Building 3D Mesh with EXACT SVG non-circular geometry (Flat Bottom Z=0 for 3D Printing)...")
     part_mesh, base_poly = build_exact_3d_model()
     part_mesh.export('part.stl')
     part_mesh.export('part.obj')
-    print("Exported part.stl and part.obj successfully!")
+    print("Exported part.stl and part.obj successfully! (Flat bottom Z=0 to 13.59mm)")
+    
+    print("Building separate 3D-printable slit insert mesh with indexing key...")
+    insert_mesh = build_slit_insert_mesh()
+    insert_mesh.export('slit_insert.stl')
+    insert_mesh.export('slit_insert.obj')
+    print("Exported slit_insert.stl and slit_insert.obj successfully!")
+    
+    # Export pair of inserts for single build-plate 3D printing
+    ins_1 = insert_mesh.copy()
+    ins_1.apply_translation([-4.0, 0, 0])
+    ins_2 = insert_mesh.copy()
+    ins_2.apply_translation([4.0, 0, 0])
+    pair_mesh = trimesh.util.concatenate([ins_1, ins_2])
+    pair_mesh.export('slit_inserts_pair.stl')
+    print("Exported slit_inserts_pair.stl successfully!")
+    
+    # Export complete assembled model
+    assembly_mesh = build_indexed_assembly_mesh(part_mesh, insert_mesh)
+    assembly_mesh.export('complete_assembly.stl')
+    assembly_mesh.export('complete_assembly.obj')
+    print("Exported complete_assembly.stl successfully!")
+    
     render_plots(part_mesh, base_poly)
     export_openscad_exact(base_poly)
     print("All tasks complete!")

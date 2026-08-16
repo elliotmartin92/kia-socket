@@ -185,8 +185,8 @@ ax1.annotate('Bottom Central Arch Wall\n(5.00mm Interior Width at Base\n7.95mm O
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
              fontsize=9, fontweight='bold', color='#1f77b4', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1f77b4'))
 
-# 12. Backside Slit Walls
-ax1.annotate('Backside Slit Walls (2x)\n(Protrude 2.47mm on -Z side\naround 1.1x3.0mm slits)', xy=(-8.4, -14.8), xytext=(-26, -18.5),
+# 12. Backside Slits (Through-holes for Separate Indexed Inserts)
+ax1.annotate('Through Slits 1.1x3.0mm (2x)\n(Flat Z=0 bottom for 3D print;\nSeparate indexed insert part)', xy=(-8.4, -14.8), xytext=(-26, -18.5),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
              fontsize=9, fontweight='bold', color='#6a1b9a', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#6a1b9a'))
 
@@ -223,7 +223,7 @@ ax2.text(6.28, -3.2, 11.8, "Center Curved Feature\n(10.50mm)", color='#6a1b9a', 
 ax2.text(0, 20.0, 8.0, "Top Tab (6.77mm wall)", color='#1f77b4', fontsize=9, fontweight='bold', ha='center')
 ax2.text(13.5, 13.5, 8.5, "Snap Clip (45°)", color='#0e8188', fontsize=9, fontweight='bold')
 ax2.text(0, -18.0, 4.0, "Bottom Arch & Tab", color='#1f77b4', fontsize=9, fontweight='bold', ha='center')
-ax2.text(-8.0, -15.0, -3.5, "Backside Slit Walls\n(2.47mm)", color='#6a1b9a', fontsize=9, fontweight='bold', ha='center')
+ax2.text(-8.0, -15.0, 2.0, "Flat Base (Z=0)\n(Indexed Inserts)", color='#6a1b9a', fontsize=9, fontweight='bold', ha='center')
 
 ax2.set_xlim(-24, 24)
 ax2.set_ylim(-24, 24)
