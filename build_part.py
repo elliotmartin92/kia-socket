@@ -218,7 +218,21 @@ def create_arch_wall_poly():
     return Polygon(wall_polygon_pts)
 
 def get_exact_base_polygon():
-    raw_poly = Polygon(outer_pts)
+    # Align bottom exterior wall notch to exactly match the bottom central arch walls (X = ±3.70mm)
+    pts = outer_pts.copy()
+    for idx, (x, y) in enumerate(pts):
+        if abs(y - (-18.539)) < 0.05:
+            if abs(x - 1.382) < 0.05:
+                pts[idx] = [3.70, -18.539]
+            elif abs(x - (-2.291)) < 0.05:
+                pts[idx] = [-3.70, -18.539]
+        elif abs(y - (-16.650)) < 0.05:
+            if abs(x - 1.382) < 0.05:
+                pts[idx] = [3.70, -16.650]
+            elif abs(x - (-2.291)) < 0.05:
+                pts[idx] = [-3.70, -16.650]
+                
+    raw_poly = Polygon(pts)
     if not raw_poly.is_valid:
         raw_poly = raw_poly.buffer(0)
     
@@ -229,7 +243,7 @@ def get_exact_base_polygon():
     hole_y = -((86.8 + 99.7)/2.0 - Y0) * SCALE
     hole_box = box(hole_x - hole_w/2, hole_y - hole_h/2, hole_x + hole_w/2, hole_y + hole_h/2)
     
-    # 2. Outer Solid Body: complete perimeter including 1.88mm inset bottom wall
+    # 2. Outer Solid Body: complete perimeter including 1.88mm inset bottom wall aligned to arch
     outer_body_poly = raw_poly
     
     # 3. Two Bottom Vertical Slits / Holes (1.10mm wide in X, 3.00mm long in Y)
