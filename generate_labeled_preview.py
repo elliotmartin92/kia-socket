@@ -181,7 +181,7 @@ arch_poly = create_arch_wall_poly()
 ax1.plot(*arch_poly.exterior.xy, color='#1f77b4', linewidth=2.0)
 
 # 11. Bottom Central Arch Wall
-ax1.annotate('Bottom Central Arch Wall\n(5.00mm Interior Width at Base\nHeight: 6.77mm, Thick: 1.20mm)', xy=(0, -11.0), xytext=(-22, -7.0),
+ax1.annotate('Bottom Central Arch Wall\n(5.00mm Interior Width at Base\n7.95mm Outer Height, Thick: 1.20mm)', xy=(0, -8.7), xytext=(-22, -7.0),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
              fontsize=9, fontweight='bold', color='#1f77b4', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1f77b4'))
 

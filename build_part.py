@@ -196,16 +196,19 @@ def create_arch_wall_poly():
     """Creates a clean geometric U-arch wall (1.20mm thick) with 5.00mm interior width at base.
     - Interior Width: 5.00mm (inner radius R_inner = 2.50mm), centered on X = 0.
     - Wall thickness: 1.20mm (outer radius R_outer = 3.70mm).
-    - Interior Apex: Y = -11.00mm (Arc center at Y = -13.50mm).
-    - Sides: Vertical straight tangent legs from Y = -13.50mm down to bottom wall (Y = -16.65mm)."""
+    - Total Outer Height: 7.95mm from inset bottom wall (Y = -16.65mm to outer apex Y = -8.70mm).
+    - Arc center at Y = -12.40mm (Inner Apex Y = -9.90mm).
+    - Sides: Vertical straight tangent legs from Y = -12.40mm down to inset wall (Y = -16.65mm)."""
     w_inner = 5.00
     r_inner = w_inner / 2.0         # 2.50mm
     wall_thick = OUTER_WALL_THICK  # 1.20mm
     r_outer = r_inner + wall_thick # 3.70mm
     
-    y_bot = -16.65
-    y_apex_inner = -11.00
-    y_arc_center = y_apex_inner - r_inner  # -13.50mm
+    y_bot = -16.650
+    total_outer_height = 7.950
+    y_apex_outer = y_bot + total_outer_height  # -8.700mm
+    y_apex_inner = y_apex_outer - wall_thick   # -9.900mm
+    y_arc_center = y_apex_inner - r_inner      # -12.400mm
     
     angles = np.linspace(np.pi, 0, 32)
     arc_inner_pts = [(r_inner * np.cos(a), y_arc_center + r_inner * np.sin(a)) for a in angles]
