@@ -668,28 +668,32 @@ def build_exact_3d_model():
     full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_towers_assembly, mesh_curved_feat] + hook_meshes)
     return full_part, base_poly
 
-def build_slit_insert_mesh():
-    """Builds a single separate 3D-printable backside slit wall insert with indexing key.
+def build_slit_insert_mesh(is_hollow=True, inner_hole_w=0.60, inner_hole_l=2.40):
+    """Builds a single 100% monolithic, watertight 3D-printable slit insert part with indexing key.
     - Flat print bed face at Z = 0
-    - Wall body: 3.50mm x 5.40mm outer, 1.10mm x 3.00mm inner, height = 2.47mm (Z: 0 to 2.47mm)
-    - Indexing registration key: 0.95mm x 2.85mm outer, 0.65mm x 2.55mm inner, height = 0.85mm (Z: 2.47 to 3.32mm)
-    - Mating shoulder at Z = 2.47mm sits flush against main plate bottom.
+    - Wall body: 3.50mm x 5.40mm outer, height = 2.47mm (Z: 0 to 2.47mm)
+    - Continuous solid horizontal shoulder at Z = 2.47mm (1.275mm wide contact rim)
+    - Raised indexing registration key: 0.95mm x 2.85mm outer, height = 0.85mm (Z: 2.47 to 3.32mm)
+    - Continuous inner through-hole: 0.60mm x 2.40mm from Z = 0 to 3.32mm
     """
-    # 1. Main Wall Body (Z: 0.0 to 2.47mm)
-    outer_box = box(-3.50/2, -5.40/2, 3.50/2, 5.40/2)
-    inner_box = box(-1.10/2, -3.00/2, 1.10/2, 3.00/2)
-    body_poly = outer_box.difference(inner_box)
-    m_body = extrude_shapely_geom(body_poly, height=SLIT_BOSS_HEIGHT)
+    outer_body = box(-3.50/2, -5.40/2, 3.50/2, 5.40/2)
+    inner_hole = box(-inner_hole_w/2, -inner_hole_l/2, inner_hole_w/2, inner_hole_l/2)
     
-    # 2. Indexing Registration Key (Z: 2.47 to 3.32mm)
-    key_outer = box(-0.95/2, -2.85/2, 0.95/2, 2.85/2)
-    key_inner = box(-0.65/2, -2.55/2, 0.65/2, 2.55/2)
-    key_poly = key_outer.difference(key_inner)
-    m_key = extrude_shapely_geom(key_poly, height=0.85)
-    m_key.apply_translation([0, 0, SLIT_BOSS_HEIGHT])
+    if is_hollow:
+        poly_body = outer_body.difference(inner_hole)
+    else:
+        poly_body = outer_body
+    m_body = extrude_shapely_geom(poly_body, height=SLIT_BOSS_HEIGHT)
     
-    m_insert = trimesh.util.concatenate([m_body, m_key])
-    m_insert = trimesh.Trimesh(vertices=m_insert.vertices, faces=m_insert.faces, process=True)
+    outer_key = box(-0.95/2, -2.85/2, 0.95/2, 2.85/2)
+    if is_hollow:
+        poly_key = outer_key.difference(inner_hole)
+    else:
+        poly_key = outer_key
+    m_key = extrude_shapely_geom(poly_key, height=0.85 + 0.10)
+    m_key.apply_translation([0, 0, SLIT_BOSS_HEIGHT - 0.10])
+    
+    m_insert = m_body.union(m_key, engine='manifold')
     return m_insert
 
 def build_indexed_assembly_mesh(main_mesh, insert_mesh):
