@@ -186,7 +186,7 @@ ax1.annotate('Bottom Central Arch Wall\n(5.00mm Interior Width at Base\n7.95mm O
              fontsize=9, fontweight='bold', color='#1f77b4', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1f77b4'))
 
 # 12. Backside Slits (Through-holes for Separate Indexed Inserts)
-ax1.annotate('Through Slits 1.1x3.0mm (2x)\n(Flat Z=0 bottom for 3D print;\nSeparate indexed insert part)', xy=(-8.4, -14.8), xytext=(-26, -18.5),
+ax1.annotate('Through Slits 1.05x3.35mm (2x)\n(Clearance fit for 0.75x3.0mm part;\nFlat Z=0 for print; Separate inserts)', xy=(-8.4, -14.8), xytext=(-27, -18.5),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
              fontsize=9, fontweight='bold', color='#6a1b9a', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#6a1b9a'))
 

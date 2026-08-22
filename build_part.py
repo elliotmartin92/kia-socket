@@ -39,9 +39,9 @@ CLIP_SLOT_CLEARANCE = 0.50
 CLIP_HOOK_DEPTH = 1.59    # 1.59mm radial overhang from wall
 CLIP_HOOK_HEIGHT = 1.80
 
-# Bottom Slits / Holes
-SLIT_W_X = 1.10         # 1.1mm wide in X
-SLIT_LEN_Y = 3.00       # 3.0mm long in Y
+# Bottom Slits / Holes (Clearance fit for 0.75mm x 3.00mm mating part)
+SLIT_W_X = 1.05         # 1.05mm wide in X (+0.30mm clearance for 0.75mm part)
+SLIT_LEN_Y = 3.35       # 3.35mm long in Y (+0.35mm clearance for 3.00mm part)
 SLIT_BOSS_HEIGHT = 2.47 # 2.47mm protrusion on back side (-Z)
 SLIT_BOSS_WALL = 0.80   # 0.8mm thick wall around slits
 
@@ -668,15 +668,20 @@ def build_exact_3d_model():
     full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_towers_assembly, mesh_curved_feat] + hook_meshes)
     return full_part, base_poly
 
-def build_slit_insert_mesh(is_hollow=True, inner_hole_w=0.60, inner_hole_l=2.40):
+def build_slit_insert_mesh(is_hollow=True, inner_hole_w=1.05, inner_hole_l=3.35):
     """Builds a single 100% monolithic, watertight 3D-printable slit insert part with indexing key.
     - Flat print bed face at Z = 0
-    - Wall body: 3.50mm x 5.40mm outer, height = 2.47mm (Z: 0 to 2.47mm)
-    - Continuous solid horizontal shoulder at Z = 2.47mm (1.275mm wide contact rim)
-    - Raised indexing registration key: 0.95mm x 2.85mm outer, height = 0.85mm (Z: 2.47 to 3.32mm)
-    - Continuous inner through-hole: 0.60mm x 2.40mm from Z = 0 to 3.32mm
+    - Wall body: 3.65mm x 5.55mm outer, height = 2.47mm (Z: 0 to 2.47mm)
+    - Continuous solid horizontal shoulder at Z = 2.47mm (0.90mm wide contact rim)
+    - Raised indexing registration key: 1.85mm x 4.15mm outer, height = 0.85mm (Z: 2.47 to 3.32mm)
+    - Continuous inner through-hole: 1.05mm x 3.35mm from Z = 0 to 3.32mm (clearance for 0.75x3.0mm part)
     """
-    outer_body = box(-3.50/2, -5.40/2, 3.50/2, 5.40/2)
+    outer_body_w = 3.65
+    outer_body_l = 5.55
+    outer_key_w = 1.85
+    outer_key_l = 4.15
+    
+    outer_body = box(-outer_body_w/2, -outer_body_l/2, outer_body_w/2, outer_body_l/2)
     inner_hole = box(-inner_hole_w/2, -inner_hole_l/2, inner_hole_w/2, inner_hole_l/2)
     
     if is_hollow:
@@ -685,7 +690,7 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=0.60, inner_hole_l=2.40)
         poly_body = outer_body
     m_body = extrude_shapely_geom(poly_body, height=SLIT_BOSS_HEIGHT)
     
-    outer_key = box(-0.95/2, -2.85/2, 0.95/2, 2.85/2)
+    outer_key = box(-outer_key_w/2, -outer_key_l/2, outer_key_w/2, outer_key_l/2)
     if is_hollow:
         poly_key = outer_key.difference(inner_hole)
     else:
@@ -697,15 +702,13 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=0.60, inner_hole_l=2.40)
     return m_insert
 
 def build_indexed_assembly_mesh(main_mesh, insert_mesh):
-    """Creates the full mated 3D assembly mesh with both inserts indexed into the main part."""
-    # Left slit position: X = -8.403mm, Y = -14.839mm
-    # Right slit position: X = +8.403mm, Y = -14.839mm
-    # When mated, insert shoulder (Z = 2.47mm) touches main part bottom (Z = 0.00mm) -> translation in Z = -2.47mm
+    """Creates the complete 3D build-plate layout with the main part and both separate inserts arranged on the same plane (Z = 0.00mm) for 1-click support-free 3D printing."""
+    # Place inserts side by side to the right of the main baseplate on the build plate (Z = 0.00mm)
     ins_left = insert_mesh.copy()
-    ins_left.apply_translation([-8.403, -14.839, -SLIT_BOSS_HEIGHT])
+    ins_left.apply_translation([27.50, -5.00, 0.00])
     
     ins_right = insert_mesh.copy()
-    ins_right.apply_translation([8.403, -14.839, -SLIT_BOSS_HEIGHT])
+    ins_right.apply_translation([27.50, 5.00, 0.00])
     
     return trimesh.util.concatenate([main_mesh, ins_left, ins_right])
 
@@ -854,11 +857,11 @@ module base_plate_2d() {{
         translate([10.28 - 5.35/2, 10.83 - 4.51/2])
             square([5.35, 4.51]);
             
-        // Two Bottom Vertical Slits
-        translate([-7.853 - 1.10, -16.339])
-            square([1.10, 3.00]);
+        // Two Bottom Vertical Slits (Clearance fit for 0.75mm x 3.00mm part)
+        translate([-7.853 - {SLIT_W_X}, -16.339])
+            square([{SLIT_W_X}, {SLIT_LEN_Y}]);
         translate([7.853, -16.339])
-            square([1.10, 3.00]);
+            square([{SLIT_W_X}, {SLIT_LEN_Y}]);
     }}
 }}
 

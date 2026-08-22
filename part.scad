@@ -282,11 +282,11 @@ module base_plate_2d() {
         translate([10.28 - 5.35/2, 10.83 - 4.51/2])
             square([5.35, 4.51]);
             
-        // Two Bottom Vertical Slits
-        translate([-7.853 - 1.10, -16.339])
-            square([1.10, 3.00]);
+        // Two Bottom Vertical Slits (Clearance fit for 0.75mm x 3.00mm part)
+        translate([-7.853 - 1.05, -16.339])
+            square([1.05, 3.35]);
         translate([7.853, -16.339])
-            square([1.10, 3.00]);
+            square([1.05, 3.35]);
     }
 }
 

@@ -22,7 +22,7 @@ py -3 generate_labeled_preview.py
 | **`part.stl`** / **`part.obj`** | Main baseplate with **100% planar flat bottom ($Z = 0.00\text{ mm}$)** for support-free 3D printing. |
 | **`slit_insert.stl`** / **`slit_insert.obj`** | Separate 3D-printable backside slit wall insert with integrated indexing registration key. |
 | **`slit_inserts_pair.stl`** | Two inserts pre-arranged side-by-side on a single build plate for 1-click 3D printing. |
-| **`complete_assembly.stl`** | Complete mated assembly showing both inserts keyed into the main baseplate. |
+| **`complete_assembly.stl`** / **`complete_assembly.obj`** | Complete 1-click 3D print plate with the main baseplate and both separate slit inserts pre-arranged side-by-side on the **same flat print plane ($Z = 0.00\text{ mm}$)**. |
 | **`part.scad`** | OpenSCAD source file representing the exact geometry. |
 | **`labeled_part_preview.png`** | 2-panel blueprint showing top-down dimensioned feature map and 3D isometric perspective. |
 | **`part_preview.png`** | 3-panel multi-angle view (Top-Down, 3D Perspective, Bottom View). |
@@ -44,8 +44,8 @@ py -3 generate_labeled_preview.py
   - $Z \in [1.00, 10.50]\text{ mm}$: Center curved feature with internal rib ($10.50\text{ mm}$ total height).
   - $Z \in [1.00, 13.59]\text{ mm}$: Shaft support towers ($12.59\text{ mm}$ height above floor, total $13.59\text{ mm}$).
 - **Separate Slit Insert Dimensions**:
-  - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.50\text{ mm} \times 5.40\text{ mm}$ outer, $1.10\text{ mm} \times 3.00\text{ mm}$ inner core).
-  - $Z \in [2.47, 3.32]\text{ mm}$: Indexing registration key ($0.95\text{ mm} \times 2.85\text{ mm} \times 0.85\text{ mm}$) that plugs into the through-slit.
+  - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.65\text{ mm} \times 5.55\text{ mm}$ outer, $1.05\text{ mm} \times 3.35\text{ mm}$ inner clearance channel for $0.75\text{ mm} \times 3.00\text{ mm}$ part).
+  - $Z \in [2.47, 3.32]\text{ mm}$: Indexing registration key ($1.85\text{ mm} \times 4.15\text{ mm} \times 0.85\text{ mm}$) with continuous $1.05\text{ mm} \times 3.35\text{ mm}$ core.
 
 ---
 
@@ -65,7 +65,7 @@ py -3 generate_labeled_preview.py
                             |   (10.50mm tall)      |
            Snap Clip (225°) |                       | Snap Clip (315°)
                             \   [SLIT 1]  [SLIT 2]  /
-                             \   1.1x3.0   1.1x3.0 /
+                             \  1.05x3.35 1.05x3.35/
                               +---+             +---+
                               |   | [U-ARCH 5mm]|   |
                               |   | (7.95mm H)  |   |
@@ -101,7 +101,7 @@ py -3 generate_labeled_preview.py
 ### 3.3. Curved Snap Clips (4x at $45^\circ, 135^\circ, 225^\circ, 315^\circ$)
 - **Wall Following**: Matches the exact curved contour of the outer ($R \approx 19.25\text{ mm}$) and inner ($R \approx 18.05\text{ mm}$) wall.
 - **Flex Isolation**: Two $0.60\text{ mm}$ vertical through-slots from $Z = 3.07\text{ mm}$ to $Z = 6.77\text{ mm}$ isolating a $3.00\text{ mm}$ wide curved beam.
-- **Hook Geometry ($Z \in [4.97, 6.77]\text{ mm}$)**:
+- **Hook Geometry ($Z \in [4.97, 6.77\text{ mm}$)**:
   - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting $+1.59\text{ mm}$ radially outward.
   - Sloped lead-in ramp tapering up to top outer wall apex at $Z = 6.77\text{ mm}$.
   - Inner wall face: 100% flush, smooth, continuous cylinder.
@@ -120,12 +120,13 @@ py -3 generate_labeled_preview.py
 - **Height**: $4.60\text{ mm}$ ($Z \in [1.00, 4.60]\text{ mm}$).
 - **Wall Thickness**: $0.84\text{ mm}$ nominal.
 
-### 3.6. Backside Slit Protruding Bosses
-- **Hole Dimensions**: Two $1.10\text{ mm} \text{ (in X)} \times 3.00\text{ mm} \text{ (in Y)}$ through-slits.
+### 3.6. Backside Slit Protruding Bosses & Separate Inserts
+- **Hole Dimensions**: Two $1.05\text{ mm} \text{ (in X)} \times 3.35\text{ mm} \text{ (in Y)}$ through-slits (clearance fit to comfortably pass a $0.75\text{ mm} \times 3.00\text{ mm}$ component).
 - **Positioning**:
-  - $1.00\text{ mm}$ in $+Y$ from inner face of bottom wall ($Y \in [-16.34, -13.34]\text{ mm}$).
+  - $1.00\text{ mm}$ in $+Y$ from inner face of bottom wall ($Y \in [-16.34, -12.99]\text{ mm}$).
   - Aligned with leftmost wall of right bracket ($X = +7.853\text{ mm}$) and rightmost wall of left bracket ($X = -7.853\text{ mm}$).
-- **Protruding Walls**: $1.20\text{ mm}$ thick, protruding **$2.47\text{ mm}$** on the $-Z$ side ($Z \in [-2.47, 0.00]\text{ mm}$).
+- **Protruding Walls / Separate Inserts**: $0.80\text{ mm}$ thick wall, protruding **$2.47\text{ mm}$** on the $-Z$ side ($Z \in [-2.47, 0.00]\text{ mm}$).
+- **Complete Assembly Build Plate Layout**: `complete_assembly.stl` arranges the main baseplate and both separate slit inserts flat on the **same build plane ($Z = 0.00\text{ mm}$)** side-by-side for 1-click support-free 3D printing.
 
 ### 3.7. Internal Floor Stiffener Grid
 - **Pitch**: $5.20\text{ mm}$ (in $X$) $\times 3.20\text{ mm}$ (in $Y$).
