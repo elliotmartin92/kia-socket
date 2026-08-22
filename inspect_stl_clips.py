@@ -10,7 +10,8 @@ import math
 from build_part import (
     build_exact_3d_model, find_boundary_point_and_normal,
     get_exact_base_polygon, OUTER_WALL_THICK, OUTER_WALL_HEIGHT,
-    CLIP_HEIGHT, CLIP_HOOK_HEIGHT, CLIP_ARM_WIDTH, CLIP_HOOK_DEPTH
+    CLIP_HEIGHT, CLIP_HOOK_HEIGHT, CLIP_ARM_WIDTH, CLIP_HOOK_DEPTH,
+    CLIP_ANGLES
 )
 
 # Load the exported part.stl
@@ -20,7 +21,7 @@ print("Number of vertices:", len(stl_mesh.vertices), "faces:", len(stl_mesh.face
 
 base_poly, outer_body_poly, hole_info = get_exact_base_polygon()
 
-for angle_deg in [45, 135, 225, 315]:
+for angle_deg in CLIP_ANGLES:
     p, norm, tang = find_boundary_point_and_normal(base_poly, angle_deg)
     
     # Crop mesh around this clip

@@ -1,6 +1,6 @@
 """
 Generate a comprehensive, beautifully labeled part preview diagram
-with all named features, dimensions, and callouts.
+with all named features, dimensions, shaft/rocker kinematics, and Y-axis button actuation.
 """
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -16,8 +16,9 @@ from build_part import (
     create_center_curved_feature_poly,
     OUTER_WALL_HEIGHT, OUTER_WALL_THICK, BASE_THICK, BRACKET_HEIGHT,
     TOWER_HEIGHT, TOWER_WALL_THICK, TOWER_INTERNAL_GAP, SLIT_BOSS_HEIGHT,
-    find_boundary_point_and_normal
+    find_boundary_point_and_normal, CLIP_ANGLES
 )
+from build_shaft import build_shaft_rocker_mesh
 
 # 1. Build 3D mesh and base poly
 part_mesh, base_poly = build_exact_3d_model()
@@ -25,13 +26,15 @@ base_poly, outer_body_poly, hole_info = get_exact_base_polygon()
 inner_wall_poly = outer_body_poly.buffer(-OUTER_WALL_THICK)
 hole_x, hole_y, hole_w, hole_h = hole_info
 
-# Setup Figure
-fig = plt.figure(figsize=(26, 12), dpi=200)
+shaft_assembled_mesh = build_shaft_rocker_mesh(in_assembly_coords=True)
+
+# Setup Figure (3 panels: 2D Feature Map, 3D Isometric Assembly, Y-Axis Kinematic Stroke Cross-Section)
+fig = plt.figure(figsize=(30, 11), dpi=200)
 
 # ==============================================================================
 # PANEL 1: 2D TOP-DOWN SCHEMATIC WITH ALL NAMED FEATURE CALLOUTS
 # ==============================================================================
-ax1 = fig.add_subplot(1, 2, 1)
+ax1 = fig.add_subplot(1, 3, 1)
 
 # Outer and Inner Perimeter Wall
 x, y = outer_body_poly.exterior.xy
@@ -86,153 +89,168 @@ for geom in (bosses_poly.geoms if hasattr(bosses_poly, 'geoms') else [bosses_pol
     ax1.plot(bx, by, color='#9467bd', linestyle='--', linewidth=1.8)
 
 # Snap Clip positions
-for angle_deg in [45, 135, 225, 315]:
+for angle_deg in CLIP_ANGLES:
     p, norm, tang = find_boundary_point_and_normal(base_poly, angle_deg)
     ax1.plot(p[0], p[1], 'o', color='#17becf', markersize=7)
 
-# Shaft centerline axis
-ax1.plot([left_t_x - 4, right_t_x + 3], [7.666, 7.666], color='#8c564b', linestyle='-.', linewidth=1.8)
+# Shaft Axle & Plunger Top-Down Footprint
+ax1.plot([3.05, 15.81], [7.666, 7.666], color='#ff6f00', linewidth=3.5, label='Ø1.90mm Shaft Axle')
+ax1.fill([10.284 - 1.5, 10.284 + 1.5, 10.284 + 1.5, 10.284 - 1.5],
+         [7.666, 7.666, 12.35, 12.35], color='#e65100', alpha=0.8, label='Output Plunger (Through Hole)')
+ax1.fill([6.60 - 1.0, 6.60 + 1.0, 6.60 + 1.0, 6.60 - 1.0],
+         [3.17, 3.17, 7.666, 7.666], color='#ffd54f', alpha=0.9, edgecolor='#ff8f00', linewidth=1.5, label='Input Cam (Bar Contact)')
 
-# ------------------------------------------------------------------------------
-# ANNOTATIONS & FEATURE LABELS (2D)
-# ------------------------------------------------------------------------------
-# 1. Top Tab
+# Annotations
 ax1.annotate('Top Tab\n(Width: 8.22mm)', xy=(0, 20.0), xytext=(-16, 21.5),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=10, fontweight='bold', color='#1f77b4', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1f77b4'))
+             fontsize=9.5, fontweight='bold', color='#1f77b4', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1f77b4'))
 
-# 2. Side Ears / Tabs
-ax1.annotate('Left Side Ear', xy=(-20.5, 0), xytext=(-28, 0),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#1f77b4', va='center')
-ax1.annotate('Right Side Ear', xy=(20.5, 0), xytext=(22, 0),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#1f77b4', va='center')
-
-# 3. 4x Snap Clips
-ax1.annotate('Snap Clip (45°)\nFlush with Inner Wall (1.20mm)\n1.59mm Radial Hook', xy=(13.5, 13.5), xytext=(17, 16.5),
+ax1.annotate('Snap Clip (45°)\n1.59mm Radial Hook', xy=(13.5, 13.5), xytext=(17, 16.5),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
              fontsize=9, fontweight='bold', color='#0e8188', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#0e8188'))
-ax1.annotate('Snap Clip (135°)', xy=(-13.5, 13.5), xytext=(-22, 15.5),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#0e8188')
-ax1.annotate('Snap Clip (225°)', xy=(-13.5, -13.5), xytext=(-24, -13.5),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#0e8188')
-ax1.annotate('Snap Clip (315°)', xy=(13.5, -13.5), xytext=(16, -13.5),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#0e8188')
 
-# 4. Guide Brackets
-ax1.text(-6.0, 0, 'Bracket Pair 1 & 2\n(Height: 4.60mm)', color='#2ca02c', fontsize=9.5, fontweight='bold', ha='center',
+ax1.text(-6.0, 0, 'Bracket Pair 1 & 2\n(Height: 4.60mm)', color='#2ca02c', fontsize=9, fontweight='bold', ha='center',
          bbox=dict(boxstyle='round,pad=0.2', fc='#e8f5e9', ec='#2ca02c'))
-ax1.text(3.2, -2.0, 'Bracket 3', color='#2ca02c', fontsize=9, fontweight='bold', ha='center')
-ax1.text(9.3, -2.0, 'Bracket 4', color='#2ca02c', fontsize=9, fontweight='bold', ha='center')
 
-# 4b. Center Curved Feature (10.5mm tall)
 curved_feat_poly = create_center_curved_feature_poly()
 for geom in (curved_feat_poly.geoms if hasattr(curved_feat_poly, 'geoms') else [curved_feat_poly]):
     cx_pts, cy_pts = geom.exterior.xy
     ax1.fill(cx_pts, cy_pts, color='#ab47bc', alpha=0.6)
     ax1.plot(cx_pts, cy_pts, color='#8e24aa', linewidth=2.0)
-    for interior in geom.interiors:
-        ax1.plot(*interior.xy, color='#8e24aa', linewidth=1.5)
 
-ax1.annotate('Center Curved Feature (10.50mm tall)\n(4.30mm wide x 1.62mm in Y\nInternal center rib, 2mm above bracket step)', xy=(6.28, -3.2), xytext=(-6.0, -2.5),
+ax1.annotate('Center Curved Feature (10.50mm)', xy=(6.28, -3.2), xytext=(-6.0, -3.0),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
              fontsize=9, fontweight='bold', color='#6a1b9a', bbox=dict(boxstyle='round,pad=0.2', fc='#f3e5f5', ec='#8e24aa'))
 
-# 5. Shaft Support Towers
-ax1.annotate('Left Tower (12.59mm tall)\nThick: 1.25mm\nØ2mm Shaft Cradle', xy=(4.87, 8.5), xytext=(-5.0, 12.5),
+ax1.annotate('Shaft Support Towers (12.59mm)\nØ2mm Cradle with 1.65mm Throat', xy=(4.87, 8.5), xytext=(-8.0, 13.0),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9.5, fontweight='bold', color='#c51b7d', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#c51b7d'))
+             fontsize=9, fontweight='bold', color='#c51b7d', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#c51b7d'))
 
-ax1.annotate('Right Tower (12.59mm tall)\nThick: 1.25mm\n0.40mm Right of Hole', xy=(13.98, 8.5), xytext=(16.5, 12.0),
+ax1.annotate('Top-Right Through-Hole (5.35x4.51mm)\nPlunger Reaches ≥6.5mm Below Floor', xy=(10.28, 10.83), xytext=(4.0, 17.0),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9.5, fontweight='bold', color='#c51b7d', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#c51b7d'))
+             fontsize=9, fontweight='bold', color='#d62728', bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#d62728'))
 
-# 6. Triangular Buttress Struts
-ax1.annotate('Steep Triangular Struts (2x)\nBase: 2.35mm outreach\nDirect slope into tower\n(2mm below apex, no top flat)', xy=(2.6, 9.6), xytext=(-12, 8.0),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#d62728', bbox=dict(boxstyle='round,pad=0.2', fc='#fbe9e7', ec='#d62728'))
-
-# 7. Reinforced Bridge Rib
-ax1.annotate('Reinforcing Bridge Rib\n(Extruded to full 6.77mm\nouter wall height)', xy=(15.5, 7.5), xytext=(17.0, 5.0),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#d62728', bbox=dict(boxstyle='round,pad=0.2', fc='#fbe9e7', ec='#d62728'))
-
-# 8. Top-Right Floor Through-Hole
-ax1.annotate('Top-Right Through-Hole\n5.35mm x 4.51mm', xy=(10.28, 10.83), xytext=(3.0, 16.5),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#d62728', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#d62728'))
-
-# 9. Internal clearance span
-ax1.annotate('Internal Clearance: 7.86mm', xy=(9.43, 6.0), xytext=(9.43, 6.0),
-             fontsize=8.5, fontweight='bold', color='#8c564b', ha='center', va='center',
-             bbox=dict(boxstyle='round,pad=0.15', fc='#fff3e0', ec='#8c564b'))
-
-# 10. Floor Grid Ribs
-ax1.annotate('Floor Stiffener Ribs (0.5mm tall)\n5.20mm x 3.20mm Grid\nDirectly connected to outer walls', xy=(-15, 6.4), xytext=(-26, 7.5),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#e65100', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#e65100'))
-
-# Arch Wall (6.77mm)
 arch_poly = create_arch_wall_poly()
 ax1.plot(*arch_poly.exterior.xy, color='#1f77b4', linewidth=2.0)
 
-# 11. Bottom Central Arch Wall
-ax1.annotate('Bottom Central Arch Wall\n(5.00mm Interior Width at Base\n7.95mm Outer Height, Thick: 1.20mm)', xy=(0, -8.7), xytext=(-22, -7.0),
+ax1.annotate('Bottom Central Arch Wall (7.95mm H)\n(5.00mm Inner Width at Base)', xy=(0, -8.7), xytext=(-24, -7.5),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
              fontsize=9, fontweight='bold', color='#1f77b4', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1f77b4'))
 
-# 12. Backside Slits (Through-holes for Separate Indexed Inserts)
-ax1.annotate('Through Slits 1.05x3.35mm (2x)\n(Clearance fit for 0.75x3.0mm part;\nFlat Z=0 for print; Separate inserts)', xy=(-8.4, -14.8), xytext=(-27, -18.5),
+ax1.annotate('Through Slits 1.05x3.35mm (2x)\n(Flat Z=0; Separate Inserts)', xy=(-8.4, -14.8), xytext=(-26, -18.0),
              arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
              fontsize=9, fontweight='bold', color='#6a1b9a', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#6a1b9a'))
-
-# 13. Bottom Inset Wall & Floor
-ax1.annotate('Inset Bottom Exterior Wall\n(1.88mm inset at Y = -16.66mm\nSolid Floor within wall)', xy=(0, -16.66), xytext=(5, -21.0),
-             arrowprops=dict(facecolor='black', shrink=0.08, width=1, headwidth=5),
-             fontsize=9, fontweight='bold', color='#333333', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f2f1', ec='#00695c'))
 
 ax1.set_xlim(-29, 29)
 ax1.set_ylim(-23, 24)
 ax1.set_aspect('equal')
 ax1.grid(True, linestyle=':', alpha=0.6)
-ax1.set_title('Top-Down 2D Dimensioned Feature Map', fontsize=14, fontweight='bold', pad=15)
-ax1.set_xlabel('X (mm)', fontsize=10)
-ax1.set_ylabel('Y (mm)', fontsize=10)
+ax1.set_title('1. Top-Down 2D Dimensioned Feature Map', fontsize=13, fontweight='bold', pad=12)
+ax1.set_xlabel('X (mm)')
+ax1.set_ylabel('Y (mm)')
 
 # ==============================================================================
-# PANEL 2: 3D ISOMETRIC TOP VIEW WITH 3D CALLOUTS
+# PANEL 2: 3D ISOMETRIC TOP VIEW WITH SEATED SHAFT MECHANISM
 # ==============================================================================
-ax2 = fig.add_subplot(1, 2, 2, projection='3d')
-vertices = part_mesh.vertices
-faces = part_mesh.faces
-mesh_col = Poly3DCollection(vertices[faces], alpha=0.85, edgecolor='#333333', linewidths=0.15)
+ax2 = fig.add_subplot(1, 3, 2, projection='3d')
+
+# Baseplate mesh
+v_base = part_mesh.vertices
+f_base = part_mesh.faces
+mesh_col = Poly3DCollection(v_base[f_base], alpha=0.65, edgecolor='#2c3e50', linewidths=0.15)
 mesh_col.set_facecolor('#4A90E2')
 ax2.add_collection3d(mesh_col)
 
+# Seated shaft mechanism (gold/orange)
+v_shaft = shaft_assembled_mesh.vertices
+f_shaft = shaft_assembled_mesh.faces
+mesh_shaft = Poly3DCollection(v_shaft[f_shaft], alpha=0.95, edgecolor='#b71c1c', linewidths=0.3)
+mesh_shaft.set_facecolor('#ff9800')
+ax2.add_collection3d(mesh_shaft)
+
 # 3D Feature text tags
-ax2.text(4.87, 7.67, 14.5, "Left Shaft Tower\n(12.59mm)", color='#c51b7d', fontsize=9.5, fontweight='bold', ha='center')
-ax2.text(13.98, 7.67, 14.5, "Right Shaft Tower\n(12.59mm)", color='#c51b7d', fontsize=9.5, fontweight='bold', ha='center')
-ax2.text(1.5, 7.67, 6.0, "Triangular\nStruts", color='#d62728', fontsize=9, fontweight='bold', ha='center')
-ax2.text(16.5, 6.0, 7.5, "Bridge Rib\n(6.77mm)", color='#d62728', fontsize=9, fontweight='bold', ha='center')
-ax2.text(-6.0, 0, 6.5, "Guide Brackets (4.6mm)", color='#2ca02c', fontsize=9, fontweight='bold', ha='center')
-ax2.text(6.28, -3.2, 11.8, "Center Curved Feature\n(10.50mm)", color='#6a1b9a', fontsize=9, fontweight='bold', ha='center')
-ax2.text(0, 20.0, 8.0, "Top Tab (6.77mm wall)", color='#1f77b4', fontsize=9, fontweight='bold', ha='center')
-ax2.text(13.5, 13.5, 8.5, "Snap Clip (45°)", color='#0e8188', fontsize=9, fontweight='bold')
-ax2.text(0, -18.0, 4.0, "Bottom Arch & Tab", color='#1f77b4', fontsize=9, fontweight='bold', ha='center')
-ax2.text(-8.0, -15.0, 2.0, "Flat Base (Z=0)\n(Indexed Inserts)", color='#6a1b9a', fontsize=9, fontweight='bold', ha='center')
+ax2.text(4.87, 7.67, 15.0, "Shaft & Towers\n(Z=12.59mm)", color='#c51b7d', fontsize=9, fontweight='bold', ha='center')
+ax2.text(10.28, 10.83, -7.5, "Plunger Reach\n(Z ≤ -6.50mm)", color='#d32f2f', fontsize=9, fontweight='bold', ha='center')
+ax2.text(-6.0, 0, 6.5, "Guide Brackets", color='#2ca02c', fontsize=9, fontweight='bold', ha='center')
+ax2.text(6.28, -3.2, 11.8, "Center Feature (10.5mm)", color='#6a1b9a', fontsize=9, fontweight='bold', ha='center')
+ax2.text(0, 20.0, 8.0, "Top Tab", color='#1f77b4', fontsize=9, fontweight='bold', ha='center')
+ax2.text(0, -18.0, 4.0, "Bottom Arch", color='#1f77b4', fontsize=9, fontweight='bold', ha='center')
 
 ax2.set_xlim(-24, 24)
 ax2.set_ylim(-24, 24)
-ax2.set_zlim(-4, 16)
-ax2.view_init(elev=26, azim=220)
-ax2.set_title('3D Isometric Perspective of Complete Assembly', fontsize=14, fontweight='bold', pad=15)
-ax2.set_xlabel('X (mm)', fontsize=10)
-ax2.set_ylabel('Y (mm)', fontsize=10)
-ax2.set_zlabel('Z (mm)', fontsize=10)
+ax2.set_zlim(-8, 16)
+ax2.view_init(elev=28, azim=225)
+ax2.set_title('2. 3D Isometric View (Baseplate + Seated Shaft Rocker)', fontsize=13, fontweight='bold', pad=12)
+ax2.set_xlabel('X (mm)')
+ax2.set_ylabel('Y (mm)')
+ax2.set_zlabel('Z (mm)')
+
+# ==============================================================================
+# PANEL 3: SIDE CROSS-SECTION (Y-Z PLANE) & Y-AXIS BUTTON ACTUATION
+# ==============================================================================
+ax3 = fig.add_subplot(1, 3, 3)
+
+# Tower profile in Y-Z
+y_tower_min, y_tower_max = 5.341, 9.991
+z_tower_top = 13.59
+ax3.fill([y_tower_min, y_tower_max, y_tower_max, y_tower_min],
+         [1.0, 1.0, z_tower_top, z_tower_top], color='#cfd8dc', alpha=0.6, label='Tower Support Profile')
+
+# Baseplate floor (Z: 0 to 1.0mm)
+ax3.fill([0, 18, 18, 0], [0, 0, 1.0, 1.0], color='#78909c', alpha=0.7, label='Base Floor (1.0mm)')
+# Through-hole cutout in floor
+ax3.fill([8.570, 13.082, 13.082, 8.570], [-0.1, -0.1, 1.1, 1.1], color='white')
+ax3.plot([8.570, 8.570], [-0.1, 1.1], 'r--', linewidth=1.5)
+ax3.plot([13.082, 13.082], [-0.1, 1.1], 'r--', linewidth=1.5)
+
+# Shaft Pivot Center
+y_axle, z_axle = 7.666, 12.590
+ax3.plot(y_axle, z_axle, 'r+', markersize=12, markeredgewidth=2.2, label='Shaft Axis (Y=7.67, Z=12.59)')
+
+# Plunger Arm Profile (Rest Position - Z = -6.50mm, Y = 11.60mm)
+y_rest, z_rest = 11.60, -6.50
+ax3.plot([y_axle, y_rest, y_rest], [z_axle, 4.0, z_rest], color='#e65100', linewidth=4.5, label='Output Plunger (Rest: Y=11.60mm)')
+
+# Plunger Arm Profile (Actuated Position - rotated 7 deg CW)
+theta_act = np.radians(7)
+c_a, s_a = np.cos(theta_act), np.sin(theta_act)
+rot_mat = np.array([[c_a, s_a], [-s_a, c_a]])
+p_arm_home = np.array([y_rest - y_axle, z_rest - z_axle])
+p_arm_act = rot_mat @ p_arm_home
+y_act = y_axle + p_arm_act[0]
+z_act = z_axle + p_arm_act[1]
+ax3.plot([y_axle, y_act], [z_axle, z_act], color='#d32f2f', linestyle='--', linewidth=3.0, label=f'Actuated Plunger (Swings -Y to {y_act:.2f}mm)')
+
+# Input Cam Profile (Pushed +Y by key)
+y_input, z_input = 3.17, 6.59
+ax3.plot([y_axle, y_input], [z_axle, z_input], color='#ffb300', linewidth=4.5, label='Input Cam (Bar Contact)')
+
+# Y-Axis Oriented Switch (Right-angle switch facing +Y at Z = -6.5mm)
+ax3.fill([5.5, 8.5, 8.5, 5.5], [-7.5, -7.5, -5.5, -5.5], color='#4caf50', alpha=0.85, label='Y-Axis Switch Body')
+ax3.fill([8.5, 9.2, 9.2, 8.5], [-6.8, -6.8, -6.2, -6.2], color='#2e7d32', alpha=0.9, label='Switch Actuator Stem (Faces +Y)')
+ax3.plot([2.0, 10.0], [-7.8, -7.8], color='#1b5e20', linewidth=3, label='PCB Surface (Z = -7.8mm)')
+
+# Annotations
+ax3.annotate('Key Insertion Push\n(Moves along +Y)', xy=(y_input, z_input), xytext=(y_input - 3.2, z_input + 2.5),
+             arrowprops=dict(facecolor='#d32f2f', edgecolor='#b71c1c', width=2.5, headwidth=8),
+             fontweight='bold', color='#b71c1c', fontsize=9.5)
+
+ax3.annotate('Through-Hole\n(Y in [8.57, 13.08])', xy=(10.826, 0.5), xytext=(14.0, 2.5),
+             arrowprops=dict(arrowstyle='->', color='#d32f2f', lw=1.5),
+             fontweight='bold', color='#d32f2f', fontsize=9.5)
+
+ax3.annotate(f'Horizontal Stroke: {y_rest - y_act:.2f}mm in -Y\n(Presses Y-axis switch stem)', xy=(y_act, z_act), xytext=(11.5, -9.0),
+             arrowprops=dict(facecolor='#d32f2f', edgecolor='#b71c1c', width=2, headwidth=7),
+             fontweight='bold', color='#d32f2f', fontsize=9.5)
+
+ax3.set_xlim(-1.0, 19.0)
+ax3.set_ylim(-11.0, 16.0)
+ax3.set_aspect('equal')
+ax3.grid(True, linestyle=':', alpha=0.6)
+ax3.set_title("3. Y-Axis Kinematic Stroke: Plunger Swings Horizontally into Switch", fontsize=13, fontweight='bold', pad=12)
+ax3.set_xlabel("Y (mm)")
+ax3.set_ylabel("Z (mm)")
+ax3.legend(loc='upper right', fontsize=8)
 
 plt.tight_layout()
 plt.savefig('labeled_part_preview.png', dpi=200)

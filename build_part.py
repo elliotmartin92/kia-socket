@@ -35,15 +35,27 @@ CLIP_HEIGHT = 6.77        # Flush with outer wall
 CLIP_GAP_DEPTH = 3.70     # Depth of flex slot in wall
 CLIP_ARM_THICK = 1.20     # Exactly matches OUTER_WALL_THICK (1.20mm) for flush interior alignment
 CLIP_ARM_WIDTH = 3.00
-CLIP_SLOT_CLEARANCE = 0.50
+CLIP_SLOT_CLEARANCE = 0.35 # 0.35mm minimal printable gap for 0.4mm nozzle (prevents fusion while minimizing air gap)
 CLIP_HOOK_DEPTH = 1.59    # 1.59mm radial overhang from wall
 CLIP_HOOK_HEIGHT = 1.80
+# 4 Clip positions: Top clips (45°, 135°) halfway to top tab; Bottom clips (214.5°, 325.5°) halfway between side ears & bottom tabs
+CLIP_ANGLES = [45.0, 135.0, 214.5, 325.5]
 
 # Bottom Slits / Holes (Clearance fit for 0.75mm x 3.00mm mating part)
 SLIT_W_X = 1.05         # 1.05mm wide in X (+0.30mm clearance for 0.75mm part)
 SLIT_LEN_Y = 3.35       # 3.35mm long in Y (+0.35mm clearance for 3.00mm part)
 SLIT_BOSS_HEIGHT = 2.47 # 2.47mm protrusion on back side (-Z)
 SLIT_BOSS_WALL = 0.80   # 0.8mm thick wall around slits
+# Slit Y positioning: Option 1 (+1.00mm shift in +Y, 2.00mm offset from inner bottom wall, was 1.00mm)
+SLIT_OFFSET_FROM_WALL = 2.00
+
+# Slit Insert Detent Socket (Press-fit registration in main baseplate floor)
+INSERT_KEY_W_X = 1.85     # Male key width in X on separate insert
+INSERT_KEY_LEN_Y = 4.15   # Male key length in Y on separate insert
+INSERT_KEY_HEIGHT = 0.85  # Male key height in Z on separate insert
+INSERT_CLEARANCE = 0.15   # 0.15mm total clearance (0.075mm per side) for snug friction press-fit
+SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.00mm female detent socket width in X
+SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 4.30mm female detent socket length in Y
 
 # Shaft Support Towers (Top-Right Above Hole)
 TOWER_HEIGHT = 12.59    # 12.59mm protrusion above face
@@ -249,23 +261,25 @@ def get_exact_base_polygon():
     # 2. Outer Solid Body: complete perimeter including 1.88mm inset bottom wall aligned to arch
     outer_body_poly = raw_poly
     
-    # 3. Two Bottom Vertical Slits / Holes (1.10mm wide in X, 3.00mm long in Y)
-    # Right wall of left slit aligns with rightmost wall of leftmost bracket (X = -7.853mm)
-    # Left wall of right slit aligns with leftmost wall of rightmost bracket (X = +7.853mm)
-    # Bottom of slits is exactly 1.0mm from the INNER side of the bottom wall
+    # 3. Two Bottom Detent Sockets for Press-Fit Slit Inserts (2.00mm x 4.30mm)
+    # Option 1: Slits shifted +1.00mm in +Y (SLIT_OFFSET_FROM_WALL = 2.00mm)
     b1_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_1_raw_pts]
     b4_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_4_raw_pts]
     b1_rightmost_x = max(p[0] for p in b1_pts)  # -7.853mm
     b4_leftmost_x = min(p[0] for p in b4_pts)   # +7.853mm
     
-    slit_y_bot = -18.539 + OUTER_WALL_THICK + 1.00  # -16.339mm (1.0mm from inner wall face)
-    slit_y_top = slit_y_bot + SLIT_LEN_Y            # -13.339mm
+    slit_y_bot = -18.539 + OUTER_WALL_THICK + SLIT_OFFSET_FROM_WALL  # -15.339mm
+    slit_y_top = slit_y_bot + SLIT_LEN_Y                             # -11.989mm
     
-    slit_left = box(b1_rightmost_x - SLIT_W_X, slit_y_bot, b1_rightmost_x, slit_y_top)
-    slit_right = box(b4_leftmost_x, slit_y_bot, b4_leftmost_x + SLIT_W_X, slit_y_top)
+    cx_left = b1_rightmost_x - SLIT_W_X / 2.0       # -8.378mm
+    cx_right = b4_leftmost_x + SLIT_W_X / 2.0       # +8.378mm
+    cy = (slit_y_bot + slit_y_top) / 2.0            # -13.664mm
     
-    # Base plate floor (with all through-holes cut through 1mm floor)
-    base_poly = outer_body_poly.difference(unary_union([hole_box, slit_left, slit_right]))
+    detent_left = box(cx_left - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_left + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2)
+    detent_right = box(cx_right - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_right + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2)
+    
+    # Base plate floor (with all through-holes and detent sockets cut through 1mm floor)
+    base_poly = outer_body_poly.difference(unary_union([hole_box, detent_left, detent_right]))
     return base_poly, outer_body_poly, (hole_x, hole_y, hole_w, hole_h)
 
 def create_grid_ribs_poly(base_poly, outer_body_poly=None):
@@ -380,8 +394,8 @@ def create_backside_slit_bosses_poly():
     b1_rightmost_x = max(p[0] for p in b1_pts)  # -7.853mm
     b4_leftmost_x = min(p[0] for p in b4_pts)   # +7.853mm
     
-    slit_y_bot = -18.539 + OUTER_WALL_THICK + 1.00  # -16.339mm
-    slit_y_top = slit_y_bot + SLIT_LEN_Y            # -13.339mm
+    slit_y_bot = -18.539 + OUTER_WALL_THICK + SLIT_OFFSET_FROM_WALL  # -15.339mm
+    slit_y_top = slit_y_bot + SLIT_LEN_Y                             # -11.989mm
     
     # Left slit outer box and hole
     slit_left_hole = box(b1_rightmost_x - SLIT_W_X, slit_y_bot, b1_rightmost_x, slit_y_top)
@@ -577,15 +591,15 @@ def build_exact_3d_model():
     mesh_struts = build_left_tower_struts_mesh()
     mesh_towers_assembly = trimesh.util.concatenate([mesh_towers, mesh_struts])
     
-    # 7. Snap Clips: Slotted perimeter wall + direct outer hook wedges (4 clips: 45, 135, 225, 315 deg)
+    # 7. Snap Clips: Slotted perimeter wall + direct outer hook wedges (4 clips: 45°, 135°, 214.5°, 325.5°)
     slot_cuts = []
     hook_meshes = []
     
     stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT         # 4.97 mm
     slot_z_bot = OUTER_WALL_HEIGHT - CLIP_GAP_DEPTH # 3.07 mm
-    slot_t = 0.60                                   # 0.60mm wide flex slots
+    slot_t = CLIP_SLOT_CLEARANCE                    # Minimal printable flex slot width for 0.4mm nozzle
     
-    for angle_deg in [45, 135, 225, 315]:
+    for angle_deg in CLIP_ANGLES:
         center_rad = math.radians(angle_deg)
         p, norm, tang = find_boundary_point_and_normal(base_poly, angle_deg)
         r_est = np.linalg.norm(p)
@@ -701,8 +715,18 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=1.05, inner_hole_l=3.35)
     m_insert = m_body.union(m_key, engine='manifold')
     return m_insert
 
-def build_indexed_assembly_mesh(main_mesh, insert_mesh):
-    """Creates the complete 3D build-plate layout with the main part and both separate inserts arranged on the same plane (Z = 0.00mm) for 1-click support-free 3D printing."""
+def build_cooling_tower_mesh(radius=4.0, height=14.0):
+    """Builds a sacrificial cylindrical cooling tower (Ø8mm x 14.0mm tall) for 1-click print plate placement.
+    Forces the nozzle to travel away from the delicate shaft support towers on high layers (Z > 10mm),
+    giving each layer of the tower tips dedicated time to cool and solidify."""
+    tower = trimesh.creation.cylinder(radius=radius, height=height, sections=32)
+    tower.apply_translation([0, 0, height / 2.0])  # Base flat at Z = 0.00mm
+    return tower
+
+def build_indexed_assembly_mesh(main_mesh, insert_mesh, shaft_mesh=None, include_cooling_tower=True):
+    """Creates the complete 3D build-plate layout with the main part, both separate inserts,
+    the shaft rocker mechanism, and a sacrificial cooling tower arranged on the same plane (Z = 0.00mm)
+    for 1-click support-free 3D printing."""
     # Place inserts side by side to the right of the main baseplate on the build plate (Z = 0.00mm)
     ins_left = insert_mesh.copy()
     ins_left.apply_translation([27.50, -5.00, 0.00])
@@ -710,7 +734,18 @@ def build_indexed_assembly_mesh(main_mesh, insert_mesh):
     ins_right = insert_mesh.copy()
     ins_right.apply_translation([27.50, 5.00, 0.00])
     
-    return trimesh.util.concatenate([main_mesh, ins_left, ins_right])
+    meshes = [main_mesh, ins_left, ins_right]
+    if shaft_mesh is not None:
+        shaft_plate = shaft_mesh.copy()
+        shaft_plate.apply_translation([27.50, 16.00, 0.00])
+        meshes.append(shaft_plate)
+        
+    if include_cooling_tower:
+        cool_tower = build_cooling_tower_mesh(radius=4.0, height=14.0)
+        cool_tower.apply_translation([27.50, -16.00, 0.00])
+        meshes.append(cool_tower)
+        
+    return trimesh.util.concatenate(meshes)
 
 # ==============================================================================
 # RENDER PLOTS & EXPORT OPENSCAD
@@ -835,6 +870,7 @@ clip_height         = {CLIP_HEIGHT};
 clip_gap_depth      = {CLIP_GAP_DEPTH};
 clip_arm_thick      = {CLIP_ARM_THICK};
 clip_arm_width      = {CLIP_ARM_WIDTH};
+clip_slot_clearance = {CLIP_SLOT_CLEARANCE};
 clip_hook_depth     = {CLIP_HOOK_DEPTH};
 clip_hook_height    = {CLIP_HOOK_HEIGHT};
 slit_boss_height    = {SLIT_BOSS_HEIGHT};
@@ -857,11 +893,11 @@ module base_plate_2d() {{
         translate([10.28 - 5.35/2, 10.83 - 4.51/2])
             square([5.35, 4.51]);
             
-        // Two Bottom Vertical Slits (Clearance fit for 0.75mm x 3.00mm part)
-        translate([-7.853 - {SLIT_W_X}, -16.339])
-            square([{SLIT_W_X}, {SLIT_LEN_Y}]);
-        translate([7.853, -16.339])
-            square([{SLIT_W_X}, {SLIT_LEN_Y}]);
+        // Two Bottom Detent Sockets (Press-fit registration for slit inserts)
+        translate([{-8.378} - {SOCKET_W_X}/2, {-13.664} - {SOCKET_LEN_Y}/2])
+            square([{SOCKET_W_X}, {SOCKET_LEN_Y}]);
+        translate([{8.378} - {SOCKET_W_X}/2, {-13.664} - {SOCKET_LEN_Y}/2])
+            square([{SOCKET_W_X}, {SOCKET_LEN_Y}]);
     }}
 }}
 
@@ -911,11 +947,34 @@ if __name__ == '__main__':
     pair_mesh.export('slit_inserts_pair.stl')
     print("Exported slit_inserts_pair.stl successfully!")
     
+    # Export shaft rocker models
+    print("Building separate 3D-printable shaft/rocker mechanism...")
+    try:
+        from build_shaft import build_shaft_rocker_mesh
+        shaft_assembled = build_shaft_rocker_mesh(in_assembly_coords=True)
+        shaft_assembled.export('shaft_rocker_assembled.stl')
+        shaft_assembled.export('shaft_rocker_assembled.obj')
+        
+        shaft_printable = build_shaft_rocker_mesh(in_assembly_coords=False)
+        shaft_printable.export('shaft_rocker.stl')
+        shaft_printable.export('shaft_rocker.obj')
+        print("Exported shaft_rocker.stl and shaft_rocker_assembled.stl successfully!")
+    except Exception as e:
+        print(f"Warning: could not generate shaft rocker: {e}")
+        shaft_printable = None
+    
+    # Export cooling tower model
+    print("Building separate 3D-printable sacrificial cooling tower...")
+    cool_tower_mesh = build_cooling_tower_mesh()
+    cool_tower_mesh.export('cooling_tower.stl')
+    cool_tower_mesh.export('cooling_tower.obj')
+    print("Exported cooling_tower.stl and cooling_tower.obj successfully!")
+    
     # Export complete assembled model
-    assembly_mesh = build_indexed_assembly_mesh(part_mesh, insert_mesh)
+    assembly_mesh = build_indexed_assembly_mesh(part_mesh, insert_mesh, shaft_printable, include_cooling_tower=True)
     assembly_mesh.export('complete_assembly.stl')
     assembly_mesh.export('complete_assembly.obj')
-    print("Exported complete_assembly.stl successfully!")
+    print("Exported complete_assembly.stl successfully! (Main Part + Slit Inserts + Shaft Rocker + Cooling Tower on Z=0.00mm)")
     
     render_plots(part_mesh, base_poly)
     export_openscad_exact(base_poly)

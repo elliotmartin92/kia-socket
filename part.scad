@@ -18,6 +18,7 @@ clip_height         = 6.77;
 clip_gap_depth      = 3.7;
 clip_arm_thick      = 1.2;
 clip_arm_width      = 3.0;
+clip_slot_clearance = 0.35;
 clip_hook_depth     = 1.59;
 clip_hook_height    = 1.8;
 slit_boss_height    = 2.47;
@@ -282,11 +283,11 @@ module base_plate_2d() {
         translate([10.28 - 5.35/2, 10.83 - 4.51/2])
             square([5.35, 4.51]);
             
-        // Two Bottom Vertical Slits (Clearance fit for 0.75mm x 3.00mm part)
-        translate([-7.853 - 1.05, -16.339])
-            square([1.05, 3.35]);
-        translate([7.853, -16.339])
-            square([1.05, 3.35]);
+        // Two Bottom Detent Sockets (Press-fit registration for slit inserts)
+        translate([-8.378 - 2.0/2, -13.664 - 4.300000000000001/2])
+            square([2.0, 4.300000000000001]);
+        translate([8.378 - 2.0/2, -13.664 - 4.300000000000001/2])
+            square([2.0, 4.300000000000001]);
     }
 }
 
