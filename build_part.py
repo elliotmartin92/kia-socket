@@ -30,11 +30,11 @@ RIB_GRID_Y = 3.20
 
 BRACKET_HEIGHT = 4.60
 
-# Clips
+# Clips (Mating with 5.00mm female holes)
 CLIP_HEIGHT = 6.77        # Flush with outer wall
 CLIP_GAP_DEPTH = 3.70     # Depth of flex slot in wall
 CLIP_ARM_THICK = 1.20     # Exactly matches OUTER_WALL_THICK (1.20mm) for flush interior alignment
-CLIP_ARM_WIDTH = 3.00
+CLIP_ARM_WIDTH = 4.20     # 4.20mm wide snap beam (leaves 0.80mm total margin / 0.40mm per side for 5.0mm mating holes)
 CLIP_SLOT_CLEARANCE = 0.35 # 0.35mm minimal printable gap for 0.4mm nozzle (prevents fusion while minimizing air gap)
 CLIP_HOOK_DEPTH = 1.59    # 1.59mm radial overhang from wall
 CLIP_HOOK_HEIGHT = 1.80

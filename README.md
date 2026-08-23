@@ -107,7 +107,8 @@ py -3 generate_labeled_preview.py
   - Top pair: $45^\circ$ and $135^\circ$ (halfway between top tab and side ears).
   - Bottom pair: $214.5^\circ$ and $325.5^\circ$ (exactly halfway along the perimeter arc between the side ears and bottom tabs).
 - **Wall Following**: Matches the exact curved contour of the outer ($R \approx 19.25\text{ mm}$) and inner ($R \approx 18.05\text{ mm}$) wall.
-- **Flex Isolation**: Two $0.35\text{ mm}$ vertical through-slots (minimal printable clearance for a $0.4\text{ mm}$ nozzle) from $Z = 3.07\text{ mm}$ to $Z = 6.77\text{ mm}$ isolating a $3.00\text{ mm}$ wide curved beam.
+- **Beam Dimensions**: **$4.20\text{ mm}$ wide curved beam** (leaves $0.80\text{ mm}$ total margin / $0.40\text{ mm}$ per side for smooth insertion into $5.00\text{ mm}$ mating holes).
+- **Flex Isolation**: Two $0.35\text{ mm}$ vertical through-slots (minimal printable clearance for a $0.4\text{ mm}$ nozzle) from $Z = 3.07\text{ mm}$ to $Z = 6.77\text{ mm}$ isolating the cantilever beam.
 - **Hook Geometry ($Z \in [4.97, 6.77\text{ mm}$)**:
   - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting $+1.59\text{ mm}$ radially outward.
   - Sloped lead-in ramp tapering up to top outer wall apex at $Z = 6.77\text{ mm}$.
