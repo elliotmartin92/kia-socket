@@ -56,7 +56,7 @@ py -3 generate_labeled_preview.py
 ## 3. Comprehensive Feature Specifications
 
 ```
-                              TOP TAB (8.22mm Wide)
+                              TOP TAB (8.20mm Wide, fits 8.33mm Gap)
                               +-------------------+
                              /                     \
                             /   [TOWER 1] [TOWER 2] \  <-- Shaft Axis (Y = 7.67mm, Z = 12.59mm)
@@ -67,8 +67,8 @@ py -3 generate_labeled_preview.py
              Left Side Ear -|   [BRACKETS]          |- Right Side Ear
                             |   [CENTER ARCH WALL]  |
                             |   (10.50mm tall)      |
-          Snap Clip (214.5°)|                       | Snap Clip (325.5°)
-                            \   [SLIT 1]  [SLIT 2]  / (Halfway between ears)
+          Snap Clip (211.3°)|                       | Snap Clip (327.5°)
+                            \   [SLIT 1]  [SLIT 2]  / (4.42mm from ears, 8.47mm from tabs)
                              \  1.05x3.35 1.05x3.35/
                               +---+             +---+
                               |   | [U-ARCH 5mm]|   |
@@ -102,10 +102,10 @@ py -3 generate_labeled_preview.py
 - **Left Tower Buttress Struts**: Two steep triangular ribs ($0.80\text{ mm}$ thick in $Y$), extending $2.35\text{ mm}$ in $-X$ at base ($Z = 1.0\text{ mm}$), sloping directly into the tower at $Z = 11.59\text{ mm}$ ($2\text{ mm}$ below apex).
 - **Right Tower Reinforcing Bridge Rib**: Spans $X \in [14.61, 18.20]\text{ mm}$ at $Y = 9.49\text{ mm}$, extruded to full $6.77\text{ mm}$ outer wall height.
 
-### 3.3. Curved Snap Clips (4x at $45^\circ, 135^\circ, 214.5^\circ, 325.5^\circ$)
+### 3.3. Curved Snap Clips (4x at $45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$)
 - **Perimeter Positions**:
   - Top pair: $45^\circ$ and $135^\circ$ (halfway between top tab and side ears).
-  - Bottom pair: $214.5^\circ$ and $325.5^\circ$ (exactly halfway along the perimeter arc between the side ears and bottom tabs).
+  - Bottom pair: **$211.3^\circ$ and $327.5^\circ$** (**$4.42\text{ mm}$ from respective side ears, $8.47\text{ mm}$ from respective bottom tabs**).
 - **Wall Following**: Matches the exact curved contour of the outer ($R \approx 19.25\text{ mm}$) and inner ($R \approx 18.05\text{ mm}$) wall.
 - **Beam Dimensions**: **$4.20\text{ mm}$ wide curved beam** (leaves $0.80\text{ mm}$ total margin / $0.40\text{ mm}$ per side for smooth insertion into $5.00\text{ mm}$ mating holes).
 - **Flex Isolation**: Two $0.35\text{ mm}$ vertical through-slots (minimal printable clearance for a $0.4\text{ mm}$ nozzle) from $Z = 3.07\text{ mm}$ to $Z = 6.77\text{ mm}$ isolating the cantilever beam.
@@ -122,18 +122,24 @@ py -3 generate_labeled_preview.py
 - **Wall & Rib Thickness**: $0.60\text{ mm}$ wall + $0.60\text{ mm}$ internal dividing rib along $X = 6.279\text{ mm}$.
 - **Total Height**: **$10.50\text{ mm}$** ($Z \in [1.00, 10.50]\text{ mm}$).
 
-### 3.5. Guide Brackets (4 Brackets / 2 Pairs)
-- **Left Pair (Brackets 1 & 2)**: $X \in [-10.80, -3.70]\text{ mm}$.
-- **Right Pair (Brackets 3 & 4)**: $X \in [+3.70, +10.80]\text{ mm}$.
+### 3.5. Guide Brackets (4 Brackets / 2 Pairs - Adjusted Top Gaps)
+- **Left Pair (Brackets 1 & 2)**: $X \in [-10.79, -1.77]\text{ mm}$.
+- **Right Pair (Brackets 3 & 4)**: $X \in [+1.77, +10.79]\text{ mm}$.
 - **Height**: $4.60\text{ mm}$ ($Z \in [1.00, 4.60]\text{ mm}$).
 - **Wall Thickness**: $0.84\text{ mm}$ nominal.
+- **Top Gap Tolerance Adjustment (All Brackets)**:
+  - Lower face of top hook raised to $Y = 4.800\text{ mm}$ (was $4.582\text{ mm}$, giving $+0.22\text{ mm}$ extra vertical fit clearance).
+  - Upper pocket depth extended to $Y = 6.250\text{ mm}$ (was $6.051\text{ mm}$, giving $+0.20\text{ mm}$ extra vertical pocket clearance).
+- **Bracket 3 Left Tower Anti-Interference Adjustment**:
+  - Top-right hook flange tip pulled back from $X = 4.705\text{ mm}$ to **$X = 4.150\text{ mm}$** (leaving a clean $0.10\text{ mm}$ clearance gap to the Left Tower wall at $X = 4.250\text{ mm}$).
+  - Inner step repositioned to $X = 3.350\text{ mm}$ (was $3.725\text{ mm}$), ensuring zero intrusion/pinching into the sliding part channel in Bracket Pair 3 & 4.
 
 ### 3.6. Backside Slit Protruding Bosses & Press-Fit Detent Inserts
-- **Main Baseplate Detent Sockets**: Two $2.00\text{ mm} \times 4.30\text{ mm}$ female detent sockets cut through the $1.00\text{ mm}$ baseplate floor centered at $X = \pm 8.378\text{ mm}, Y = -13.664\text{ mm}$.
+- **Main Baseplate Detent Sockets**: Two **$2.15\text{ mm} \times 4.45\text{ mm}$** female detent sockets cut through the $1.00\text{ mm}$ baseplate floor centered at $X = \pm 8.378\text{ mm}, Y = -13.664\text{ mm}$.
 - **Separate Slit Inserts (`slit_insert.stl`)**:
   - Base body: $3.65\text{ mm} \times 5.55\text{ mm} \times 2.47\text{ mm}$ outer shroud ($Z \in [-2.47, 0.00]\text{ mm}$).
   - Male indexing key: $1.85\text{ mm} \times 4.15\text{ mm} \times 0.85\text{ mm}$ tall ($Z \in [0.00, 0.85]\text{ mm}$ in assembly coordinates).
-  - Clearances: $0.15\text{ mm}$ total radial fit clearance ($0.075\text{ mm}$ per side) into the baseplate detent socket for a tight, positive-friction press-fit.
+  - Clearances: **$0.30\text{ mm}$ total radial clearance ($0.15\text{ mm}$ per side)** into the baseplate detent socket for smooth, firm press-fit seating without binding or requiring excessive force.
   - Continuous internal through-channel: $1.05\text{ mm} \times 3.35\text{ mm}$ running through both the body and key (clearance fit to pass a $0.75\text{ mm} \times 3.00\text{ mm}$ blade component).
 - **Positioning (Option 1 - Shifted $+1.00\text{ mm}$ in $+Y$)**:
   - $2.00\text{ mm}$ in $+Y$ from inner face of bottom wall ($Y \in [-15.34, -11.99]\text{ mm}$, centered at $Y = -13.664\text{ mm}$).
@@ -141,23 +147,35 @@ py -3 generate_labeled_preview.py
   - Reduces the lead-in gap to the bracket entrance from $5.82\text{ mm}$ to $4.82\text{ mm}$.
 - **Complete Assembly Build Plate Layout**: `complete_assembly.stl` arranges the main baseplate, both separate slit inserts, shaft rocker, and sacrificial cooling tower flat on the **same build plane ($Z = 0.00\text{ mm}$)** side-by-side for 1-click support-free 3D printing.
 
-### 3.7. Internal Floor Stiffener Grid
+### 3.7. Left and Right Side Ears (8.20mm Width for 8.30mm Enclosure Gap)
+- **Position**: Left Side Ear at $X \approx -21.075\text{ mm}$, Right Side Ear at $X \approx +20.200\text{ mm}$ (centered at $Y = 0.00\text{ mm}$).
+- **Outer Width in $Y$**: **$8.20\text{ mm}$** ($Y \in [-4.10, +4.10]\text{ mm}$).
+- **Mating Enclosure Gap**: $8.30\text{ mm}$ (leaves $0.10\text{ mm}$ total sliding clearance / $0.05\text{ mm}$ per side for a smooth, bind-free sliding fit into the chassis guide slots).
+
+### 3.8. Top Tab (8.20mm Width for 8.33mm Enclosure Gap)
+- **Position**: Symmetrically centered along $X = 0.00\text{ mm}$ ($X \in [-4.10, +4.10]\text{ mm}$, Top apex at $Y = 20.01\text{ mm}$).
+- **Outer Width in $X$**: **$8.20\text{ mm}$**.
+- **Mating Enclosure Gap**: $8.33\text{ mm}$ (leaves $0.13\text{ mm}$ total sliding clearance / $0.065\text{ mm}$ per side for a clean, centered fit into the chassis top indexing slot).
+
+### 3.9. Internal Floor Stiffener Grid
 - **Pitch**: $5.20\text{ mm}$ (in $X$) $\times 3.20\text{ mm}$ (in $Y$).
 - **Thickness & Height**: $0.60\text{ mm}$ thick, $0.50\text{ mm}$ tall ($Z \in [1.00, 1.50]\text{ mm}$).
 - **Connectivity**: Connects directly into outer perimeter walls; excluded under bracket pairs and bottom zone ($Y < -7.17\text{ mm}$).
 
-### 3.8. Heavy-Duty Reinforced Shaft & Rocker Mechanism (PCB Button Actuator)
+### 3.10. Heavy-Duty Reinforced Shaft & Rocker Mechanism (PCB Button Actuator)
 - **Pivot Axle & Structural Core**:
   - Precision $\varnothing 1.90\text{ mm}$ bearing ends ($R = 0.95\text{ mm}$, $0.10\text{ mm}$ clearance fit inside $\varnothing 2.00\text{ mm}$ tower cradles) snapping firmly through the $1.65\text{ mm}$ tower throat.
-  - **$\varnothing 2.80\text{ mm}$ heavy-duty structural reinforcing trunk sleeve** spanning the central span ($X \in [5.60, 13.26]\text{ mm}$) to prevent shaft deflection, shear, or twisting.
+  - **$\varnothing 3.20\text{ mm}$ heavy-duty structural reinforcing trunk sleeve** ($1.7\times$ higher torsional rigidity) spanning $X \in [5.60, 13.26]\text{ mm}$ to prevent shaft deflection, shear, or twisting.
 - **Thrust Retention Collars**: Two $\varnothing 3.00\text{ mm} \times 0.80\text{ mm}$ retaining flanges at $X = 3.05 - 3.85\text{ mm}$ and $X = 15.01 - 15.81\text{ mm}$ preventing lateral axial shift.
-- **Heavy-Duty Filleted Output Plunger Arm**:
-  - **Width & Thickness**: Widened to **$3.80\text{ mm}$ in $X$** and thickened to **$2.00\text{ mm}$ in $Y$** with continuous large $R \approx 5.0\text{ mm}$ concave structural root fillets into the axle collar.
-  - **Zero Sharp Notches**: Eliminates stress-concentration notches at the bend for high flexural strength and rugged print bed removal.
-  - **Reach & Stroke**: Reaches **$\ge 6.50\text{ mm}$ below the outer bottom face of the baseplate ($Z \le -6.50\text{ mm}$)** with a smooth rounded tip ($R = 1.00\text{ mm}$).
-  - **Kinematics**: Rotates clockwise to produce a **$\Delta Y \approx 2.36\text{ mm}$ horizontal stroke in $-Y$**, pressing directly into the actuator stem of the Y-axis oriented PCB tactile switch while maintaining positive through-hole clearance.
-- **Reinforced Input Cam & Monolithic Gusset Web**:
-  - $2.40\text{ mm}$ wide input cam with structural bridging web connecting directly across to the plunger arm along the axle.
+- **Heavy-Duty Filleted Output Plunger Arm (Widened & Anti-Flexion Reinforced)**:
+  - **Width in $X$**: Widened to **$4.60\text{ mm}$ in $X$** (centered in the $5.35\text{ mm}$ through-hole with $0.38\text{ mm}$ lateral clearances).
+  - **Root Thickness in $Y$**: Thickened to **$3.20\text{ mm}$ at the shaft junction** with a massive **$\varnothing 4.40\text{ mm}$ collar boss** ($R = 2.20\text{ mm}$) to eliminate flexion and bending under key insertion pressure.
+  - **Tip Contact**: Smoothly tapers from $3.20\text{ mm}$ down to a $2.00\text{ mm}$ nose radius ($R = 1.00\text{ mm}$) at the switch contact point.
+  - **Reach & Stroke**: Reaches **$\ge 6.50\text{ mm}$ below the outer bottom face of the baseplate ($Z \le -6.50\text{ mm}$)**.
+  - **Kinematics**: Rotates clockwise to produce a **$\Delta Y \approx 2.36\text{ mm}$ horizontal stroke in $-Y$**, pressing directly into the actuator stem of the Y-axis oriented PCB tactile switch with zero through-hole interference.
+- **Reinforced Input Cam & Full-Span Monolithic Gusset Web**:
+  - $2.50\text{ mm}$ wide input cam with thickened $3.00\text{ mm}$ root.
+  - Monolithic structural gusset web spanning continuously from $X = 5.30\text{ mm}$ all the way to $X = 13.25\text{ mm}$ across the entire opening between the towers.
 
 ---
 
@@ -176,4 +194,14 @@ py -3 generate_labeled_preview.py
   - `export_shaft_scad()`: Generates parametric OpenSCAD source file (`shaft_rocker.scad`).
 - **`generate_labeled_preview.py`**:
   - Generates the 3-panel labeled blueprint: Top-down feature map, 3D isometric assembly, and side kinematic stroke cross-section.
+- **`testing/`**:
+  - Dedicated directory containing unit tests, dimensional verification scripts, geometric exploration scripts, and inspection renders.
+
+---
+
+## 5. Development & Testing Guidelines
+
+- **Testing Files Location**: All new test scripts, verification scripts, geometric inspection scripts, and one-off diagnostic visualization scripts/renders **must be created inside the `testing/` directory**.
+- **Root Directory Cleanliness**: The project root directory is strictly reserved for core build pipeline generators (`build_part.py`, `build_shaft.py`, `generate_labeled_preview.py`), source geometry inputs (`part.svg`), final CAD exports (`.stl`, `.obj`, `.scad`), final documentation previews (`part_preview.png`, `labeled_part_preview.png`), and documentation (`README.md`).
+
 

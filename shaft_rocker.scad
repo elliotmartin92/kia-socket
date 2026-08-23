@@ -7,22 +7,28 @@ $fn = 64;
 axle_d = 1.9;
 axle_r = axle_d / 2;
 axle_len = 12.76;
+axle_trunk_d = 3.2;
 
 collar_d = 3.0;
 collar_t = 0.8;
 
 plunger_reach_below_z = 6.5;
-plunger_w = 3.8;
-plunger_t = 2.0;
+plunger_w = 4.6;
+plunger_root_t = 3.2;
+plunger_tip_t = 2.0;
 plunger_y_c = 11.4;
 
-input_cam_w = 2.4;
-input_cam_x_c = 6.6;
+input_cam_w = 2.5;
+input_cam_x_c = 6.55;
 
 module shaft_rocker() {
     // Main Axle
     rotate([0, 90, 0])
         cylinder(r = axle_r, h = axle_len, center = true);
+        
+    // Reinforcing Trunk Sleeve
+    rotate([0, 90, 0])
+        cylinder(r = axle_trunk_d/2, h = 7.66, center = true);
         
     // Left Collar
     translate([-(axle_len/2 - collar_t/2), 0, 0])

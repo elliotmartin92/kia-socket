@@ -38,8 +38,8 @@ CLIP_ARM_WIDTH = 4.20     # 4.20mm wide snap beam (leaves 0.80mm total margin / 
 CLIP_SLOT_CLEARANCE = 0.35 # 0.35mm minimal printable gap for 0.4mm nozzle (prevents fusion while minimizing air gap)
 CLIP_HOOK_DEPTH = 1.59    # 1.59mm radial overhang from wall
 CLIP_HOOK_HEIGHT = 1.80
-# 4 Clip positions: Top clips (45°, 135°) halfway to top tab; Bottom clips (214.5°, 325.5°) halfway between side ears & bottom tabs
-CLIP_ANGLES = [45.0, 135.0, 214.5, 325.5]
+# 4 Clip positions: Top clips (45°, 135°) halfway to top tab; Bottom clips (211.3°, 327.5°) 4.42mm from ears, 8.47mm from bottom tabs
+CLIP_ANGLES = [45.0, 135.0, 211.3, 327.5]
 
 # Bottom Slits / Holes (Clearance fit for 0.75mm x 3.00mm mating part)
 SLIT_W_X = 1.05         # 1.05mm wide in X (+0.30mm clearance for 0.75mm part)
@@ -53,15 +53,25 @@ SLIT_OFFSET_FROM_WALL = 2.00
 INSERT_KEY_W_X = 1.85     # Male key width in X on separate insert
 INSERT_KEY_LEN_Y = 4.15   # Male key length in Y on separate insert
 INSERT_KEY_HEIGHT = 0.85  # Male key height in Z on separate insert
-INSERT_CLEARANCE = 0.15   # 0.15mm total clearance (0.075mm per side) for snug friction press-fit
-SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.00mm female detent socket width in X
-SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 4.30mm female detent socket length in Y
+INSERT_CLEARANCE = 0.30   # 0.30mm total clearance (0.15mm per side) for smooth, snug press-fit without binding
+SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.15mm female detent socket width in X
+SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 4.45mm female detent socket length in Y
 
 # Shaft Support Towers (Top-Right Above Hole)
 TOWER_HEIGHT = 12.59    # 12.59mm protrusion above face
 TOWER_Y_LEN = 4.65      # 4.65mm in Y dimension
 TOWER_INTERNAL_GAP = 7.86 # 7.86mm internal distance between towers
 TOWER_WALL_THICK = 1.25 # 1.25mm wall thickness in X
+
+# Side Ears (Mating with 8.30mm enclosure guide slot/gap)
+EAR_GAP = 8.30             # 8.30mm enclosure guide slot/gap
+EAR_CLEARANCE = 0.10       # 0.10mm total clearance (0.05mm per side) for smooth sliding fit
+EAR_WIDTH_Y = EAR_GAP - EAR_CLEARANCE  # 8.20mm outer width in Y (Y in [-4.10, +4.10]mm)
+
+# Top Tab (Mating with 8.33mm enclosure guide slot/gap)
+TOP_TAB_GAP = 8.33         # 8.33mm enclosure guide slot/gap
+TOP_TAB_CLEARANCE = 0.13   # 0.13mm total clearance (0.065mm per side) for smooth sliding fit
+TOP_TAB_WIDTH_X = TOP_TAB_GAP - TOP_TAB_CLEARANCE  # 8.20mm outer width in X (X in [-4.10, +4.10]mm)
 
 # ==============================================================================
 # EXACT SVG PATH PARSER
@@ -171,31 +181,33 @@ else:
 # ==============================================================================
 # GEOMETRY GENERATION (Shapely)
 # ==============================================================================
-# 1. Exact Bracket Polygons from SVG line segments
+# 1. Exact Bracket Polygons (Adjusted for Part Tolerance & Zero Tower Interference)
+# - Top hook gap in all brackets enlarged for part tolerance (+0.22mm vertical clearance, +0.20mm pocket depth)
+# - Bracket 3 top-right hook tip pulled back to X=4.150mm (0.10mm clearance left of Left Tower at X=4.250mm)
 bracket_4_raw_pts = [
-    (159.5, 103.7), (151.1, 103.7), (151.1, 111.1), (154.0, 111.1),
-    (154.0, 106.8), (156.4, 106.8), (156.4, 141.5), (151.6, 141.5),
-    (151.6, 144.6), (159.5, 144.6), (159.5, 103.7)
+    (10.791,  7.171), (7.853,  7.171), (7.853,  4.800), (8.850,  4.800),
+    (8.850,  6.250), (9.707,  6.250), (9.707, -6.051), (8.028, -6.051),
+    (8.028, -7.136), (10.791, -7.136), (10.791,  7.171)
 ]
 bracket_3_raw_pts = [
-    (133.7, 103.7), (142.1, 103.7), (142.1, 111.1), (139.3, 111.1),
-    (139.3, 106.9), (136.8, 106.9), (136.8, 141.6), (141.7, 141.6),
-    (141.7, 144.7), (133.7, 144.7), (133.7, 103.7)
+    (1.766,  7.171), (4.150,  7.171), (4.150,  4.800), (3.350,  4.800),
+    (3.350,  6.250), (2.851,  6.250), (2.851, -6.086), (4.565, -6.086),
+    (4.565, -7.171), (1.766, -7.171), (1.766,  7.171)
 ]
 bracket_2_raw_pts = [
-    (123.6, 103.7), (115.3, 103.7), (115.3, 111.1), (118.1, 111.1),
-    (118.1, 106.9), (120.5, 106.9), (120.5, 141.5), (115.7, 141.5),
-    (115.7, 144.6), (123.6, 144.6), (123.6, 103.7)
+    (-1.766,  7.171), (-4.670,  7.171), (-4.670,  4.800), (-3.650,  4.800),
+    (-3.650,  6.250), (-2.851,  6.250), (-2.851, -6.051), (-4.530, -6.051),
+    (-4.530, -7.136), (-1.766, -7.136), (-1.766,  7.171)
 ]
 bracket_1_raw_pts = [
-    (97.8, 103.8), (106.2, 103.8), (106.2, 111.1), (103.4, 111.1),
-    (103.4, 106.9), (100.9, 106.9), (100.9, 141.6), (105.8, 141.6),
-    (105.8, 144.7), (97.8, 144.7), (97.8, 103.8)
+    (-10.791,  7.136), (-7.853,  7.136), (-7.853,  4.800), (-8.850,  4.800),
+    (-8.850,  6.250), (-9.707,  6.250), (-9.707, -6.086), (-7.993, -6.086),
+    (-7.993, -7.171), (-10.791, -7.171), (-10.791,  7.136)
 ]
 
 def to_mm_poly(raw_pts):
-    pts_mm = [((x - X0) * SCALE, -(y - Y0) * SCALE) for x, y in raw_pts]
-    return Polygon(pts_mm)
+    # Points already in exact mm coordinates
+    return Polygon(raw_pts)
 
 def create_all_brackets_poly():
     b1 = to_mm_poly(bracket_1_raw_pts)
@@ -233,8 +245,38 @@ def create_arch_wall_poly():
     return Polygon(wall_polygon_pts)
 
 def get_exact_base_polygon():
-    # Config 1: Align bottom exterior wall notch outer walls with Arch INNER walls (X = ±2.50mm)
     pts = outer_pts.copy()
+    
+    # 1. Adjust Left and Right Side Ears to fit into 8.30mm enclosure gap (EAR_WIDTH_Y = 8.20mm, Y in [-4.10, +4.10]mm)
+    half_ear_w = EAR_WIDTH_Y / 2.0
+    
+    # Right Ear (indices 0..4, 242..243)
+    pts[0] = [18.206, half_ear_w]
+    pts[1] = [20.200, half_ear_w]
+    pts[2] = [20.200, 0.0]
+    pts[3] = [20.200, -half_ear_w]
+    pts[4] = [18.206, -half_ear_w]
+    if len(pts) > 242:
+        pts[242] = [18.206, half_ear_w]
+        pts[243] = [18.206, half_ear_w]
+        
+    # Left Ear (indices 111..139)
+    pts[111] = [-19.081, -half_ear_w]
+    for k in range(112, 136):
+        pts[k] = [-21.075, -half_ear_w]
+    pts[136] = [-21.075, -half_ear_w]
+    pts[137] = [-21.075, 0.0]
+    pts[138] = [-21.075, half_ear_w]
+    pts[139] = [-19.081, half_ear_w]
+    
+    # 2. Adjust Top Tab to fit into 8.33mm enclosure gap (TOP_TAB_WIDTH_X = 8.20mm, X in [-4.10, +4.10]mm)
+    half_tab_w = TOP_TAB_WIDTH_X / 2.0
+    pts[189] = [-half_tab_w, 18.504]
+    pts[190] = [-half_tab_w, 20.008]
+    pts[191] = [half_tab_w, 20.008]
+    pts[192] = [half_tab_w, 18.504]
+    
+    # 3. Config 1: Align bottom exterior wall notch outer walls with Arch INNER walls (X = ±2.50mm)
     for idx, (x, y) in enumerate(pts):
         if abs(y - (-18.539)) < 0.05:
             if abs(x - 1.382) < 0.05 or abs(x - 3.70) < 0.05:
@@ -263,8 +305,8 @@ def get_exact_base_polygon():
     
     # 3. Two Bottom Detent Sockets for Press-Fit Slit Inserts (2.00mm x 4.30mm)
     # Option 1: Slits shifted +1.00mm in +Y (SLIT_OFFSET_FROM_WALL = 2.00mm)
-    b1_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_1_raw_pts]
-    b4_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_4_raw_pts]
+    b1_pts = bracket_1_raw_pts
+    b4_pts = bracket_4_raw_pts
     b1_rightmost_x = max(p[0] for p in b1_pts)  # -7.853mm
     b4_leftmost_x = min(p[0] for p in b4_pts)   # +7.853mm
     
@@ -290,10 +332,10 @@ def create_grid_ribs_poly(base_poly, outer_body_poly=None):
     - Excludes the top-right through hole."""
     if outer_body_poly is None:
         outer_body_poly = base_poly
-    b1_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_1_raw_pts]
-    b2_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_2_raw_pts]
-    b3_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_3_raw_pts]
-    b4_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_4_raw_pts]
+    b1_pts = bracket_1_raw_pts
+    b2_pts = bracket_2_raw_pts
+    b3_pts = bracket_3_raw_pts
+    b4_pts = bracket_4_raw_pts
     
     # 1. Left Bracket Pair Entire Bounding Envelope
     left_pair_bbox = box(
@@ -389,8 +431,8 @@ def find_boundary_point_and_normal(base_poly, angle_deg):
 def create_backside_slit_bosses_poly():
     """Returns the 2D polygon of the protruding shroud walls around the bottom slits on the back side.
     Wall thickness is 0.8mm around the 1.1mm x 3.0mm slit holes."""
-    b1_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_1_raw_pts]
-    b4_pts = [((x - X0)*SCALE, -(y - Y0)*SCALE) for x, y in bracket_4_raw_pts]
+    b1_pts = bracket_1_raw_pts
+    b4_pts = bracket_4_raw_pts
     b1_rightmost_x = max(p[0] for p in b1_pts)  # -7.853mm
     b4_leftmost_x = min(p[0] for p in b4_pts)   # +7.853mm
     
@@ -591,7 +633,7 @@ def build_exact_3d_model():
     mesh_struts = build_left_tower_struts_mesh()
     mesh_towers_assembly = trimesh.util.concatenate([mesh_towers, mesh_struts])
     
-    # 7. Snap Clips: Slotted perimeter wall + direct outer hook wedges (4 clips: 45°, 135°, 214.5°, 325.5°)
+    # 7. Snap Clips: Slotted perimeter wall + direct outer hook wedges (4 clips: 45°, 135°, 211.3°, 327.5°)
     slot_cuts = []
     hook_meshes = []
     
