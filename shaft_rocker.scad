@@ -16,10 +16,10 @@ plunger_reach_below_z = 6.5;
 plunger_w = 4.6;
 plunger_root_t = 3.2;
 plunger_tip_t = 2.0;
-plunger_y_c = 11.4;
+plunger_y_c = 10.826;
 
-input_cam_w = 2.1;
-input_cam_x_c = 6.55;
+input_cam_w = 4.1;
+input_cam_x_c = 7.55;
 
 module shaft_rocker() {
     // Main Axle

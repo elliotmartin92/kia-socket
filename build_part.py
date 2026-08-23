@@ -195,8 +195,8 @@ bracket_4_raw_pts = [
     (8.028, -7.136), (10.791, -7.136), (10.791,  7.171)
 ]
 bracket_3_raw_pts = [
-    (1.766,  7.171), (3.500,  7.171), (3.500,  4.900), (2.900,  4.900),
-    (2.900,  6.250), (2.851,  6.250), (2.851, -6.086), (4.565, -6.086),
+    (1.766,  7.171), (4.705,  7.171), (4.705,  4.800), (3.708,  4.800),
+    (3.708,  6.250), (2.851,  6.250), (2.851, -6.086), (4.565, -6.086),
     (4.565, -7.171), (1.766, -7.171), (1.766,  7.171)
 ]
 bracket_2_raw_pts = [
@@ -484,9 +484,9 @@ def create_center_curved_feature_poly():
     return unary_union([wall_poly, rib_poly])
 
 def create_shaft_support_towers_poly():
-    """Returns 2D bounding boxes for the two reinforced shaft support towers and left tower struts."""
-    y_min = 4.60
-    y_max = 11.20
+    """Returns 2D bounding boxes for the two reinforced shaft support towers and left tower buttress struts."""
+    y_min = 7.171
+    y_max = 13.771
     
     x_left_outer = 3.900
     x_left_inner = 5.400
@@ -497,31 +497,32 @@ def create_shaft_support_towers_poly():
     left_box = box(x_left_outer, y_min, x_left_inner, y_max)
     right_box = box(x_right_inner, y_min, x_right_outer, y_max)
     
-    # Triangular strut footprints (base extends 2.00mm in -X to X = 1.90mm)
-    strut_bot = box(1.90, 4.60, x_left_outer, 4.60 + 0.80)
-    strut_top = box(1.90, 11.20 - 0.80, x_left_outer, 11.20)
+    # Front strut (meets top of Bracket 3 at Y = 7.171mm, X: 1.90 to 3.90mm)
+    strut_front = box(1.90, 7.171, x_left_outer, 7.971)
+    # Rear strut (full height, X: 1.90 to 3.90mm, Y: 12.571 to 13.771mm)
+    strut_rear = box(1.90, 12.571, x_left_outer, 13.771)
     
-    return unary_union([left_box, right_box, strut_bot, strut_top])
+    return unary_union([left_box, right_box, strut_front, strut_rear])
 
 def build_clean_shaft_towers_mesh():
     """Directly extrudes the reinforced 2D U-cradle profile in (Y, Z) along X.
-    - Flared trapezoidal profile in Y-Z: Base Y in [4.60, 11.20] (6.60mm wide), Top Y in [4.90, 10.53] (5.63mm wide).
-    - Tuned 1.78mm retention throat constriction (0.12mm gentle snap with Ø1.90mm shaft, >305 deg permanent wrap).
+    - Flared trapezoidal profile in Y-Z: Base Y in [7.171, 13.771] (6.60mm wide), Top Y in [7.471, 13.101] (5.63mm wide).
+    - Tuned 1.52mm retention throat constriction (0.38mm positive snap with Ø1.90mm shaft, 261 deg permanent lock).
     - 1.50mm heavy-duty wall thickness in X.
     - Guarantees 100% clean, watertight monolithic solid with zero internal facets or boolean artifacts.
     """
-    y_shaft = 7.666
+    y_shaft = 10.200  # Shifted up to align front strut directly with top of Bracket 3 (Y = 7.171mm)
     z_base = BASE_THICK  # 1.0mm
     z_top = z_base + TOWER_HEIGHT  # 13.59mm
     r_shaft = 1.00  # 2mm diameter shaft cradle -> 1.0mm radius
     z_cradle_center = z_top - r_shaft  # 12.59mm
     
-    y_min_base = 4.60
-    y_max_base = 11.20
-    y_min_top = 4.90
-    y_max_top = 10.53
+    y_min_base = 7.171
+    y_max_base = 13.771
+    y_min_top = 7.471
+    y_max_top = 13.101
     
-    throat_w = TOWER_THROAT_W  # 1.78mm
+    throat_w = TOWER_THROAT_W  # 1.52mm
     half_w = throat_w / 2.0
     alpha = np.arcsin(half_w / r_shaft)
     
@@ -561,17 +562,16 @@ def build_clean_shaft_towers_mesh():
     
     return trimesh.util.concatenate([mesh_left, mesh_right])
 
-def build_left_tower_struts_mesh(strut_thick_y=0.80):
-    """Builds the full-height triangular buttress struts on the left side of the left tower.
-    - Base reaches from X = 1.90mm to X = 3.90mm at Z = 1.0mm
-    - Slopes directly into the tower wall at Z = 13.20mm (right up to cradle center level) with ZERO horizontal flat top.
-    - Placed at the front (Y: 4.60 to 5.40mm) and rear (Y: 10.40 to 11.20mm) edges of the flared tower."""
+def build_left_tower_struts_mesh():
+    """Builds the dual triangular buttress struts on the left side of the left tower.
+    - Front Strut: Meets the top edge of Bracket 3 at Y = 7.171mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.20mm).
+    - Rear Strut: Full-height triangle at Y: 12.571 to 13.771mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.20mm).
+    """
     x_left_outer = 3.900
-    
     z_base = BASE_THICK  # 1.0mm
     z_strut_top = 13.20  # 13.20mm (cradle center level)
     
-    # Pure 3-point triangle: base reaches out 2.00mm from wall (X = 1.90 to 3.90mm)
+    # Triangular strut in (X, Z)
     strut_pts_xz = [
         (1.90, z_base),
         (x_left_outer, z_base),
@@ -579,17 +579,19 @@ def build_left_tower_struts_mesh(strut_thick_y=0.80):
     ]
     poly_xz = Polygon(strut_pts_xz)
     
-    m_raw = trimesh.creation.extrude_polygon(poly_xz, height=strut_thick_y)
-    verts = m_raw.vertices.copy()
+    # 1. Front Strut at Y in [7.171, 7.971] (0.80mm thick, aligns with top of Bracket 3!)
+    m_front_raw = trimesh.creation.extrude_polygon(poly_xz, height=0.80)
+    v_front = m_front_raw.vertices.copy()
+    v_front = np.column_stack([v_front[:, 0], v_front[:, 2] + 7.171, v_front[:, 1]])
+    mesh_front = trimesh.Trimesh(vertices=v_front, faces=m_front_raw.faces.copy(), process=True)
     
-    # Map [X_coord, Z_coord, Y_extruded] -> [X, Y, Z]
-    verts_bot = np.column_stack([verts[:, 0], verts[:, 2] + 4.60, verts[:, 1]])
-    mesh_bot = trimesh.Trimesh(vertices=verts_bot, faces=m_raw.faces.copy(), process=True)
+    # 2. Rear Strut at Y in [12.571, 13.771] (1.20mm thick)
+    m_rear_raw = trimesh.creation.extrude_polygon(poly_xz, height=1.20)
+    v_rear = m_rear_raw.vertices.copy()
+    v_rear = np.column_stack([v_rear[:, 0], v_rear[:, 2] + 12.571, v_rear[:, 1]])
+    mesh_rear = trimesh.Trimesh(vertices=v_rear, faces=m_rear_raw.faces.copy(), process=True)
     
-    verts_top = np.column_stack([verts[:, 0], verts[:, 2] + (11.20 - strut_thick_y), verts[:, 1]])
-    mesh_top = trimesh.Trimesh(vertices=verts_top, faces=m_raw.faces.copy(), process=True)
-    
-    return trimesh.util.concatenate([mesh_bot, mesh_top])
+    return trimesh.util.concatenate([mesh_front, mesh_rear])
 
 def build_exact_3d_model():
     base_poly, outer_body_poly, hole_info = get_exact_base_polygon()
@@ -607,8 +609,8 @@ def build_exact_3d_model():
     # 3. Floor Grid Ribbing (Z: BASE_THICK to BASE_THICK + RIB_HEIGHT)
     # Plus bridge ribs to the right of the right tower extruded to OUTER_WALL_HEIGHT (6.77mm)
     all_ribs_poly = create_grid_ribs_poly(base_poly, outer_body_poly)
-    # Bridge ribbing bounded between second horizontal rib (Y=6.4mm) and top horizontal rib (Y=9.6mm)
-    bridge_box = box(13.36, 6.0, 25.0, 10.0)
+    # Bridge ribbing bounded between through-hole and top outer wall
+    bridge_box = box(13.10, 8.5, 25.0, 14.0)
     bridge_ribs_poly = all_ribs_poly.intersection(bridge_box)
     normal_ribs_poly = all_ribs_poly.difference(bridge_box)
     

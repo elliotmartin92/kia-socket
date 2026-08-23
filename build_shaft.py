@@ -22,7 +22,7 @@ from shapely.ops import unary_union
 # PARAMETRIC SPECIFICATIONS & DEFAULTS
 # ==============================================================================
 # Baseplate Datum & Tower Coordinates
-Y_AXLE = 7.666
+Y_AXLE = 10.200
 Z_AXLE = 12.590
 
 # Tower X bounds (1.50mm reinforced towers)
@@ -42,14 +42,14 @@ AXLE_DIAMETER = 1.90          # Ø1.90mm bearing ends (snaps through 1.52mm thro
 AXLE_TRUNK_DIAMETER = 3.20    # Ø3.20mm heavy-duty structural reinforcing core between towers (1.7x torsional stiffness)
 COLLAR_ROOT_RADIUS = 2.20     # Ø4.40mm heavy junction collar boss where arms meet the shaft
 PLUNGER_REACH_BELOW_Z = 6.50  # 6.50mm below baseplate outer bottom face (Z = -6.50mm)
-PLUNGER_WIDTH_X = 4.60        # Widened to 4.60mm in X (centered in 5.35mm hole -> 0.38mm side clearances)
+PLUNGER_WIDTH_X = 4.60        # 4.60mm in X (centered in 5.35mm hole -> X: 7.984 to 12.584mm)
 PLUNGER_ROOT_THICK_Y = 3.20   # Thickened root in Y (3.20mm) where plunger meets shaft to prevent flexion
 PLUNGER_TIP_THICK_Y = 2.00    # 2.00mm nose thickness at switch actuation contact tip
-PLUNGER_Y_CENTER = 11.40      # Optimized centerline for smooth horizontal Y-axis actuation
+PLUNGER_Y_CENTER = 10.826     # Centered in through-hole for smooth actuation
 
-INPUT_CAM_WIDTH_X = 2.10      # 2.10mm wide input cam in X (X in [5.50, 7.60]mm, leaving 0.10mm clearance to tower)
-INPUT_CAM_X_CENTER = 6.55     # Aligned with guide channel between Brackets 3 & 4
-INPUT_CAM_REACH_Y = 4.50      # Reaches 4.50mm in -Y (to Y = 3.17mm)
+INPUT_CAM_WIDTH_X = 4.10      # Widened by +2.00mm on the right (4.10mm wide, X in [5.50, 9.60]mm)
+INPUT_CAM_X_CENTER = 7.55     # Center of widened input cam
+INPUT_CAM_REACH_Y = 4.70      # Reaches 4.70mm in -Y (to Y = 5.50mm in guide channel)
 INPUT_CAM_DROP_Z = 6.00       # Drops 6.00mm below axle in Z (to Z = 6.59mm)
 
 COLLAR_DIAMETER = 3.00        # Ø3.00mm thrust retention collars
@@ -145,7 +145,7 @@ def build_shaft_rocker_mesh(
     m_plunger_raw = trimesh.creation.extrude_polygon(poly_plunger, height=plunger_w_x)
     v_p = m_plunger_raw.vertices.copy()
     
-    x_p_min = HOLE_X_CENTER - plunger_w_x/2.0
+    x_p_min = HOLE_X_CENTER - plunger_w_x/2.0  # Centered in through-hole (7.984 to 12.584mm)
     v_plunger = np.column_stack([
         v_p[:, 2] + x_p_min,
         v_p[:, 0],
