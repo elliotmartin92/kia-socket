@@ -48,8 +48,8 @@ py -3 generate_labeled_preview.py
   - $Z \in [1.00, 10.50]\text{ mm}$: Center curved feature with internal rib ($10.50\text{ mm}$ total height).
   - $Z \in [1.00, 13.59]\text{ mm}$: Shaft support towers ($12.59\text{ mm}$ height above floor, total $13.59\text{ mm}$).
 - **Separate Slit Insert Dimensions**:
-  - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.65\text{ mm} \times 5.55\text{ mm}$ outer, $1.05\text{ mm} \times 3.35\text{ mm}$ inner clearance channel for $0.75\text{ mm} \times 3.00\text{ mm}$ part).
-  - $Z \in [2.47, 3.32]\text{ mm}$: Indexing registration key ($1.85\text{ mm} \times 4.15\text{ mm} \times 0.85\text{ mm}$) with continuous $1.05\text{ mm} \times 3.35\text{ mm}$ core.
+  - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.80\text{ mm} \times 5.60\text{ mm}$ outer, $1.20\text{ mm} \times 3.50\text{ mm}$ inner clearance channel for $0.77\text{ mm} \times 3.10\text{ mm}$ part).
+  - $Z \in [2.47, 3.32]\text{ mm}$: Indexing registration key ($2.00\text{ mm} \times 4.30\text{ mm} \times 0.85\text{ mm}$) with continuous $1.20\text{ mm} \times 3.50\text{ mm}$ core.
 
 ---
 
@@ -60,16 +60,16 @@ py -3 generate_labeled_preview.py
                               +-------------------+
                              /                     \
                             /   [TOWER 1] [TOWER 2] \  <-- Shaft Axis (Y = 7.67mm, Z = 12.59mm)
-           Snap Clip (135°) |      (1.65mm throat)  | Snap Clip (45°)
+           Snap Clip (135°) |      (1.78mm throat)  | Snap Clip (45°)
                             |   [Through-Hole]      |
                             |   5.35 x 4.51 mm      |
                             |                       |
-             Left Side Ear -|   [BRACKETS]          |- Right Side Ear
+       Left Side Ear (7.70)-|   [BRACKETS]          |- Right Side Ear (7.70mm Wide, fits 8.30mm Gap)
                             |   [CENTER ARCH WALL]  |
                             |   (10.50mm tall)      |
           Snap Clip (211.3°)|                       | Snap Clip (327.5°)
                             \   [SLIT 1]  [SLIT 2]  / (4.42mm from ears, 8.47mm from tabs)
-                             \  1.05x3.35 1.05x3.35/
+                             \  1.20x3.50 1.20x3.50/
                               +---+             +---+
                               |   | [U-ARCH 5mm]|   |
                               |   | (7.95mm H)  |   |
@@ -96,12 +96,12 @@ py -3 generate_labeled_preview.py
 - **Right Tower**: $X \in [13.100, 14.600]\text{ mm}$ ($1.50\text{ mm}$ thickness, $0.14\text{ mm}$ clearance right of through-hole).
 - **Internal Clearance Between Towers**: **$7.70\text{ mm}$**.
 - **Flared Trapezoidal Tower Profile (in Y-Z)**:
-  - Base Length in $Y$: **$7.00\text{ mm}$** ($Y \in [4.20, 11.20]\text{ mm}$, $+200\%$ bending stiffness).
-  - Top Length in $Y$: **$5.73\text{ mm}$** ($Y \in [4.80, 10.53]\text{ mm}$, $+45\%$ solid retention material in front and rear of cradle).
-- **Tuned Snap-Fit Retention Cradle**:
-  - Retention throat constriction gap: **$1.78\text{ mm}$** ($0.12\text{ mm}$ gentle snap with $\varnothing 1.90\text{ mm}$ shaft, reducing layer line insertion stress by $52\%$).
-  - Full $305.8^\circ$ wrap-around capture angle (> $180^\circ$ equator).
-  - Top lead-in bevel expanding out to $Z = 13.59\text{ mm}$ ($z_{\text{top}}$).
+  - Base Length in $Y$: **$6.60\text{ mm}$** ($Y \in [4.60, 11.20]\text{ mm}$, $+180\%$ bending stiffness).
+  - Top Length in $Y$: **$5.63\text{ mm}$** ($Y \in [4.90, 10.53]\text{ mm}$, $+45\%$ solid retention material in front and rear of cradle).
+- **Positive Heavy-Duty Snap-Fit Retention Cradle**:
+  - Retention throat constriction gap: **$1.52\text{ mm}$** ($0.38\text{ mm}$ firm positive mechanical interference with $\varnothing 1.90\text{ mm}$ shaft).
+  - Wrap angle: **$261^\circ$** ($40.5^\circ$ past the horizontal equator on each side), permanently locking the axle inside the circular $\varnothing 2.00\text{ mm}$ socket.
+  - Wide $2.22\text{ mm}$ lead-in funnel with $45^\circ$ bevels expanding up to $Z = 13.59\text{ mm}$ for smooth downward insertion.
 - **Full-Height Left Tower Buttress Struts**: Two steep triangular ribs ($0.80\text{ mm}$ thick in $Y$), extending $2.00\text{ mm}$ in $-X$ at base ($X = 1.90\text{ mm}$ at $Z = 1.0\text{ mm}$), sloping directly into the tower right up to $Z = 13.20\text{ mm}$ (cradle center level).
 - **Right Tower Reinforcing Bridge Rib**: Spans $X \in [14.60, 18.20]\text{ mm}$ at $Y = 9.49\text{ mm}$, extruded to full $6.77\text{ mm}$ outer wall height.
 
@@ -116,6 +116,10 @@ py -3 generate_labeled_preview.py
   - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting $+1.59\text{ mm}$ radially outward.
   - Sloped lead-in ramp tapering up to top outer wall apex at $Z = 6.77\text{ mm}$.
   - Inner wall face: 100% flush, smooth, continuous cylinder.
+- **Built-In Sacrificial Support Towers (4x Breakaway Mini-Pillars)**:
+  - Small vertical support tower ($0.90\text{ mm} \times 2.00\text{ mm}$) directly under the horizontal overhang shelf of each clip.
+  - Base flat on the print bed ($Z = 0.00\text{ mm}$) with an adhesion foot ($1.50\text{ mm} \times 2.80\text{ mm}$).
+  - Rises to $Z = 4.82\text{ mm}$ with a small chisel contact interface ($0.15\text{ mm}$ breakaway gap under the $Z = 4.97\text{ mm}$ shelf) for effortless snap-off removal without marring.
 
 ### 3.4. Center Curved Feature with Dividing Rib (Option 1A)
 - **Position**: Centered between Brackets 3 & 4 at $X_c = +6.279\text{ mm}$.
@@ -133,17 +137,20 @@ py -3 generate_labeled_preview.py
 - **Top Gap Tolerance Adjustment (All Brackets)**:
   - Lower face of top hook raised to $Y = 4.800\text{ mm}$ (was $4.582\text{ mm}$, giving $+0.22\text{ mm}$ extra vertical fit clearance).
   - Upper pocket depth extended to $Y = 6.250\text{ mm}$ (was $6.051\text{ mm}$, giving $+0.20\text{ mm}$ extra vertical pocket clearance).
-- **Bracket 3 Left Tower Anti-Interference Adjustment**:
-  - Top-right hook flange tip pulled back from $X = 4.705\text{ mm}$ to **$X = 4.150\text{ mm}$** (leaving a clean $0.10\text{ mm}$ clearance gap to the Left Tower wall at $X = 4.250\text{ mm}$).
-  - Inner step repositioned to $X = 3.350\text{ mm}$ (was $3.725\text{ mm}$), ensuring zero intrusion/pinching into the sliding part channel in Bracket Pair 3 & 4.
+- **Bracket 3 Left Tower Anti-Interference Optimization**:
+  - Top hook flange tip pulled back to **$X = 3.500\text{ mm}$** and step pulled to **$X = 2.900\text{ mm}$**, creating a dedicated **$0.40\text{ mm}$ air gap** to the Left Tower wall ($X = 3.900\text{ mm}$).
+  - Left Tower front flank starts at $Y = 4.600\text{ mm}$, completely clearing Bracket 3's upper pocket envelope.
+  - Channel width between Bracket 3 and 4 opened from $3.29\text{ mm} \rightarrow \mathbf{4.35\text{ mm}}$, eliminating all tight pinches and fitment interference.
 
-### 3.6. Backside Slit Protruding Bosses & Press-Fit Detent Inserts
-- **Main Baseplate Detent Sockets**: Two **$2.15\text{ mm} \times 4.45\text{ mm}$** female detent sockets cut through the $1.00\text{ mm}$ baseplate floor centered at $X = \pm 8.378\text{ mm}, Y = -13.664\text{ mm}$.
+### 3.6. Backside Slit Protruding Bosses & Press-Fit Detent Inserts (For 0.77mm x 3.10mm Part)
+- **Mating Component Fitment**: Custom engineered to comfortably pass a **$0.77\text{ mm} \text{ (thick in X)} \times 3.10\text{ mm} \text{ (long in Y)}$** metal contact blade.
+- **Continuous Internal Through-Channel**: **$1.20\text{ mm} \text{ (in X)} \times 3.50\text{ mm} \text{ (in Y)}$** through both the insert and baseplate (+0.43mm in X, +0.40mm in Y generous sliding clearance to prevent FDM print shrinkage binding).
+- **Main Baseplate Detent Sockets**: Two **$2.25\text{ mm} \times 4.55\text{ mm}$** female detent sockets cut through the $1.00\text{ mm}$ baseplate floor centered at $X = \pm 8.453\text{ mm}, Y = -13.589\text{ mm}$.
 - **Separate Slit Inserts (`slit_insert.stl`)**:
-  - Base body: $3.65\text{ mm} \times 5.55\text{ mm} \times 2.47\text{ mm}$ outer shroud ($Z \in [-2.47, 0.00]\text{ mm}$).
-  - Male indexing key: $1.85\text{ mm} \times 4.15\text{ mm} \times 0.85\text{ mm}$ tall ($Z \in [0.00, 0.85]\text{ mm}$ in assembly coordinates).
-  - Clearances: **$0.30\text{ mm}$ total radial clearance ($0.15\text{ mm}$ per side)** into the baseplate detent socket for smooth, firm press-fit seating without binding or requiring excessive force.
-  - Continuous internal through-channel: $1.05\text{ mm} \times 3.35\text{ mm}$ running through both the body and key (clearance fit to pass a $0.75\text{ mm} \times 3.00\text{ mm}$ blade component).
+  - Base body: $3.80\text{ mm} \times 5.60\text{ mm} \times 2.47\text{ mm}$ outer shroud ($Z \in [-2.47, 0.00]\text{ mm}$).
+  - Male indexing key: $2.00\text{ mm} \times 4.30\text{ mm} \times 0.85\text{ mm}$ tall ($Z \in [0.00, 0.85]\text{ mm}$ in assembly coordinates, $0.40\text{ mm}$ perimeter wall).
+  - Clearances: **$0.25\text{ mm}$ total clearance ($0.125\text{ mm}$ per side)** into the baseplate detent socket for smooth, firm press-fit seating without binding or requiring excessive force.
+  - Flush horizontal seating shoulder: $0.78\text{ mm}$ wide flat seating rim against $Z = 0.00\text{ mm}$ baseplate bottom.
 - **Positioning (Option 1 - Shifted $+1.00\text{ mm}$ in $+Y$)**:
   - $2.00\text{ mm}$ in $+Y$ from inner face of bottom wall ($Y \in [-15.34, -11.99]\text{ mm}$, centered at $Y = -13.664\text{ mm}$).
   - Aligned with leftmost wall of right bracket ($X = +7.853\text{ mm}$) and rightmost wall of left bracket ($X = -7.853\text{ mm}$).

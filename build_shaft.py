@@ -38,7 +38,7 @@ HOLE_Y_CENTER = 10.826
 HOLE_Y_LEN = 4.512
 
 # Shaft Default Parameters (Heavy-Duty Reinforced)
-AXLE_DIAMETER = 1.90          # Ø1.90mm bearing ends (snaps through 1.78mm throat into Ø2.00mm cradle)
+AXLE_DIAMETER = 1.90          # Ø1.90mm bearing ends (snaps through 1.52mm throat into Ø2.00mm cradle)
 AXLE_TRUNK_DIAMETER = 3.20    # Ø3.20mm heavy-duty structural reinforcing core between towers (1.7x torsional stiffness)
 COLLAR_ROOT_RADIUS = 2.20     # Ø4.40mm heavy junction collar boss where arms meet the shaft
 PLUNGER_REACH_BELOW_Z = 6.50  # 6.50mm below baseplate outer bottom face (Z = -6.50mm)

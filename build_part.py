@@ -41,34 +41,37 @@ CLIP_HOOK_HEIGHT = 1.80
 # 4 Clip positions: Top clips (45°, 135°) halfway to top tab; Bottom clips (211.3°, 327.5°) 4.42mm from ears, 8.47mm from bottom tabs
 CLIP_ANGLES = [45.0, 135.0, 211.3, 327.5]
 
-# Bottom Slits / Holes (Clearance fit for 0.75mm x 3.00mm mating part)
-SLIT_W_X = 1.05         # 1.05mm wide in X (+0.30mm clearance for 0.75mm part)
-SLIT_LEN_Y = 3.35       # 3.35mm long in Y (+0.35mm clearance for 3.00mm part)
+# Bottom Slits / Holes (Clearance fit for 0.77mm x 3.10mm mating part)
+SLIT_W_X = 1.20         # 1.20mm wide in X (+0.43mm clearance for 0.77mm part)
+SLIT_LEN_Y = 3.50       # 3.50mm long in Y (+0.40mm clearance for 3.10mm part)
 SLIT_BOSS_HEIGHT = 2.47 # 2.47mm protrusion on back side (-Z)
 SLIT_BOSS_WALL = 0.80   # 0.8mm thick wall around slits
 # Slit Y positioning: Option 1 (+1.00mm shift in +Y, 2.00mm offset from inner bottom wall, was 1.00mm)
 SLIT_OFFSET_FROM_WALL = 2.00
 
 # Slit Insert Detent Socket (Press-fit registration in main baseplate floor)
-INSERT_KEY_W_X = 1.85     # Male key width in X on separate insert
-INSERT_KEY_LEN_Y = 4.15   # Male key length in Y on separate insert
+INSERT_KEY_W_X = 2.00     # Male key width in X on separate insert (0.40mm single perimeter wall around 1.20mm slit)
+INSERT_KEY_LEN_Y = 4.30   # Male key length in Y on separate insert (0.40mm single perimeter wall around 3.50mm slit)
 INSERT_KEY_HEIGHT = 0.85  # Male key height in Z on separate insert
-INSERT_CLEARANCE = 0.30   # 0.30mm total clearance (0.15mm per side) for smooth, snug press-fit without binding
-SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.15mm female detent socket width in X
-SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 4.45mm female detent socket length in Y
+INSERT_CLEARANCE = 0.25   # 0.25mm total clearance (0.125mm per side) for smooth, snug press-fit without binding
+SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.25mm female detent socket width in X
+SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 4.55mm female detent socket length in Y
+
+INSERT_BODY_W_X = 3.80    # 3.80mm outer shroud body width in X
+INSERT_BODY_LEN_Y = 5.60  # 5.60mm outer shroud body length in Y
 
 # Shaft Support Towers (Top-Right Above Hole) - Heavy-Duty Reinforced
 TOWER_HEIGHT = 12.59         # 12.59mm protrusion above face
-TOWER_Y_BASE_LEN = 7.00      # 7.00mm flared base in Y (Y in [4.20, 11.20]mm, +200% bending stiffness)
-TOWER_Y_TOP_LEN = 5.73       # 5.73mm flared top in Y (Y in [4.80, 10.53]mm, +45% solid material around cradle)
+TOWER_Y_BASE_LEN = 6.60      # 6.60mm flared base in Y (Y in [4.60, 11.20]mm, +180% bending stiffness)
+TOWER_Y_TOP_LEN = 5.63       # 5.63mm flared top in Y (Y in [4.90, 10.53]mm, +45% solid material around cradle)
 TOWER_INTERNAL_GAP = 7.70    # 7.70mm internal gap between reinforced tower inner faces (X: 5.40 to 13.10mm)
 TOWER_WALL_THICK = 1.50      # 1.50mm heavy-duty wall thickness in X (+50% column strength)
-TOWER_THROAT_W = 1.78        # 1.78mm tuned snap throat (0.12mm gentle snap with Ø1.90mm shaft, >305 deg permanent wrap)
+TOWER_THROAT_W = 1.52        # 1.52mm heavy-duty snap throat (0.38mm firm snap with Ø1.90mm shaft, >260 deg permanent lock)
 
 # Side Ears (Mating with 8.30mm enclosure guide slot/gap)
 EAR_GAP = 8.30             # 8.30mm enclosure guide slot/gap
-EAR_CLEARANCE = 0.10       # 0.10mm total clearance (0.05mm per side) for smooth sliding fit
-EAR_WIDTH_Y = EAR_GAP - EAR_CLEARANCE  # 8.20mm outer width in Y (Y in [-4.10, +4.10]mm)
+EAR_CLEARANCE = 0.60       # 0.60mm total clearance (0.30mm per side) for smooth sliding fit without binding
+EAR_WIDTH_Y = EAR_GAP - EAR_CLEARANCE  # 7.70mm outer width in Y (Y in [-3.85, +3.85]mm)
 
 # Top Tab (Mating with 8.33mm enclosure guide slot/gap)
 TOP_TAB_GAP = 8.33         # 8.33mm enclosure guide slot/gap
@@ -192,8 +195,8 @@ bracket_4_raw_pts = [
     (8.028, -7.136), (10.791, -7.136), (10.791,  7.171)
 ]
 bracket_3_raw_pts = [
-    (1.766,  7.171), (4.150,  7.171), (4.150,  4.800), (3.350,  4.800),
-    (3.350,  6.250), (2.851,  6.250), (2.851, -6.086), (4.565, -6.086),
+    (1.766,  7.171), (3.500,  7.171), (3.500,  4.900), (2.900,  4.900),
+    (2.900,  6.250), (2.851,  6.250), (2.851, -6.086), (4.565, -6.086),
     (4.565, -7.171), (1.766, -7.171), (1.766,  7.171)
 ]
 bracket_2_raw_pts = [
@@ -305,19 +308,20 @@ def get_exact_base_polygon():
     # 2. Outer Solid Body: complete perimeter including 1.88mm inset bottom wall aligned to arch
     outer_body_poly = raw_poly
     
-    # 3. Two Bottom Detent Sockets for Press-Fit Slit Inserts (2.00mm x 4.30mm)
-    # Option 1: Slits shifted +1.00mm in +Y (SLIT_OFFSET_FROM_WALL = 2.00mm)
+    # 3. Two Bottom Detent Sockets for Press-Fit Slit Inserts (2.25mm x 4.55mm)
+    # Left slit / detent: Centered on Bracket 1 datum line (X = -7.853mm, shifted 0.60mm inward)
+    # Right slit / detent: Kept at outer alignment (X = +8.453mm) for testing
     b1_pts = bracket_1_raw_pts
     b4_pts = bracket_4_raw_pts
     b1_rightmost_x = max(p[0] for p in b1_pts)  # -7.853mm
     b4_leftmost_x = min(p[0] for p in b4_pts)   # +7.853mm
     
     slit_y_bot = -18.539 + OUTER_WALL_THICK + SLIT_OFFSET_FROM_WALL  # -15.339mm
-    slit_y_top = slit_y_bot + SLIT_LEN_Y                             # -11.989mm
+    slit_y_top = slit_y_bot + SLIT_LEN_Y                             # -11.839mm
     
-    cx_left = b1_rightmost_x - SLIT_W_X / 2.0       # -8.378mm
-    cx_right = b4_leftmost_x + SLIT_W_X / 2.0       # +8.378mm
-    cy = (slit_y_bot + slit_y_top) / 2.0            # -13.664mm
+    cx_left = b1_rightmost_x                        # -7.853mm (centered on bracket line, shifted 0.60mm inward)
+    cx_right = b4_leftmost_x + SLIT_W_X / 2.0       # +8.453mm (original outer alignment)
+    cy = (slit_y_bot + slit_y_top) / 2.0            # -13.589mm
     
     detent_left = box(cx_left - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_left + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2)
     detent_right = box(cx_right - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_right + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2)
@@ -481,7 +485,7 @@ def create_center_curved_feature_poly():
 
 def create_shaft_support_towers_poly():
     """Returns 2D bounding boxes for the two reinforced shaft support towers and left tower struts."""
-    y_min = 4.20
+    y_min = 4.60
     y_max = 11.20
     
     x_left_outer = 3.900
@@ -494,14 +498,14 @@ def create_shaft_support_towers_poly():
     right_box = box(x_right_inner, y_min, x_right_outer, y_max)
     
     # Triangular strut footprints (base extends 2.00mm in -X to X = 1.90mm)
-    strut_bot = box(1.90, 4.20, x_left_outer, 4.20 + 0.80)
+    strut_bot = box(1.90, 4.60, x_left_outer, 4.60 + 0.80)
     strut_top = box(1.90, 11.20 - 0.80, x_left_outer, 11.20)
     
     return unary_union([left_box, right_box, strut_bot, strut_top])
 
 def build_clean_shaft_towers_mesh():
     """Directly extrudes the reinforced 2D U-cradle profile in (Y, Z) along X.
-    - Flared trapezoidal profile in Y-Z: Base Y in [4.20, 11.20] (7.00mm wide), Top Y in [4.80, 10.53] (5.73mm wide).
+    - Flared trapezoidal profile in Y-Z: Base Y in [4.60, 11.20] (6.60mm wide), Top Y in [4.90, 10.53] (5.63mm wide).
     - Tuned 1.78mm retention throat constriction (0.12mm gentle snap with Ø1.90mm shaft, >305 deg permanent wrap).
     - 1.50mm heavy-duty wall thickness in X.
     - Guarantees 100% clean, watertight monolithic solid with zero internal facets or boolean artifacts.
@@ -512,9 +516,9 @@ def build_clean_shaft_towers_mesh():
     r_shaft = 1.00  # 2mm diameter shaft cradle -> 1.0mm radius
     z_cradle_center = z_top - r_shaft  # 12.59mm
     
-    y_min_base = 4.20
+    y_min_base = 4.60
     y_max_base = 11.20
-    y_min_top = 4.80
+    y_min_top = 4.90
     y_max_top = 10.53
     
     throat_w = TOWER_THROAT_W  # 1.78mm
@@ -561,7 +565,7 @@ def build_left_tower_struts_mesh(strut_thick_y=0.80):
     """Builds the full-height triangular buttress struts on the left side of the left tower.
     - Base reaches from X = 1.90mm to X = 3.90mm at Z = 1.0mm
     - Slopes directly into the tower wall at Z = 13.20mm (right up to cradle center level) with ZERO horizontal flat top.
-    - Placed at the front (Y: 4.20 to 5.00mm) and rear (Y: 10.40 to 11.20mm) edges of the flared tower."""
+    - Placed at the front (Y: 4.60 to 5.40mm) and rear (Y: 10.40 to 11.20mm) edges of the flared tower."""
     x_left_outer = 3.900
     
     z_base = BASE_THICK  # 1.0mm
@@ -579,7 +583,7 @@ def build_left_tower_struts_mesh(strut_thick_y=0.80):
     verts = m_raw.vertices.copy()
     
     # Map [X_coord, Z_coord, Y_extruded] -> [X, Y, Z]
-    verts_bot = np.column_stack([verts[:, 0], verts[:, 2] + 4.20, verts[:, 1]])
+    verts_bot = np.column_stack([verts[:, 0], verts[:, 2] + 4.60, verts[:, 1]])
     mesh_bot = trimesh.Trimesh(vertices=verts_bot, faces=m_raw.faces.copy(), process=True)
     
     verts_top = np.column_stack([verts[:, 0], verts[:, 2] + (11.20 - strut_thick_y), verts[:, 1]])
@@ -718,22 +722,66 @@ def build_exact_3d_model():
     mesh_curved_feat = extrude_shapely_geom(curved_feat_poly, height=10.50 - BASE_THICK)
     mesh_curved_feat.apply_translation([0, 0, BASE_THICK])
     
+    # 9. Manual Breakaway Support Towers under 4 Snap Clip Overhangs (Z: 0 to 4.94mm)
+    mesh_clip_supports = build_clip_supports_mesh(base_poly)
+    
     # Main part is 100% planar at Z = 0.00mm for direct support-free 3D printing
-    full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_towers_assembly, mesh_curved_feat] + hook_meshes)
+    full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_towers_assembly, mesh_curved_feat, mesh_clip_supports] + hook_meshes)
     return full_part, base_poly
 
-def build_slit_insert_mesh(is_hollow=True, inner_hole_w=1.05, inner_hole_l=3.35):
+def build_clip_supports_mesh(base_poly):
+    """Builds very small vertical sacrificial support towers directly under the 4 snap clip hook overhangs.
+    - Base sits flat on the print bed at Z = 0.00mm with a small foot for bed adhesion.
+    - Rises vertically to Z = 4.82mm (0.15mm breakaway gap below the Z = 4.97mm horizontal hook shelf).
+    - Features a small breakaway chisel contact interface for effortless snap-off removal with zero marring.
+    """
+    stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT  # 4.97mm
+    support_top_z = stem_h - 0.15           # 4.82mm (0.15mm breakaway gap)
+    
+    support_meshes = []
+    for angle_deg in CLIP_ANGLES:
+        rad = math.radians(angle_deg)
+        p, norm, tang = find_boundary_point_and_normal(base_poly, angle_deg)
+        r_wall = np.linalg.norm(p)
+        n_dir = p / r_wall
+        
+        # Position support tower under the center of the outer hook shelf
+        r_supp = r_wall + CLIP_HOOK_DEPTH * 0.60
+        pos_center = n_dir * r_supp
+        
+        # 1. Main vertical support pillar (0.90mm radial x 2.00mm tangential x support_top_z tall)
+        pillar = trimesh.creation.box([0.90, 2.00, support_top_z])
+        rot = trimesh.transformations.rotation_matrix(rad, [0, 0, 1])
+        pillar.apply_transform(rot)
+        pillar.apply_translation([pos_center[0], pos_center[1], support_top_z / 2.0])
+        
+        # 2. Bed adhesion foot (0.40mm tall, 1.50mm x 2.80mm)
+        foot = trimesh.creation.box([1.50, 2.80, 0.40])
+        foot.apply_transform(rot)
+        foot.apply_translation([pos_center[0], pos_center[1], 0.20])
+        
+        # 3. Chisel breakaway contact tip (0.12mm tall, reaches Z = 4.94mm)
+        tip = trimesh.creation.box([0.40, 1.60, 0.12])
+        tip.apply_transform(rot)
+        tip.apply_translation([pos_center[0], pos_center[1], support_top_z + 0.06])
+        
+        supp_combined = trimesh.util.concatenate([pillar, foot, tip])
+        support_meshes.append(supp_combined)
+        
+    return trimesh.util.concatenate(support_meshes)
+
+def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=SLIT_LEN_Y):
     """Builds a single 100% monolithic, watertight 3D-printable slit insert part with indexing key.
     - Flat print bed face at Z = 0
-    - Wall body: 3.65mm x 5.55mm outer, height = 2.47mm (Z: 0 to 2.47mm)
-    - Continuous solid horizontal shoulder at Z = 2.47mm (0.90mm wide contact rim)
-    - Raised indexing registration key: 1.85mm x 4.15mm outer, height = 0.85mm (Z: 2.47 to 3.32mm)
-    - Continuous inner through-hole: 1.05mm x 3.35mm from Z = 0 to 3.32mm (clearance for 0.75x3.0mm part)
+    - Wall body: 3.80mm x 5.60mm outer, height = 2.47mm (Z: 0 to 2.47mm)
+    - Continuous solid horizontal shoulder at Z = 2.47mm (0.78mm wide contact rim)
+    - Raised indexing registration key: 2.00mm x 4.30mm outer, height = 0.85mm (Z: 2.47 to 3.32mm)
+    - Continuous inner through-hole: 1.20mm x 3.50mm from Z = 0 to 3.32mm (clearance for 0.77x3.10mm part)
     """
-    outer_body_w = 3.65
-    outer_body_l = 5.55
-    outer_key_w = 1.85
-    outer_key_l = 4.15
+    outer_body_w = INSERT_BODY_W_X  # 3.80mm
+    outer_body_l = INSERT_BODY_LEN_Y  # 5.60mm
+    outer_key_w = INSERT_KEY_W_X    # 2.00mm
+    outer_key_l = INSERT_KEY_LEN_Y    # 4.30mm
     
     outer_body = box(-outer_body_w/2, -outer_body_l/2, outer_body_w/2, outer_body_l/2)
     inner_hole = box(-inner_hole_w/2, -inner_hole_l/2, inner_hole_w/2, inner_hole_l/2)
@@ -933,10 +981,11 @@ module base_plate_2d() {{
         translate([10.28 - 5.35/2, 10.83 - 4.51/2])
             square([5.35, 4.51]);
             
-        // Two Bottom Detent Sockets (Press-fit registration for slit inserts)
-        translate([{-8.378} - {SOCKET_W_X}/2, {-13.664} - {SOCKET_LEN_Y}/2])
+        // Left Detent Socket (Centered on X = -7.853mm)
+        translate([{-7.853:.3f} - {SOCKET_W_X}/2, {(-15.339*2 + SLIT_LEN_Y)/2:.3f} - {SOCKET_LEN_Y}/2])
             square([{SOCKET_W_X}, {SOCKET_LEN_Y}]);
-        translate([{8.378} - {SOCKET_W_X}/2, {-13.664} - {SOCKET_LEN_Y}/2])
+        // Right Detent Socket (Original outer alignment)
+        translate([{7.853 + SLIT_W_X/2:.3f} - {SOCKET_W_X}/2, {(-15.339*2 + SLIT_LEN_Y)/2:.3f} - {SOCKET_LEN_Y}/2])
             square([{SOCKET_W_X}, {SOCKET_LEN_Y}]);
     }}
 }}
