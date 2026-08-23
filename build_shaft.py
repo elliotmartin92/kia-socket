@@ -25,11 +25,11 @@ from shapely.ops import unary_union
 Y_AXLE = 7.666
 Z_AXLE = 12.590
 
-# Tower X bounds
-X_LEFT_TOWER_OUTER = 4.250
-X_LEFT_TOWER_INNER = 5.500
-X_RIGHT_TOWER_INNER = 13.360
-X_RIGHT_TOWER_OUTER = 14.610
+# Tower X bounds (1.50mm reinforced towers)
+X_LEFT_TOWER_OUTER = 3.900
+X_LEFT_TOWER_INNER = 5.400
+X_RIGHT_TOWER_INNER = 13.100
+X_RIGHT_TOWER_OUTER = 14.600
 
 # Through-Hole bounds: X in [7.608, 12.960], Y in [8.570, 13.082], Z in [0.00, 1.00]
 HOLE_X_CENTER = 10.284
@@ -38,7 +38,7 @@ HOLE_Y_CENTER = 10.826
 HOLE_Y_LEN = 4.512
 
 # Shaft Default Parameters (Heavy-Duty Reinforced)
-AXLE_DIAMETER = 1.90          # Ø1.90mm bearing ends (snaps through 1.65mm throat into Ø2.00mm cradle)
+AXLE_DIAMETER = 1.90          # Ø1.90mm bearing ends (snaps through 1.78mm throat into Ø2.00mm cradle)
 AXLE_TRUNK_DIAMETER = 3.20    # Ø3.20mm heavy-duty structural reinforcing core between towers (1.7x torsional stiffness)
 COLLAR_ROOT_RADIUS = 2.20     # Ø4.40mm heavy junction collar boss where arms meet the shaft
 PLUNGER_REACH_BELOW_Z = 6.50  # 6.50mm below baseplate outer bottom face (Z = -6.50mm)
@@ -47,7 +47,7 @@ PLUNGER_ROOT_THICK_Y = 3.20   # Thickened root in Y (3.20mm) where plunger meets
 PLUNGER_TIP_THICK_Y = 2.00    # 2.00mm nose thickness at switch actuation contact tip
 PLUNGER_Y_CENTER = 11.40      # Optimized centerline for smooth horizontal Y-axis actuation
 
-INPUT_CAM_WIDTH_X = 2.50      # 2.50mm wide input cam in X (centered at X = 6.55mm in bracket guide channel)
+INPUT_CAM_WIDTH_X = 2.10      # 2.10mm wide input cam in X (X in [5.50, 7.60]mm, leaving 0.10mm clearance to tower)
 INPUT_CAM_X_CENTER = 6.55     # Aligned with guide channel between Brackets 3 & 4
 INPUT_CAM_REACH_Y = 4.50      # Reaches 4.50mm in -Y (to Y = 3.17mm)
 INPUT_CAM_DROP_Z = 6.00       # Drops 6.00mm below axle in Z (to Z = 6.59mm)

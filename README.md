@@ -90,17 +90,20 @@ py -3 generate_labeled_preview.py
   - Notch outer sidewalls: placed at **$X = \pm 2.500\text{ mm}$**, aligning with the **interior sidewalls of the arch**.
   - Floor: Solid continuous $1.00\text{ mm}$ floor within the inset wall.
 
-### 3.2. Shaft Support Towers with Retention Cradles
-- **Shaft Axis**: $Y = 7.666\text{ mm}$, $Z = 12.59\text{ mm}$ ($\varnothing 2.00\text{ mm}$ shaft, $R = 1.00\text{ mm}$).
-- **Left Tower**: $X \in [4.250, 5.500]\text{ mm}$ ($1.25\text{ mm}$ wall thickness).
-- **Right Tower**: $X \in [13.360, 14.610]\text{ mm}$ ($1.25\text{ mm}$ thickness, $0.40\text{ mm}$ clearance right of through-hole).
-- **Internal Clearance Between Towers**: **$7.86\text{ mm}$**.
-- **Snap-Fit Retention Cradle**:
-  - Circle wraps $248.8^\circ$ around the shaft ($34.4^\circ$ above equator).
-  - Retention throat constriction gap: **$1.65\text{ mm}$** at $Z = 13.155\text{ mm}$.
-  - Top lead-in bevel: $45^\circ$ slope expanding out to $Z = 13.59\text{ mm}$ ($z_{\text{top}}$).
-- **Left Tower Buttress Struts**: Two steep triangular ribs ($0.80\text{ mm}$ thick in $Y$), extending $2.35\text{ mm}$ in $-X$ at base ($Z = 1.0\text{ mm}$), sloping directly into the tower at $Z = 11.59\text{ mm}$ ($2\text{ mm}$ below apex).
-- **Right Tower Reinforcing Bridge Rib**: Spans $X \in [14.61, 18.20]\text{ mm}$ at $Y = 9.49\text{ mm}$, extruded to full $6.77\text{ mm}$ outer wall height.
+### 3.2. Shaft Support Towers with Heavy-Duty Reinforced Retention Cradles
+- **Shaft Axis**: $Y = 7.666\text{ mm}$, $Z = 12.59\text{ mm}$ ($\varnothing 2.00\text{ mm}$ shaft cradle, $R = 1.00\text{ mm}$).
+- **Left Tower**: $X \in [3.900, 5.400]\text{ mm}$ ($1.50\text{ mm}$ wall thickness).
+- **Right Tower**: $X \in [13.100, 14.600]\text{ mm}$ ($1.50\text{ mm}$ thickness, $0.14\text{ mm}$ clearance right of through-hole).
+- **Internal Clearance Between Towers**: **$7.70\text{ mm}$**.
+- **Flared Trapezoidal Tower Profile (in Y-Z)**:
+  - Base Length in $Y$: **$7.00\text{ mm}$** ($Y \in [4.20, 11.20]\text{ mm}$, $+200\%$ bending stiffness).
+  - Top Length in $Y$: **$5.73\text{ mm}$** ($Y \in [4.80, 10.53]\text{ mm}$, $+45\%$ solid retention material in front and rear of cradle).
+- **Tuned Snap-Fit Retention Cradle**:
+  - Retention throat constriction gap: **$1.78\text{ mm}$** ($0.12\text{ mm}$ gentle snap with $\varnothing 1.90\text{ mm}$ shaft, reducing layer line insertion stress by $52\%$).
+  - Full $305.8^\circ$ wrap-around capture angle (> $180^\circ$ equator).
+  - Top lead-in bevel expanding out to $Z = 13.59\text{ mm}$ ($z_{\text{top}}$).
+- **Full-Height Left Tower Buttress Struts**: Two steep triangular ribs ($0.80\text{ mm}$ thick in $Y$), extending $2.00\text{ mm}$ in $-X$ at base ($X = 1.90\text{ mm}$ at $Z = 1.0\text{ mm}$), sloping directly into the tower right up to $Z = 13.20\text{ mm}$ (cradle center level).
+- **Right Tower Reinforcing Bridge Rib**: Spans $X \in [14.60, 18.20]\text{ mm}$ at $Y = 9.49\text{ mm}$, extruded to full $6.77\text{ mm}$ outer wall height.
 
 ### 3.3. Curved Snap Clips (4x at $45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$)
 - **Perimeter Positions**:

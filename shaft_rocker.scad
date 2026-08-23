@@ -18,7 +18,7 @@ plunger_root_t = 3.2;
 plunger_tip_t = 2.0;
 plunger_y_c = 11.4;
 
-input_cam_w = 2.5;
+input_cam_w = 2.1;
 input_cam_x_c = 6.55;
 
 module shaft_rocker() {
