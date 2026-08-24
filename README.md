@@ -59,7 +59,7 @@ py -3 generate_labeled_preview.py
                               TOP TAB (8.20mm Wide, fits 8.33mm Gap)
                               +-------------------+
                              /                     \
-                            /   [TOWER 1] [TOWER 2] \  <-- Shaft Axis (Y = 9.28mm, Z = 12.59mm)
+                            /   [TOWER 1] [TOWER 2] \  <-- Shaft Axis (Y = 10.20mm, Z = 12.59mm)
            Snap Clip (135°) |      (2.45mm throat)  | Snap Clip (45°)
                             |   [Through-Hole]      |
                             |   5.35 x 4.51 mm      |
@@ -91,22 +91,22 @@ py -3 generate_labeled_preview.py
   - Floor: Solid continuous $1.00\text{ mm}$ floor within the inset wall.
 
 ### 3.2. Shaft Support Towers with Heavy-Duty Reinforced Retention Cradles
-- **Shaft Axis**: **$Y = 9.279\text{ mm}$, $Z = 12.59\text{ mm}$** ($\varnothing 3.00\text{ mm}$ shaft cradle socket, centered directly over the through-hole).
+- **Shaft Axis**: **$Y = 10.200\text{ mm}$, $Z = 12.59\text{ mm}$** ($\varnothing 3.00\text{ mm}$ shaft cradle socket, centered directly over the through-hole).
 - **Left Tower**: $X \in [3.900, 5.400]\text{ mm}$ ($1.50\text{ mm}$ wall thickness).
 - **Right Tower**: $X \in [13.100, 14.600]\text{ mm}$ ($1.50\text{ mm}$ thickness, $0.14\text{ mm}$ clearance right of through-hole).
 - **Internal Clearance Between Towers**: **$7.70\text{ mm}$**.
 - **Flared Trapezoidal Tower Profile (in Y-Z)**:
-  - Base Length in $Y$: **$6.60\text{ mm}$** ($Y \in [6.250, 12.850]\text{ mm}$, lowest extent aligned exactly with Bracket 3 top inner wall at $Y = 6.250\text{ mm}$).
-  - Top Length in $Y$: **$5.63\text{ mm}$** ($Y \in [6.550, 12.180]\text{ mm}$).
+  - Base Length in $Y$: **$6.60\text{ mm}$** ($Y \in [7.171, 13.771]\text{ mm}$).
+  - Top Length in $Y$: **$5.63\text{ mm}$** ($Y \in [7.471, 13.101]\text{ mm}$).
 - **Positive Heavy-Duty Snap-Fit Retention Cradle**:
   - Socket Diameter: **$\varnothing 3.00\text{ mm}$** (provides $0.20\text{ mm}$ running clearance with $\varnothing 2.80\text{ mm}$ shaft pin).
   - Retention throat constriction gap: **$2.45\text{ mm}$** ($0.35\text{ mm}$ firm positive mechanical interference with $\varnothing 2.80\text{ mm}$ shaft).
   - Wrap angle: **$>250^\circ$**, permanently locking the axle inside the circular $\varnothing 3.00\text{ mm}$ socket.
   - Wide $3.25\text{ mm}$ lead-in funnel with bevels expanding up to $Z = 14.09\text{ mm}$ for smooth downward insertion.
 - **Left Tower Dual Lateral Buttress Struts**:
-  - **Front Strut**: Base meets the top inner wall of Bracket 3 at **$Y = 6.250\text{ mm}$** ($X \in [1.90, 3.90\text{ mm}]$, $Y \in [6.250, 7.050\text{ mm}]$), sloping directly into the Left Tower at $Z = 13.70\text{ mm}$ with **zero encroachment into Bracket 3's sliding channel**.
-  - **Rear Strut**: Full-height triangular rib ($1.20\text{ mm}$ thick in $Y$ at $Y \in [11.650, 12.850\text{ mm}]$, $X \in [1.90, 3.90\text{ mm}]$, $Z \in [1.00, 13.70\text{ mm}]$).
-- **Right Tower Reinforcing Bridge Rib**: Spans $X \in [13.10, 20.00]\text{ mm}$ at $Y \in [7.50, 13.00]\text{ mm}$, connecting directly to the outer perimeter wall.
+  - **Front Strut**: Base meets the top inner wall of Bracket 3 at **$Y = 6.250\text{ mm}$** ($X \in [1.90, 3.90\text{ mm}]$, $Y \in [6.250, 7.971\text{ mm}]$), sloping directly into the Left Tower at $Z = 13.70\text{ mm}$ with **zero encroachment into Bracket 3's sliding channel**.
+  - **Rear Strut**: Full-height triangular rib ($1.20\text{ mm}$ thick in $Y$ at $Y \in [12.571, 13.771]\text{ mm}$, $X \in [1.90, 3.90\text{ mm}]$, $Z \in [1.00, 13.70\text{ mm}]$).
+- **Right Tower Reinforcing Bridge Rib**: Spans $X \in [13.10, 20.00]\text{ mm}$ at $Y \in [8.50, 14.00]\text{ mm}$, connecting directly to the outer perimeter wall.
 
 ### 3.3. Curved Snap Clips (4x at $45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$)
 - **Perimeter Positions**:

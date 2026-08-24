@@ -21,7 +21,7 @@ from shapely.ops import unary_union
 # PARAMETRIC SPECIFICATIONS & OEM MEASUREMENTS
 # ==============================================================================
 # Baseplate Datum & Tower Coordinates
-Y_AXLE = 9.279
+Y_AXLE = 10.200
 Z_AXLE = 12.590
 
 # Tower X bounds (1.50mm reinforced towers)
@@ -123,7 +123,7 @@ def build_shaft_rocker_mesh(
     # Rib 2 (Center Plunger Blade): Reaching Z = -6.50mm
     z_tip = -plunger_reach_below_z  # -6.50 mm
     r_tip = 1.00                    # 2.00mm tip thickness in Y
-    plunger_y_center = 10.479
+    plunger_y_center = 11.40
     
     N = 25
     t = np.linspace(0, 1, N)
