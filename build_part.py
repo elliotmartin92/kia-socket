@@ -66,7 +66,7 @@ TOWER_Y_BASE_LEN = 6.60      # 6.60mm flared base in Y (Y in [6.250, 12.850]mm, 
 TOWER_Y_TOP_LEN = 5.63       # 5.63mm flared top in Y (Y in [7.471, 13.101]mm, +45% solid material around cradle)
 TOWER_INTERNAL_GAP = 7.70    # 7.70mm internal gap between reinforced tower inner faces (X: 5.40 to 13.10mm)
 TOWER_WALL_THICK = 1.50      # 1.50mm heavy-duty wall thickness in X (+50% column strength)
-TOWER_THROAT_W = 2.45        # 2.45mm heavy-duty snap throat (0.35mm firm snap with Ø2.80mm shaft, >250 deg permanent lock)
+TOWER_THROAT_W = 2.05        # 2.05mm tight-lock snap throat (0.75mm positive snap interference with Ø2.80mm shaft, 273.8 deg wrap angle)
 
 # Side Ears (Mating with 8.30mm enclosure guide slot/gap)
 EAR_GAP = 8.30             # 8.30mm enclosure guide slot/gap
@@ -507,7 +507,7 @@ def create_shaft_support_towers_poly():
 def build_clean_shaft_towers_mesh():
     """Directly extrudes the reinforced 2D U-cradle profile in (Y, Z) along X.
     - Flared trapezoidal profile in Y-Z: Base Y in [6.250, 12.850] (6.60mm wide), Top Y in [6.550, 12.180] (5.63mm wide).
-    - Tuned 2.45mm retention throat constriction (0.35mm positive snap with Ø2.80mm shaft, >250 deg permanent lock).
+    - Tuned 2.05mm tight-lock retention throat constriction (0.75mm positive snap with Ø2.80mm shaft, 273.8 deg wrap angle).
     - 1.50mm heavy-duty wall thickness in X.
     - Shaft axis at Y = 9.279mm (shifted -0.921mm so front buttress/tower base aligns with top inner wall of Bracket 3 at Y = 6.250mm).
     """
@@ -522,7 +522,7 @@ def build_clean_shaft_towers_mesh():
     y_min_top = 6.550
     y_max_top = 12.180
     
-    throat_w = TOWER_THROAT_W  # 2.45mm
+    throat_w = TOWER_THROAT_W  # 2.05mm
     half_w = throat_w / 2.0
     alpha = np.arcsin(half_w / r_shaft)
     
@@ -530,9 +530,10 @@ def build_clean_shaft_towers_mesh():
     phi = np.linspace(np.pi/2 - alpha, -np.pi - (np.pi/2 - alpha), 64)
     cradle_arc_pts = [(y_shaft + r_shaft * np.cos(p), z_cradle_center + r_shaft * np.sin(p)) for p in phi]
     
-    # Lead-in bevel from retention tips up to top edge (Z = z_top)
-    y_left_top = y_shaft - half_w - 0.40
-    y_right_top = y_shaft + half_w + 0.40
+    # 45-degree lead-in bevel from retention tips up to top edge (Z = z_top)
+    bevel_dx = (z_top - (z_cradle_center + r_shaft * np.cos(alpha))) * 0.75
+    y_left_top = y_shaft - half_w - bevel_dx
+    y_right_top = y_shaft + half_w + bevel_dx
     
     # 2D profile in (Y, Z)
     profile_yz = [

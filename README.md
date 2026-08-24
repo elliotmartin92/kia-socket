@@ -100,9 +100,9 @@ py -3 generate_labeled_preview.py
   - Top Length in $Y$: **$5.63\text{ mm}$** ($Y \in [6.550, 12.180]\text{ mm}$).
 - **Positive Heavy-Duty Snap-Fit Retention Cradle**:
   - Socket Diameter: **$\varnothing 3.00\text{ mm}$** (provides $0.20\text{ mm}$ running clearance with $\varnothing 2.80\text{ mm}$ shaft pin).
-  - Retention throat constriction gap: **$2.45\text{ mm}$** ($0.35\text{ mm}$ firm positive mechanical interference with $\varnothing 2.80\text{ mm}$ shaft).
-  - Wrap angle: **$>250^\circ$**, permanently locking the axle inside the circular $\varnothing 3.00\text{ mm}$ socket.
-  - Wide $3.25\text{ mm}$ lead-in funnel with bevels expanding up to $Z = 14.09\text{ mm}$ for smooth downward insertion.
+  - Retention throat constriction gap: **$2.05\text{ mm}$** ($0.75\text{ mm}$ firm positive mechanical interference with $\varnothing 2.80\text{ mm}$ shaft, $0.375\text{ mm}$ deep locking lip per side).
+  - Wrap angle: **$273.8^\circ$** ($>76\%$ wrap around socket), permanently capturing and locking the axle against vertical ejection.
+  - Wide $45^\circ$ lead-in bevel funnel expanding up to $Z = 14.09\text{ mm}$ for smooth downward press-fit insertion.
 - **Left Tower Dual Lateral Buttress Struts**:
   - **Front Strut**: Base meets the top inner wall of Bracket 3 at **$Y = 6.250\text{ mm}$** ($X \in [1.90, 3.90\text{ mm}]$, $Y \in [6.250, 7.050\text{ mm}]$), sloping directly into the Left Tower at $Z = 13.70\text{ mm}$ with **zero encroachment into Bracket 3's sliding channel**.
   - **Rear Strut**: Full-height triangular rib ($1.20\text{ mm}$ thick in $Y$ at $Y \in [11.650, 12.850\text{ mm}]$, $X \in [1.90, 3.90\text{ mm}]$, $Z \in [1.00, 13.70\text{ mm}]$).

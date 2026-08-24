@@ -333,7 +333,7 @@ ax3.annotate('Key Insertion Push\n(Moves along +Y)', xy=(y_input, z_input), xyte
              arrowprops=dict(facecolor='#d32f2f', edgecolor='#b71c1c', width=2.2, headwidth=7),
              fontweight='bold', color='#b71c1c', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#b71c1c'))
 
-ax3.annotate('Retention Cradle Throat (2.45mm)\nØ3.00mm Socket / Ø2.80mm Axle Snap', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
+ax3.annotate('Tight-Lock Retention Cradle (2.05mm Throat)\nØ3.00mm Socket / Ø2.80mm Axle Snap (0.75mm Lock)', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
              arrowprops=dict(arrowstyle='->', color='#ad1457', lw=1.5),
              fontweight='bold', color='#ad1457', fontsize=8, bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
