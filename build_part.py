@@ -485,8 +485,8 @@ def create_center_curved_feature_poly():
 
 def create_shaft_support_towers_poly():
     """Returns 2D bounding boxes for the two reinforced shaft support towers and left tower buttress struts."""
-    y_min = 7.171
-    y_max = 13.771
+    y_min = 6.250
+    y_max = 12.850
     
     x_left_outer = 3.900
     x_left_inner = 5.400
@@ -498,29 +498,29 @@ def create_shaft_support_towers_poly():
     right_box = box(x_right_inner, y_min, x_right_outer, y_max)
     
     # Front strut (starts at top inner wall of Bracket 3 at Y = 6.250mm, X: 1.90 to 3.90mm)
-    strut_front = box(1.90, 6.250, x_left_outer, 7.971)
-    # Rear strut (full height, X: 1.90 to 3.90mm, Y: 12.571 to 13.771mm)
-    strut_rear = box(1.90, 12.571, x_left_outer, 13.771)
+    strut_front = box(1.90, 6.250, x_left_outer, 7.050)
+    # Rear strut (full height, X: 1.90 to 3.90mm, Y: 11.650 to 12.850mm)
+    strut_rear = box(1.90, 11.650, x_left_outer, 12.850)
     
     return unary_union([left_box, right_box, strut_front, strut_rear])
 
 def build_clean_shaft_towers_mesh():
     """Directly extrudes the reinforced 2D U-cradle profile in (Y, Z) along X.
-    - Flared trapezoidal profile in Y-Z: Base Y in [7.171, 13.771] (6.60mm wide), Top Y in [7.471, 13.101] (5.63mm wide).
+    - Flared trapezoidal profile in Y-Z: Base Y in [6.250, 12.850] (6.60mm wide), Top Y in [6.550, 12.180] (5.63mm wide).
     - Tuned 2.45mm retention throat constriction (0.35mm positive snap with Ø2.80mm shaft, >250 deg permanent lock).
     - 1.50mm heavy-duty wall thickness in X.
-    - Shaft axis at Y = 10.200mm centered directly over through-hole.
+    - Shaft axis at Y = 9.279mm (shifted -0.921mm so front buttress/tower base aligns with top inner wall of Bracket 3 at Y = 6.250mm).
     """
-    y_shaft = 10.200  # Centered directly over through-hole
+    y_shaft = 9.279   # Shifted to Y = 9.279mm
     z_base = BASE_THICK  # 1.0mm
     z_top = z_base + TOWER_HEIGHT  # 14.09mm
     r_shaft = 1.50  # 3.0mm diameter shaft cradle -> 1.5mm radius
     z_cradle_center = 12.590  # Exact pivot axis elevation
     
-    y_min_base = 7.171
-    y_max_base = 13.771
-    y_min_top = 7.471
-    y_max_top = 13.101
+    y_min_base = 6.250
+    y_max_base = 12.850
+    y_min_top = 6.550
+    y_max_top = 12.180
     
     throat_w = TOWER_THROAT_W  # 2.45mm
     half_w = throat_w / 2.0
@@ -564,8 +564,8 @@ def build_clean_shaft_towers_mesh():
 
 def build_left_tower_struts_mesh():
     """Builds the dual triangular buttress struts on the left side of the left tower.
-    - Front Strut: Bottom in Y starts at Y = 6.250mm (aligned with top inner wall of Bracket 3!) extending to Y = 7.971mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.70mm).
-    - Rear Strut: Full-height triangle at Y: 12.571 to 13.771mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.70mm).
+    - Front Strut: Starts at Y = 6.250mm (top inner wall of Bracket 3) extending to Y = 7.050mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.70mm).
+    - Rear Strut: Full-height triangle at Y: 11.650 to 12.850mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.70mm).
     """
     x_left_outer = 3.900
     z_base = BASE_THICK  # 1.0mm
@@ -579,19 +579,16 @@ def build_left_tower_struts_mesh():
     ]
     poly_xz = Polygon(strut_pts_xz)
     
-    # 1. Front Strut starting at Y = 6.250mm (top inner wall of Bracket 3) to Y = 7.971mm (thickness = 1.721mm in Y)
-    front_strut_y_min = 6.250
-    front_strut_y_max = 7.971
-    front_strut_thick_y = front_strut_y_max - front_strut_y_min  # 1.721 mm
-    m_front_raw = trimesh.creation.extrude_polygon(poly_xz, height=front_strut_thick_y)
+    # 1. Front Strut at Y in [6.250, 7.050] (0.80mm thick, aligns with top inner wall of Bracket 3!)
+    m_front_raw = trimesh.creation.extrude_polygon(poly_xz, height=0.80)
     v_front = m_front_raw.vertices.copy()
-    v_front = np.column_stack([v_front[:, 0], v_front[:, 2] + front_strut_y_min, v_front[:, 1]])
+    v_front = np.column_stack([v_front[:, 0], v_front[:, 2] + 6.250, v_front[:, 1]])
     mesh_front = trimesh.Trimesh(vertices=v_front, faces=m_front_raw.faces.copy(), process=True)
     
-    # 2. Rear Strut at Y in [12.571, 13.771] (1.20mm thick)
+    # 2. Rear Strut at Y in [11.650, 12.850] (1.20mm thick)
     m_rear_raw = trimesh.creation.extrude_polygon(poly_xz, height=1.20)
     v_rear = m_rear_raw.vertices.copy()
-    v_rear = np.column_stack([v_rear[:, 0], v_rear[:, 2] + 12.571, v_rear[:, 1]])
+    v_rear = np.column_stack([v_rear[:, 0], v_rear[:, 2] + 11.650, v_rear[:, 1]])
     mesh_rear = trimesh.Trimesh(vertices=v_rear, faces=m_rear_raw.faces.copy(), process=True)
     
     return trimesh.util.concatenate([mesh_front, mesh_rear])
