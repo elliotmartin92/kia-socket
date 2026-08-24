@@ -21,7 +21,7 @@ from shapely.ops import unary_union
 # PARAMETRIC SPECIFICATIONS & OEM MEASUREMENTS
 # ==============================================================================
 # Baseplate Datum & Tower Coordinates
-Y_AXLE = 7.666
+Y_AXLE = 10.200
 Z_AXLE = 12.590
 
 # Tower X bounds (1.50mm reinforced towers)
@@ -37,19 +37,19 @@ HOLE_X_WIDTH = 5.352
 HOLE_Y_CENTER = 10.826
 HOLE_Y_LEN = 4.512
 
-# Confirmed OEM Measured Dimensions
+# Enlarged Heavy-Duty Dimensions
 TOTAL_AXLE_LEN = 11.50       # 11.50mm total length tip-to-tip
-HUB_WIDTH = 7.60             # 7.71mm nominal (7.60mm for 0.05mm rotation clearance in 7.70mm tower gap)
-PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 1.95 mm per side
-PIN_DIAMETER = 1.90          # Ø1.90mm for snap-fit into Ø2.00mm cradle (OEM nominal: 2.27mm)
-HUB_DIAMETER = 3.30          # Ø3.30mm central hub barrel
+HUB_WIDTH = 7.50             # 7.50mm structural hub (0.10mm clearance per side in 7.70mm tower gap)
+PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.00 mm per side
+PIN_DIAMETER = 2.80          # Ø2.80mm heavy-duty pin (fits Ø3.00mm cradle, 4.72x higher torsional rigidity)
+HUB_DIAMETER = 4.20          # Ø4.20mm central structural hub barrel
 PLUNGER_REACH_BELOW_Z = 6.50 # Reaches Z = -6.50mm below baseplate floor
 
 # Cam & Ribs
 CAM_WIDTH_X = 2.70           # 2.70mm wide input cam tab
 CAM_X_CENTER = 7.05          # Aligned with slider guide track
-RIB_FLANK_THICK = 0.90       # 0.90mm flank rib thickness
-PLUNGER_WIDTH_X = 2.40       # 2.40mm wide central plunger blade
+RIB_FLANK_THICK = 1.00       # 1.00mm flank rib thickness
+PLUNGER_WIDTH_X = 4.40       # 4.40mm wide central plunger blade (centered in 5.35mm hole)
 
 def build_shaft_rocker_mesh(
     axle_len=TOTAL_AXLE_LEN,
@@ -63,11 +63,11 @@ def build_shaft_rocker_mesh(
     in_assembly_coords=True
 ):
     """
-    Builds the OEM 3-rib 3D mesh of the shaft/rocker mechanism.
+    Builds the enlarged heavy-duty 3-rib 3D mesh of the shaft/rocker mechanism.
     
     Features:
-    - Stepped cylindrical pivot pins with central structural hub
-    - 3-rib fork array: Left & right stiffener flanks + central plunger
+    - Stepped cylindrical pivot pins (Ø2.80mm) with central structural hub (Ø4.20mm)
+    - 3-rib fork array: Left & right stiffener flanks + widened 4.40mm central plunger
     - Smooth continuous filleted plunger arm reaching Z <= -6.50mm
     - Angled input cam tab matching OEM bellcrank angle (~105 deg)
     """
@@ -77,45 +77,44 @@ def build_shaft_rocker_mesh(
     
     # 1. Stepped Cylindrical Axle & Hub
     r_pin = pin_d / 2.0
-    x_min = x_c - axle_len / 2.0  # 3.50 mm
-    x_max = x_c + axle_len / 2.0  # 15.00 mm
+    r_hub = hub_d / 2.0
     pin_len = (axle_len - hub_w) / 2.0
     
     rot_x = trimesh.transformations.rotation_matrix(np.pi/2, [0, 1, 0])
     
-    # Left pin: [3.50, 5.45]
+    # Left pin: [3.50, 5.50]
     pin_l = trimesh.creation.cylinder(radius=r_pin, height=pin_len + 0.10, sections=32)
     pin_l.apply_transform(rot_x)
-    pin_l.apply_translation([x_min + pin_len/2.0, y_axle, z_axle])
+    pin_l.apply_translation([x_c - hub_w/2.0 - pin_len/2.0, y_axle, z_axle])
     
-    # Right pin: [13.05, 15.00]
+    # Right pin: [13.00, 15.00]
     pin_r = trimesh.creation.cylinder(radius=r_pin, height=pin_len + 0.10, sections=32)
     pin_r.apply_transform(rot_x)
-    pin_r.apply_translation([x_max - pin_len/2.0, y_axle, z_axle])
+    pin_r.apply_translation([x_c + hub_w/2.0 + pin_len/2.0, y_axle, z_axle])
     
-    # Central Hub Barrel: [5.45, 13.05]
-    hub_mesh = trimesh.creation.cylinder(radius=hub_d/2.0, height=hub_w, sections=32)
+    # Central Hub Barrel: [5.50, 13.00]
+    hub_mesh = trimesh.creation.cylinder(radius=r_hub, height=hub_w, sections=32)
     hub_mesh.apply_transform(rot_x)
     hub_mesh.apply_translation([x_c, y_axle, z_axle])
     
     # 2. OEM 3-Rib Flanks & Plunger Array
-    flank_collar = Point(y_axle, z_axle).buffer(hub_d / 2.0)
+    flank_collar = Point(y_axle, z_axle).buffer(r_hub)
     flank_pts = [
-        (y_axle - 1.20, z_axle + 0.50),
-        (y_axle + 2.80, z_axle - 1.50),
-        (y_axle + 2.20, z_axle - 4.20),
-        (y_axle + 0.20, z_axle - 4.00),
-        (y_axle - 1.40, z_axle - 1.00)
+        (y_axle - 1.50, z_axle + 0.60),
+        (y_axle + 3.20, z_axle - 1.50),
+        (y_axle + 2.50, z_axle - 4.50),
+        (y_axle + 0.20, z_axle - 4.20),
+        (y_axle - 1.60, z_axle - 1.00)
     ]
     poly_flank = unary_union([flank_collar, Polygon(flank_pts)])
     
-    # Rib 1 (Left Flank): X in [5.55, 6.45]
+    # Rib 1 (Left Flank): X in [5.60, 6.60]
     m_rib1_raw = trimesh.creation.extrude_polygon(poly_flank, height=RIB_FLANK_THICK)
     v_r1 = m_rib1_raw.vertices.copy()
     v_rib1 = np.column_stack([v_r1[:, 2] + (x_c - hub_w/2.0 + 0.10), v_r1[:, 0], v_r1[:, 1]])
     mesh_rib1 = trimesh.Trimesh(vertices=v_rib1, faces=m_rib1_raw.faces.copy(), process=True)
     
-    # Rib 3 (Right Flank): X in [12.05, 12.95]
+    # Rib 3 (Right Flank): X in [11.90, 12.90]
     m_rib3_raw = trimesh.creation.extrude_polygon(poly_flank, height=RIB_FLANK_THICK)
     v_r3 = m_rib3_raw.vertices.copy()
     v_rib3 = np.column_stack([v_r3[:, 2] + (x_c + hub_w/2.0 - 0.10 - RIB_FLANK_THICK), v_r3[:, 0], v_r3[:, 1]])
@@ -128,13 +127,13 @@ def build_shaft_rocker_mesh(
     
     N = 25
     t = np.linspace(0, 1, N)
-    spine_y = (1-t)**2 * (y_axle + hub_d/2.0) + 2*(1-t)*t * (y_axle + 3.80) + t**2 * (plunger_y_center + r_tip)
+    spine_y = (1-t)**2 * (y_axle + r_hub) + 2*(1-t)*t * (y_axle + 3.80) + t**2 * (plunger_y_center + r_tip)
     spine_z = (1-t)**2 * (z_axle - 0.20) + 2*(1-t)*t * 7.50 + t**2 * 3.50
     
     tip_angles = np.linspace(0, np.pi, 33)
     tip_pts = [(plunger_y_center + r_tip * np.cos(a), z_tip + r_tip * (1 - np.sin(a))) for a in tip_angles]
     
-    belly_y = (1-t)**2 * (y_axle - hub_d/2.0) + 2*(1-t)*t * (y_axle + 1.20) + t**2 * (plunger_y_center - r_tip)
+    belly_y = (1-t)**2 * (y_axle - r_hub) + 2*(1-t)*t * (y_axle + 1.20) + t**2 * (plunger_y_center - r_tip)
     belly_z = (1-t)**2 * (z_axle - 0.50) + 2*(1-t)*t * 7.80 + t**2 * 3.50
     
     pts_plunger = (
@@ -150,11 +149,11 @@ def build_shaft_rocker_mesh(
     v_plunger = np.column_stack([v_p[:, 2] + (HOLE_X_CENTER - plunger_w_x/2.0), v_p[:, 0], v_p[:, 1]])
     mesh_plunger = trimesh.Trimesh(vertices=v_plunger, faces=m_plunger_raw.faces.copy(), process=True)
     
-    # 3. Structural Web tying the 3 ribs together (X in [5.55, 12.95])
-    web_y_min = y_axle - 1.20
-    web_y_max = y_axle + 2.20
+    # 3. Structural Web tying the 3 ribs together (X in [5.60, 12.90])
+    web_y_min = y_axle - 1.50
+    web_y_max = y_axle + 2.50
     web_z_min = z_axle - 3.20
-    web_z_max = z_axle + 0.80
+    web_z_max = z_axle + 1.00
     web_poly = box(web_y_min, web_z_min, web_y_max, web_z_max)
     web_span_x = (x_c + hub_w/2.0 - 0.10) - (x_c - hub_w/2.0 + 0.10)
     m_web_raw = trimesh.creation.extrude_polygon(web_poly, height=web_span_x)
@@ -162,19 +161,33 @@ def build_shaft_rocker_mesh(
     v_web = np.column_stack([v_w[:, 2] + (x_c - hub_w/2.0 + 0.10), v_w[:, 0], v_w[:, 1]])
     mesh_web = trimesh.Trimesh(vertices=v_web, faces=m_web_raw.faces.copy(), process=True)
     
-    # 4. Angled Input Cam Tab with Underside Coring (Bellcrank Angle ~105°)
-    y_cam_tip = y_axle - 4.20  # Reaches Y = 3.47mm
-    z_cam_tip = z_axle - 5.80  # Drops to Z = 6.79mm
+    # 4. Direct 105° Input Cam Tab (Extending directly off the cylindrical shaft hub)
+    # Centerline of plunger is at angle theta_p = atan2(-19.09, 1.20) = -86.40°
+    # 105° bellcrank angle -> angle of cam centerline = -86.40° - 75.0° = -161.40°
+    theta_cam = np.radians(-161.40)
+    dir_cam = np.array([np.cos(theta_cam), np.sin(theta_cam)]) # [-0.948, -0.319]
+    norm_cam = np.array([-dir_cam[1], dir_cam[0]])             # [0.319, -0.948]
     
-    cam_collar = Point(y_axle, z_axle).buffer(hub_d / 2.0)
-    cam_pts = [
-        (y_axle + 1.20, z_axle + 1.20),
-        (y_cam_tip, z_cam_tip + 2.20),
-        (y_cam_tip, z_cam_tip),
-        (y_cam_tip + 2.80, z_cam_tip),
-        (y_axle + 0.20, z_axle - 2.50)
-    ]
-    poly_cam = unary_union([cam_collar, Polygon(cam_pts)])
+    cam_reach = 6.80     # Total length from shaft center (reaches Y = 3.75mm, Z = 10.42mm)
+    cam_arm_thick = 2.80 # Solid 2.80mm beam thickness
+    half_t = cam_arm_thick / 2.0
+    
+    # Arm body points starting directly from the shaft center (zero gap/undercut with hub)
+    p_center_tip = np.array([y_axle, z_axle]) + dir_cam * cam_reach
+    p1 = np.array([y_axle, z_axle]) + norm_cam * half_t
+    p2 = p_center_tip + norm_cam * half_t
+    p3 = p_center_tip - norm_cam * half_t
+    p4 = np.array([y_axle, z_axle]) - norm_cam * half_t
+    
+    # Smooth rounded nose at slider contact tip
+    cam_tip_pts = []
+    for a in np.linspace(np.pi/2, -np.pi/2, 17):
+        pt = p_center_tip + dir_cam * (half_t * np.cos(a)) + norm_cam * (half_t * np.sin(a))
+        cam_tip_pts.append((pt[0], pt[1]))
+        
+    poly_cam_arm = Polygon([p1] + cam_tip_pts + [p4, p1])
+    poly_cam = unary_union([flank_collar, poly_cam_arm])
+    
     m_cam_raw = trimesh.creation.extrude_polygon(poly_cam, height=cam_w_x)
     v_c = m_cam_raw.vertices.copy()
     v_cam = np.column_stack([v_c[:, 2] + (cam_x_c - cam_w_x/2.0), v_c[:, 0], v_c[:, 1]])
@@ -264,3 +277,4 @@ if __name__ == '__main__':
     # 3. OpenSCAD code
     export_shaft_scad("shaft_rocker.scad")
     print("Shaft CAD generation complete!")
+

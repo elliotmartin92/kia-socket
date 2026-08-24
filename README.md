@@ -20,12 +20,12 @@ py -3 generate_labeled_preview.py
 | File | Description |
 | :--- | :--- |
 | **`part.stl`** / **`part.obj`** | Main baseplate with **100% planar flat bottom ($Z = 0.00\text{ mm}$)** for support-free 3D printing. |
-| **`shaft_rocker.stl`** / **`shaft_rocker.obj`** | Separate 3D-printable shaft/rocker mechanism with $\varnothing 1.90\text{ mm}$ axle, input cam, and $\ge 6.5\text{ mm}$ reach plunger. Pre-oriented flat on build bed ($Z = 0.00\text{ mm}$). |
+| **`shaft_rocker.stl`** / **`shaft_rocker.obj`** | Separate 3D-printable enlarged heavy-duty shaft/rocker mechanism with $\varnothing 2.80\text{ mm}$ axle pins, $\varnothing 4.20\text{ mm}$ hub, input cam, and $\ge 6.5\text{ mm}$ reach plunger. Pre-oriented flat on build bed ($Z = 0.00\text{ mm}$). |
 | **`shaft_rocker_assembled.stl`** | Shaft/rocker mechanism positioned in exact assembly coordinates seated in the towers. |
 | **`shaft_rocker.scad`** | OpenSCAD parametric source file for the shaft/rocker mechanism. |
 | **`slit_insert.stl`** / **`slit_insert.obj`** | Separate 3D-printable backside slit wall insert with integrated indexing registration key. |
 | **`slit_inserts_pair.stl`** | Two inserts pre-arranged side-by-side on a single build plate for 1-click 3D printing. |
-| **`cooling_tower.stl`** / **`cooling_tower.obj`** | Sacrificial cooling column ($\varnothing 8.00\text{ mm} \times 14.00\text{ mm}$ tall) to guarantee dedicated cooling time per layer on delicate tower tips. |
+| **`cooling_tower.stl`** / **`cooling_tower.obj`** | Sacrificial cooling column ($\varnothing 8.00\text{ mm} \times 14.50\text{ mm}$ tall) to guarantee dedicated cooling time per layer on delicate tower tips. |
 | **`complete_assembly.stl`** / **`complete_assembly.obj`** | Complete 1-click 3D print plate with the main baseplate, both separate slit inserts, shaft rocker, and sacrificial cooling tower pre-arranged side-by-side on the **same flat print plane ($Z = 0.00\text{ mm}$)**. |
 | **`part.scad`** | OpenSCAD source file representing the exact baseplate geometry. |
 | **`labeled_part_preview.png`** | 3-panel blueprint showing top-down dimensioned feature map, 3D isometric assembly, and kinematic stroke cross-section. |
@@ -46,7 +46,7 @@ py -3 generate_labeled_preview.py
   - $Z \in [1.00, 4.60]\text{ mm}$: Guide brackets ($4.60\text{ mm}$ total height).
   - $Z \in [1.00, 6.77]\text{ mm}$: Outer perimeter wall, snap clip stems, bottom arch wall, and bridge rib ($6.77\text{ mm}$ height).
   - $Z \in [1.00, 10.50]\text{ mm}$: Center curved feature with internal rib ($10.50\text{ mm}$ total height).
-  - $Z \in [1.00, 13.59]\text{ mm}$: Shaft support towers ($12.59\text{ mm}$ height above floor, total $13.59\text{ mm}$).
+  - $Z \in [1.00, 14.09]\text{ mm}$: Shaft support towers ($13.09\text{ mm}$ height above floor, total $14.09\text{ mm}$).
 - **Separate Slit Insert Dimensions**:
   - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.80\text{ mm} \times 5.60\text{ mm}$ outer, $1.20\text{ mm} \times 3.50\text{ mm}$ inner clearance channel for $0.77\text{ mm} \times 3.10\text{ mm}$ part).
   - $Z \in [2.47, 3.32]\text{ mm}$: Indexing registration key ($2.00\text{ mm} \times 4.30\text{ mm} \times 0.85\text{ mm}$) with continuous $1.20\text{ mm} \times 3.50\text{ mm}$ core.
@@ -60,7 +60,7 @@ py -3 generate_labeled_preview.py
                               +-------------------+
                              /                     \
                             /   [TOWER 1] [TOWER 2] \  <-- Shaft Axis (Y = 10.20mm, Z = 12.59mm)
-           Snap Clip (135°) |      (1.52mm throat)  | Snap Clip (45°)
+           Snap Clip (135°) |      (2.45mm throat)  | Snap Clip (45°)
                             |   [Through-Hole]      |
                             |   5.35 x 4.51 mm      |
                             |                       |
@@ -91,7 +91,7 @@ py -3 generate_labeled_preview.py
   - Floor: Solid continuous $1.00\text{ mm}$ floor within the inset wall.
 
 ### 3.2. Shaft Support Towers with Heavy-Duty Reinforced Retention Cradles
-- **Shaft Axis**: **$Y = 10.200\text{ mm}$, $Z = 12.59\text{ mm}$** ($\varnothing 2.00\text{ mm}$ shaft cradle, centered directly over the through-hole).
+- **Shaft Axis**: **$Y = 10.200\text{ mm}$, $Z = 12.59\text{ mm}$** ($\varnothing 3.00\text{ mm}$ shaft cradle socket, centered directly over the through-hole).
 - **Left Tower**: $X \in [3.900, 5.400]\text{ mm}$ ($1.50\text{ mm}$ wall thickness).
 - **Right Tower**: $X \in [13.100, 14.600]\text{ mm}$ ($1.50\text{ mm}$ thickness, $0.14\text{ mm}$ clearance right of through-hole).
 - **Internal Clearance Between Towers**: **$7.70\text{ mm}$**.
@@ -99,12 +99,13 @@ py -3 generate_labeled_preview.py
   - Base Length in $Y$: **$6.60\text{ mm}$** ($Y \in [7.171, 13.771]\text{ mm}$, front edge starts directly at top of Bracket 3).
   - Top Length in $Y$: **$5.63\text{ mm}$** ($Y \in [7.471, 13.101]\text{ mm}$).
 - **Positive Heavy-Duty Snap-Fit Retention Cradle**:
-  - Retention throat constriction gap: **$1.52\text{ mm}$** ($0.38\text{ mm}$ firm positive mechanical interference with $\varnothing 1.90\text{ mm}$ shaft).
-  - Wrap angle: **$261^\circ$** ($40.5^\circ$ past the horizontal equator on each side), permanently locking the axle inside the circular $\varnothing 2.00\text{ mm}$ socket.
-  - Wide $2.22\text{ mm}$ lead-in funnel with $45^\circ$ bevels expanding up to $Z = 13.59\text{ mm}$ for smooth downward insertion.
+  - Socket Diameter: **$\varnothing 3.00\text{ mm}$** (provides $0.20\text{ mm}$ running clearance with $\varnothing 2.80\text{ mm}$ shaft pin).
+  - Retention throat constriction gap: **$2.45\text{ mm}$** ($0.35\text{ mm}$ firm positive mechanical interference with $\varnothing 2.80\text{ mm}$ shaft).
+  - Wrap angle: **$>250^\circ$**, permanently locking the axle inside the circular $\varnothing 3.00\text{ mm}$ socket.
+  - Wide $3.25\text{ mm}$ lead-in funnel with bevels expanding up to $Z = 14.09\text{ mm}$ for smooth downward insertion.
 - **Left Tower Dual Lateral Buttress Struts**:
-  - **Front Strut**: Base meets the top horizontal edge of Bracket 3 at **$Y = 7.171\text{ mm}$** ($X \in [1.90, 3.90\text{ mm}]$, $Y \in [7.171, 7.971\text{ mm}]$), sloping directly into the Left Tower at $Z = 13.20\text{ mm}$ with **zero encroachment into Bracket 3's sliding channel**.
-  - **Rear Strut**: Full-height triangular rib ($1.20\text{ mm}$ thick in $Y$ at $Y \in [12.571, 13.771]\text{ mm}$, $X \in [1.90, 3.90\text{ mm}]$, $Z \in [1.00, 13.20\text{ mm}]$).
+  - **Front Strut**: Base meets the top horizontal edge of Bracket 3 at **$Y = 7.171\text{ mm}$** ($X \in [1.90, 3.90\text{ mm}]$, $Y \in [7.171, 7.971\text{ mm}]$), sloping directly into the Left Tower at $Z = 13.70\text{ mm}$ with **zero encroachment into Bracket 3's sliding channel**.
+  - **Rear Strut**: Full-height triangular rib ($1.20\text{ mm}$ thick in $Y$ at $Y \in [12.571, 13.771]\text{ mm}$, $X \in [1.90, 3.90\text{ mm}]$, $Z \in [1.00, 13.70\text{ mm}]$).
 - **Right Tower Reinforcing Bridge Rib**: Spans $X \in [13.10, 20.00]\text{ mm}$ at $Y \in [8.50, 14.00]\text{ mm}$, connecting directly to the outer perimeter wall.
 
 ### 3.3. Curved Snap Clips (4x at $45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$)
@@ -172,20 +173,19 @@ py -3 generate_labeled_preview.py
 - **Thickness & Height**: $0.60\text{ mm}$ thick, $0.50\text{ mm}$ tall ($Z \in [1.00, 1.50]\text{ mm}$).
 - **Connectivity**: Connects directly into outer perimeter walls; excluded under bracket pairs and bottom zone ($Y < -7.17\text{ mm}$).
 
-### 3.10. Heavy-Duty Reinforced Shaft & Rocker Mechanism (PCB Button Actuator)
+### 3.10. Enlarged Heavy-Duty Shaft & Rocker Mechanism (PCB Button Actuator)
 - **Pivot Axle & Structural Core**:
-  - Precision $\varnothing 1.90\text{ mm}$ bearing ends ($R = 0.95\text{ mm}$, $0.10\text{ mm}$ clearance fit inside $\varnothing 2.00\text{ mm}$ tower cradles) snapping firmly through the $1.65\text{ mm}$ tower throat.
-  - **$\varnothing 3.20\text{ mm}$ heavy-duty structural reinforcing trunk sleeve** ($1.7\times$ higher torsional rigidity) spanning $X \in [5.60, 13.26]\text{ mm}$ to prevent shaft deflection, shear, or twisting.
-- **Thrust Retention Collars**: Two $\varnothing 3.00\text{ mm} \times 0.80\text{ mm}$ retaining flanges at $X = 3.05 - 3.85\text{ mm}$ and $X = 15.01 - 15.81\text{ mm}$ preventing lateral axial shift.
-- **Heavy-Duty Filleted Output Plunger Arm (Widened & Anti-Flexion Reinforced)**:
-  - **Width in $X$**: Widened to **$4.60\text{ mm}$ in $X$** (centered in the $5.35\text{ mm}$ through-hole with $0.38\text{ mm}$ lateral clearances).
-  - **Root Thickness in $Y$**: Thickened to **$3.20\text{ mm}$ at the shaft junction** with a massive **$\varnothing 4.40\text{ mm}$ collar boss** ($R = 2.20\text{ mm}$) to eliminate flexion and bending under key insertion pressure.
-  - **Tip Contact**: Smoothly tapers from $3.20\text{ mm}$ down to a $2.00\text{ mm}$ nose radius ($R = 1.00\text{ mm}$) at the switch contact point.
+  - Precision $\varnothing 2.80\text{ mm}$ bearing ends ($R = 1.40\text{ mm}$, $0.10\text{ mm}$ radial clearance fit inside $\varnothing 3.00\text{ mm}$ tower cradles) snapping firmly through the $2.45\text{ mm}$ tower throat ($+47\%$ diameter, $4.72\times$ higher torsional rigidity over $\varnothing 1.90\text{ mm}$).
+  - **$\varnothing 4.20\text{ mm}$ heavy-duty structural hub barrel** spanning $X \in [5.50, 13.00]\text{ mm}$ to eliminate shaft deflection, shear, or twisting under spring/switch load.
+- **Heavy-Duty Filleted Output Plunger Arm**:
+  - **Width in $X$**: Widened to **$4.40\text{ mm}$ in $X$** (centered at $X = 10.284\text{ mm}$ in the $5.35\text{ mm}$ through-hole with $0.48\text{ mm}$ lateral clearances).
+  - **Root Thickness in $Y$**: Thickened to **$3.80\text{ mm}$ at the shaft junction** blending into the $\varnothing 4.20\text{ mm}$ central hub barrel to eliminate bending under key insertion.
+  - **Tip Contact**: Smoothly tapers to a $2.00\text{ mm}$ nose diameter ($R = 1.00\text{ mm}$) at the switch contact point.
   - **Reach & Stroke**: Reaches **$\ge 6.50\text{ mm}$ below the outer bottom face of the baseplate ($Z \le -6.50\text{ mm}$)**.
-  - **Kinematics**: Rotates clockwise to produce a **$\Delta Y \approx 2.36\text{ mm}$ horizontal stroke in $-Y$**, pressing directly into the actuator stem of the Y-axis oriented PCB tactile switch with zero through-hole interference.
+  - **Kinematics**: Rotates clockwise around the $Y = 10.200\text{ mm}, Z = 12.59\text{ mm}$ pivot axis to actuate the Y-axis oriented PCB tactile switch with zero through-hole interference.
 - **Reinforced Input Cam & Full-Span Monolithic Gusset Web**:
-  - $2.50\text{ mm}$ wide input cam with thickened $3.00\text{ mm}$ root.
-  - Monolithic structural gusset web spanning continuously from $X = 5.30\text{ mm}$ all the way to $X = 13.25\text{ mm}$ across the entire opening between the towers.
+  - $2.70\text{ mm}$ wide input cam tab aligned with the key blade slider track ($X = 7.05\text{ mm}$).
+  - Monolithic structural gusset web spanning continuously across the entire opening between the towers ($X \in [5.60, 12.90]\text{ mm}$).
 
 ---
 

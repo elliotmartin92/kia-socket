@@ -61,12 +61,12 @@ INSERT_BODY_W_X = 3.80    # 3.80mm outer shroud body width in X
 INSERT_BODY_LEN_Y = 5.60  # 5.60mm outer shroud body length in Y
 
 # Shaft Support Towers (Top-Right Above Hole) - Heavy-Duty Reinforced
-TOWER_HEIGHT = 12.59         # 12.59mm protrusion above face
-TOWER_Y_BASE_LEN = 6.60      # 6.60mm flared base in Y (Y in [4.60, 11.20]mm, +180% bending stiffness)
-TOWER_Y_TOP_LEN = 5.63       # 5.63mm flared top in Y (Y in [4.90, 10.53]mm, +45% solid material around cradle)
+TOWER_HEIGHT = 13.09         # 13.09mm protrusion above face (Total Z_top = 14.09mm, cradle center Z = 12.59mm)
+TOWER_Y_BASE_LEN = 6.60      # 6.60mm flared base in Y (Y in [7.171, 13.771]mm, +180% bending stiffness)
+TOWER_Y_TOP_LEN = 5.63       # 5.63mm flared top in Y (Y in [7.471, 13.101]mm, +45% solid material around cradle)
 TOWER_INTERNAL_GAP = 7.70    # 7.70mm internal gap between reinforced tower inner faces (X: 5.40 to 13.10mm)
 TOWER_WALL_THICK = 1.50      # 1.50mm heavy-duty wall thickness in X (+50% column strength)
-TOWER_THROAT_W = 1.52        # 1.52mm heavy-duty snap throat (0.38mm firm snap with Ø1.90mm shaft, >260 deg permanent lock)
+TOWER_THROAT_W = 2.45        # 2.45mm heavy-duty snap throat (0.35mm firm snap with Ø2.80mm shaft, >250 deg permanent lock)
 
 # Side Ears (Mating with 8.30mm enclosure guide slot/gap)
 EAR_GAP = 8.30             # 8.30mm enclosure guide slot/gap
@@ -507,22 +507,22 @@ def create_shaft_support_towers_poly():
 def build_clean_shaft_towers_mesh():
     """Directly extrudes the reinforced 2D U-cradle profile in (Y, Z) along X.
     - Flared trapezoidal profile in Y-Z: Base Y in [7.171, 13.771] (6.60mm wide), Top Y in [7.471, 13.101] (5.63mm wide).
-    - Tuned 1.52mm retention throat constriction (0.38mm positive snap with Ø1.90mm shaft, 261 deg permanent lock).
+    - Tuned 2.45mm retention throat constriction (0.35mm positive snap with Ø2.80mm shaft, >250 deg permanent lock).
     - 1.50mm heavy-duty wall thickness in X.
     - Guarantees 100% clean, watertight monolithic solid with zero internal facets or boolean artifacts.
     """
-    y_shaft = 10.200  # Shifted up to align front strut directly with top of Bracket 3 (Y = 7.171mm)
+    y_shaft = 10.200  # Centered directly over through-hole
     z_base = BASE_THICK  # 1.0mm
-    z_top = z_base + TOWER_HEIGHT  # 13.59mm
-    r_shaft = 1.00  # 2mm diameter shaft cradle -> 1.0mm radius
-    z_cradle_center = z_top - r_shaft  # 12.59mm
+    z_top = z_base + TOWER_HEIGHT  # 14.09mm
+    r_shaft = 1.50  # 3.0mm diameter shaft cradle -> 1.5mm radius
+    z_cradle_center = 12.590  # Exact pivot axis elevation
     
     y_min_base = 7.171
     y_max_base = 13.771
     y_min_top = 7.471
     y_max_top = 13.101
     
-    throat_w = TOWER_THROAT_W  # 1.52mm
+    throat_w = TOWER_THROAT_W  # 2.45mm
     half_w = throat_w / 2.0
     alpha = np.arcsin(half_w / r_shaft)
     
@@ -531,8 +531,8 @@ def build_clean_shaft_towers_mesh():
     cradle_arc_pts = [(y_shaft + r_shaft * np.cos(p), z_cradle_center + r_shaft * np.sin(p)) for p in phi]
     
     # Lead-in bevel from retention tips up to top edge (Z = z_top)
-    y_left_top = y_shaft - half_w - 0.35
-    y_right_top = y_shaft + half_w + 0.35
+    y_left_top = y_shaft - half_w - 0.40
+    y_right_top = y_shaft + half_w + 0.40
     
     # 2D profile in (Y, Z)
     profile_yz = [
@@ -564,12 +564,12 @@ def build_clean_shaft_towers_mesh():
 
 def build_left_tower_struts_mesh():
     """Builds the dual triangular buttress struts on the left side of the left tower.
-    - Front Strut: Meets the top edge of Bracket 3 at Y = 7.171mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.20mm).
-    - Rear Strut: Full-height triangle at Y: 12.571 to 13.771mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.20mm).
+    - Front Strut: Meets the top edge of Bracket 3 at Y = 7.171mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.70mm).
+    - Rear Strut: Full-height triangle at Y: 12.571 to 13.771mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.70mm).
     """
     x_left_outer = 3.900
     z_base = BASE_THICK  # 1.0mm
-    z_strut_top = 13.20  # 13.20mm (cradle center level)
+    z_strut_top = 13.70  # 13.70mm (reinforced buttress height)
     
     # Triangular strut in (X, Z)
     strut_pts_xz = [
@@ -805,8 +805,8 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=S
     m_insert = m_body.union(m_key, engine='manifold')
     return m_insert
 
-def build_cooling_tower_mesh(radius=4.0, height=14.0):
-    """Builds a sacrificial cylindrical cooling tower (Ø8mm x 14.0mm tall) for 1-click print plate placement.
+def build_cooling_tower_mesh(radius=4.0, height=14.50):
+    """Builds a sacrificial cylindrical cooling tower (Ø8mm x 14.50mm tall) for 1-click print plate placement.
     Forces the nozzle to travel away from the delicate shaft support towers on high layers (Z > 10mm),
     giving each layer of the tower tips dedicated time to cool and solidify."""
     tower = trimesh.creation.cylinder(radius=radius, height=height, sections=32)
@@ -831,7 +831,7 @@ def build_indexed_assembly_mesh(main_mesh, insert_mesh, shaft_mesh=None, include
         meshes.append(shaft_plate)
         
     if include_cooling_tower:
-        cool_tower = build_cooling_tower_mesh(radius=4.0, height=14.0)
+        cool_tower = build_cooling_tower_mesh(radius=4.0, height=14.50)
         cool_tower.apply_translation([27.50, -16.00, 0.00])
         meshes.append(cool_tower)
         

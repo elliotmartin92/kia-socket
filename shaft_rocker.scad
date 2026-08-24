@@ -5,13 +5,13 @@ $fn = 64;
 
 // Global Parameters (mm)
 total_axle_len = 11.5;
-hub_w = 7.6;
-pin_d = 1.9;
-pin_len = 1.95;
-hub_d = 3.3;
+hub_w = 7.5;
+pin_d = 2.8;
+pin_len = 2.00;
+hub_d = 4.2;
 
 plunger_reach_below_z = 6.5;
-plunger_w = 2.4;
+plunger_w = 4.4;
 plunger_y_c = 11.4;
 
 cam_w = 2.7;

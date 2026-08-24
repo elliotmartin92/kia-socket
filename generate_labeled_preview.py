@@ -60,23 +60,23 @@ for geom in (all_ribs_poly.geoms if hasattr(all_ribs_poly, 'geoms') else [all_ri
     ax1.plot(rx, ry, color='#ef6c00', linewidth=0.9, alpha=0.8)
 
 # Shaft Towers (Bounding box)
-left_t_x = 4.25
-right_t_x = 13.36
-y_min = 5.341
-y_max = 9.991
-ax1.fill([left_t_x, left_t_x + 1.25, left_t_x + 1.25, left_t_x], [y_min, y_min, y_max, y_max],
+left_t_x = 3.90
+right_t_x = 13.10
+y_min = 7.171
+y_max = 13.771
+ax1.fill([left_t_x, left_t_x + 1.50, left_t_x + 1.50, left_t_x], [y_min, y_min, y_max, y_max],
          color='#e91e63', alpha=0.85, edgecolor='#ad1457', linewidth=1.5)
-ax1.fill([right_t_x, right_t_x + 1.25, right_t_x + 1.25, right_t_x], [y_min, y_min, y_max, y_max],
+ax1.fill([right_t_x, right_t_x + 1.50, right_t_x + 1.50, right_t_x], [y_min, y_min, y_max, y_max],
          color='#e91e63', alpha=0.85, edgecolor='#ad1457', linewidth=1.5)
 
 # Left Tower Buttress Struts (Footprint)
-ax1.fill([left_t_x - 2.35, left_t_x, left_t_x, left_t_x - 2.35], [y_min, y_min, y_min + 0.8, y_min + 0.8],
+ax1.fill([1.90, left_t_x, left_t_x, 1.90], [7.171, 7.171, 7.971, 7.971],
          color='#c2185b', alpha=0.9, edgecolor='#880e4f', linewidth=1.2)
-ax1.fill([left_t_x - 2.35, left_t_x, left_t_x, left_t_x - 2.35], [y_max - 0.8, y_max - 0.8, y_max, y_max],
+ax1.fill([1.90, left_t_x, left_t_x, 1.90], [12.571, 12.571, 13.771, 13.771],
          color='#c2185b', alpha=0.9, edgecolor='#880e4f', linewidth=1.2)
 
 # Bridge Rib (Right of right tower)
-bridge_box = sg.box(13.36, 6.0, 25.0, 10.0)
+bridge_box = sg.box(13.10, 8.5, 25.0, 14.0)
 bridge_ribs_poly = all_ribs_poly.intersection(bridge_box)
 for geom in (bridge_ribs_poly.geoms if hasattr(bridge_ribs_poly, 'geoms') else [bridge_ribs_poly]):
     bx, by = geom.exterior.xy
@@ -107,11 +107,11 @@ for angle_deg in CLIP_ANGLES:
     ax1.plot(p[0], p[1], 'o', color='#0097a7', markersize=8, markeredgecolor='#006064', markeredgewidth=1.5)
 
 # Shaft Axle & Plunger Top-Down Footprint
-ax1.plot([3.05, 15.81], [7.666, 7.666], color='#ff6f00', linewidth=3.5, label='Ø1.90mm Shaft Axle')
-ax1.fill([10.284 - 1.5, 10.284 + 1.5, 10.284 + 1.5, 10.284 - 1.5],
-         [7.666, 7.666, 12.35, 12.35], color='#e65100', alpha=0.85, label='Output Plunger (Through Hole)')
-ax1.fill([6.60 - 1.0, 6.60 + 1.0, 6.60 + 1.0, 6.60 - 1.0],
-         [3.17, 3.17, 7.666, 7.666], color='#ffb300', alpha=0.9, edgecolor='#ff8f00', linewidth=1.5, label='Input Cam (Bar Contact)')
+ax1.plot([3.50, 15.00], [10.200, 10.200], color='#ff6f00', linewidth=3.5, label='Ø2.80mm Shaft Axle')
+ax1.fill([10.284 - 2.2, 10.284 + 2.2, 10.284 + 2.2, 10.284 - 2.2],
+         [10.200, 10.200, 13.40, 13.40], color='#e65100', alpha=0.85, label='Output Plunger (Through Hole)')
+ax1.fill([7.05 - 1.35, 7.05 + 1.35, 7.05 + 1.35, 7.05 - 1.35],
+         [3.75, 3.75, 10.200, 10.200], color='#ffb300', alpha=0.9, edgecolor='#ff8f00', linewidth=1.5, label='Direct 105° Input Cam')
 
 # ------------------------------------------------------------------------------
 # COMPREHENSIVE 2D SUBPART CALLOUT ANNOTATIONS
@@ -153,12 +153,12 @@ ax1.annotate('Right Side Ear\n(8.20mm W, fits 8.3mm gap)', xy=(20.200, 0.0), xyt
              fontsize=8, fontweight='bold', color='#01579b', bbox=dict(boxstyle='round,pad=0.2', fc='#e1f5fe', ec='#0288d1'))
 
 # Left Tower & Dual Struts
-ax1.annotate('Left Tower (12.59mm H)\n+ Dual Buttress Struts', xy=(3.5, 7.67), xytext=(-20.5, 10.5),
+ax1.annotate('Left Tower (14.09mm H)\n+ Dual Buttress Struts', xy=(3.9, 10.20), xytext=(-20.5, 10.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#ad1457'),
              fontsize=8, fontweight='bold', color='#ad1457', bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
 # Right Tower & Bridge Rib
-ax1.annotate('Right Tower & Reinforcing\nBridge Rib (to outer wall)', xy=(15.5, 8.5), xytext=(18.5, 11.5),
+ax1.annotate('Right Tower & Reinforcing\nBridge Rib (to outer wall)', xy=(14.6, 10.20), xytext=(18.5, 11.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#ad1457'),
              fontsize=8, fontweight='bold', color='#ad1457', bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
@@ -168,7 +168,7 @@ ax1.annotate('Through-Hole (5.35x4.51mm)\nPlunger Reach ≥6.5mm', xy=(10.28, 11
              fontsize=8, fontweight='bold', color='#d32f2f', bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#d32f2f'))
 
 # Shaft Rocker Mechanism (Axle, Input Cam, Plunger)
-ax1.annotate('Seated Shaft/Rocker:\n• Ø1.90mm Pivot Axle\n• Ø3.2mm Trunk Core\n• 4.60mm Plunger Arm\n• 3.2mm Anti-Flex Root', xy=(7.0, 6.0), xytext=(-10.5, 15.5),
+ax1.annotate('Seated Shaft/Rocker:\n• Ø2.80mm Pivot Axle\n• Ø4.20mm Hub Barrel\n• 4.40mm Plunger Arm\n• ≥6.50mm Reach', xy=(7.05, 8.5), xytext=(-10.5, 15.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#e65100'),
              fontsize=7.5, fontweight='bold', color='#e65100', bbox=dict(boxstyle='round,pad=0.2', fc='#fff3e0', ec='#e65100'))
 
@@ -258,10 +258,10 @@ def add_3d_callout(ax, pt_model, pt_text, text, color='#000000', bgcolor='white'
 
 # 3D Subpart Callouts with carefully placed leader lines around perimeter
 add_3d_callout(ax2, [0, 20.0, 6.77], [0.0, 33.0, 24.0], "Top Tab (Centered)\n(8.20mm W, fits 8.33mm gap)", color='#1565c0', bgcolor='white')
-add_3d_callout(ax2, [4.87, 7.67, 13.59], [-22.0, 22.0, 26.0], "Left Tower & Cradle\n(Z=13.59mm)", color='#ad1457', bgcolor='#fce4ec')
-add_3d_callout(ax2, [13.98, 7.67, 13.59], [22.0, 22.0, 26.0], "Right Tower & Bridge Rib\n(Z=13.59mm)", color='#ad1457', bgcolor='#fce4ec')
-add_3d_callout(ax2, [2.5, 7.67, 4.0], [-29.0, 14.0, 14.0], "Left Buttress Struts\n(0.8mm thick)", color='#c2185b', bgcolor='#fce4ec')
-add_3d_callout(ax2, [6.60, 4.5, 8.0], [-3.0, 4.0, 20.0], "Reinforced Shaft Rocker\n(4.60mm W, 3.2mm Root)", color='#e65100', bgcolor='#fff3e0')
+add_3d_callout(ax2, [4.65, 10.20, 14.09], [-22.0, 22.0, 26.0], "Left Tower & Cradle\n(Z=14.09mm)", color='#ad1457', bgcolor='#fce4ec')
+add_3d_callout(ax2, [13.85, 10.20, 14.09], [22.0, 22.0, 26.0], "Right Tower & Bridge Rib\n(Z=14.09mm)", color='#ad1457', bgcolor='#fce4ec')
+add_3d_callout(ax2, [2.5, 7.67, 4.0], [-29.0, 14.0, 14.0], "Left Buttress Struts\n(0.8mm & 1.2mm)", color='#c2185b', bgcolor='#fce4ec')
+add_3d_callout(ax2, [7.05, 6.5, 8.0], [-3.0, 4.0, 20.0], "Enlarged Shaft Rocker\n(Ø2.8mm Pin, 4.4mm Plunger)", color='#e65100', bgcolor='#fff3e0')
 add_3d_callout(ax2, [clip_pts[135.0][0], clip_pts[135.0][1], 6.77], [-30.0, 16.0, 6.0], "Snap Clip 135°\n(1.59mm Hook)", color='#00838f', bgcolor='#e0f7fa')
 add_3d_callout(ax2, [clip_pts[45.0][0], clip_pts[45.0][1], 6.77], [30.0, 16.0, 6.0], "Snap Clip 45°\n(1.59mm Hook)", color='#00838f', bgcolor='#e0f7fa')
 add_3d_callout(ax2, [-7.25, 0.0, 4.60], [-28.0, -12.0, 14.0], "Guide Brackets 1 & 2\n(4.60mm H)", color='#2e7d32', bgcolor='#e8f5e9')
@@ -289,10 +289,10 @@ ax2.set_zlabel('Z (mm)')
 ax3 = fig.add_subplot(1, 3, 3)
 
 # Tower profile in Y-Z
-y_tower_min, y_tower_max = 5.341, 9.991
-z_tower_top = 13.59
+y_tower_min, y_tower_max = 7.171, 13.771
+z_tower_top = 14.09
 ax3.fill([y_tower_min, y_tower_max, y_tower_max, y_tower_min],
-         [1.0, 1.0, z_tower_top, z_tower_top], color='#cfd8dc', alpha=0.6, label='Tower Support Profile (13.59mm)')
+         [1.0, 1.0, z_tower_top, z_tower_top], color='#cfd8dc', alpha=0.6, label='Tower Support Profile (14.09mm)')
 
 # Baseplate floor (Z: 0 to 1.0mm)
 ax3.fill([0, 18, 18, 0], [0, 0, 1.0, 1.0], color='#78909c', alpha=0.7, label='Base Floor (1.00mm thick, Z=0 datum)')
@@ -302,12 +302,12 @@ ax3.plot([8.570, 8.570], [-0.1, 1.1], 'r--', linewidth=1.5)
 ax3.plot([13.082, 13.082], [-0.1, 1.1], 'r--', linewidth=1.5)
 
 # Shaft Pivot Center
-y_axle, z_axle = 7.666, 12.590
-ax3.plot(y_axle, z_axle, 'r+', markersize=14, markeredgewidth=2.5, label='Shaft Axis (Y=7.67, Z=12.59)')
+y_axle, z_axle = 10.200, 12.590
+ax3.plot(y_axle, z_axle, 'r+', markersize=14, markeredgewidth=2.5, label='Shaft Axis (Y=10.20, Z=12.59)')
 
-# Plunger Arm Profile (Rest Position - Z = -6.50mm, Y = 11.60mm)
-y_rest, z_rest = 11.60, -6.50
-ax3.plot([y_axle, y_rest, y_rest], [z_axle, 4.0, z_rest], color='#e65100', linewidth=4.5, label='Output Plunger (Rest: Y=11.60mm)')
+# Plunger Arm Profile (Rest Position - Z = -6.50mm, Y = 11.40mm)
+y_rest, z_rest = 11.40, -6.50
+ax3.plot([y_axle, y_rest, y_rest], [z_axle, 4.0, z_rest], color='#e65100', linewidth=4.5, label='Output Plunger (Rest: Y=11.40mm)')
 
 # Plunger Arm Profile (Actuated Position - rotated 7 deg CW)
 theta_act = np.radians(7)
@@ -319,9 +319,9 @@ y_act = y_axle + p_arm_act[0]
 z_act = z_axle + p_arm_act[1]
 ax3.plot([y_axle, y_act], [z_axle, z_act], color='#d32f2f', linestyle='--', linewidth=3.0, label=f'Actuated Plunger (Swings -Y to {y_act:.2f}mm)')
 
-# Input Cam Profile (Pushed +Y by key)
-y_input, z_input = 3.17, 6.59
-ax3.plot([y_axle, y_input], [z_axle, z_input], color='#ffb300', linewidth=4.5, label='Input Cam (Bar Contact)')
+# Input Cam Profile (105° Bellcrank Angle, direct off shaft)
+y_input, z_input = 3.75, 10.42
+ax3.plot([y_axle, y_input], [z_axle, z_input], color='#ffb300', linewidth=4.5, label='Direct 105° Input Cam')
 
 # Y-Axis Oriented Switch (Right-angle switch facing +Y at Z = -6.5mm)
 ax3.fill([5.5, 8.5, 8.5, 5.5], [-7.5, -7.5, -5.5, -5.5], color='#4caf50', alpha=0.85, label='Y-Axis Switch Body')
@@ -333,7 +333,7 @@ ax3.annotate('Key Insertion Push\n(Moves along +Y)', xy=(y_input, z_input), xyte
              arrowprops=dict(facecolor='#d32f2f', edgecolor='#b71c1c', width=2.2, headwidth=7),
              fontweight='bold', color='#b71c1c', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#b71c1c'))
 
-ax3.annotate('Retention Cradle Throat (1.65mm)\nØ2.00mm Axle Snap Seating', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
+ax3.annotate('Retention Cradle Throat (2.45mm)\nØ3.00mm Socket / Ø2.80mm Axle Snap', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
              arrowprops=dict(arrowstyle='->', color='#ad1457', lw=1.5),
              fontweight='bold', color='#ad1457', fontsize=8, bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
