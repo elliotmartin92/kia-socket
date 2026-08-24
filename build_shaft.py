@@ -161,31 +161,32 @@ def build_shaft_rocker_mesh(
     v_web = np.column_stack([v_w[:, 2] + (x_c - hub_w/2.0 + 0.10), v_w[:, 0], v_w[:, 1]])
     mesh_web = trimesh.Trimesh(vertices=v_web, faces=m_web_raw.faces.copy(), process=True)
     
-    # 4. Direct 105° Input Cam Tab (Extending directly off the cylindrical shaft hub)
+    # 4. Direct 105° Input Cam Tab (100% FLUSH with top apex of shaft hub)
     # Centerline of plunger is at angle theta_p = atan2(-19.09, 1.20) = -86.40°
     # 105° bellcrank angle -> angle of cam centerline = -86.40° - 75.0° = -161.40°
     theta_cam = np.radians(-161.40)
-    dir_cam = np.array([np.cos(theta_cam), np.sin(theta_cam)]) # [-0.948, -0.319]
-    norm_cam = np.array([-dir_cam[1], dir_cam[0]])             # [0.319, -0.948]
-    
-    cam_reach = 6.80     # Total length from shaft center (reaches Y = 3.75mm, Z = 10.42mm)
+    u_dir = np.array([np.cos(theta_cam), np.sin(theta_cam)]) # [-0.948, -0.319]
+    u_perp_up = np.array([u_dir[1], -u_dir[0]])
+    if u_perp_up[1] < 0:
+        u_perp_up = -u_perp_up # [-0.319, 0.948] -> normal pointing up/forward
+        
+    cam_reach = 6.80     # Total length from shaft center
     cam_arm_thick = 2.80 # Solid 2.80mm beam thickness
+    
+    # Top line starts TANGENT to cylinder top (100% flush with shaft top apex at Z = z_axle + r_hub = 14.69mm)
+    p_tangent_top = np.array([y_axle, z_axle]) + u_perp_up * r_hub
+    p_top_tip = p_tangent_top + u_dir * cam_reach
+    p_bot_tip = p_top_tip - u_perp_up * cam_arm_thick
+    p_tangent_bot = p_tangent_top - u_perp_up * cam_arm_thick
+    
     half_t = cam_arm_thick / 2.0
-    
-    # Arm body points starting directly from the shaft center (zero gap/undercut with hub)
-    p_center_tip = np.array([y_axle, z_axle]) + dir_cam * cam_reach
-    p1 = np.array([y_axle, z_axle]) + norm_cam * half_t
-    p2 = p_center_tip + norm_cam * half_t
-    p3 = p_center_tip - norm_cam * half_t
-    p4 = np.array([y_axle, z_axle]) - norm_cam * half_t
-    
-    # Smooth rounded nose at slider contact tip
+    p_tip_mid = (p_top_tip + p_bot_tip) / 2.0
     cam_tip_pts = []
     for a in np.linspace(np.pi/2, -np.pi/2, 17):
-        pt = p_center_tip + dir_cam * (half_t * np.cos(a)) + norm_cam * (half_t * np.sin(a))
+        pt = p_tip_mid + u_dir * (half_t * np.cos(a)) + u_perp_up * (half_t * np.sin(a))
         cam_tip_pts.append((pt[0], pt[1]))
         
-    poly_cam_arm = Polygon([p1] + cam_tip_pts + [p4, p1])
+    poly_cam_arm = Polygon([p_tangent_top] + cam_tip_pts + [p_tangent_bot, p_tangent_top])
     poly_cam = unary_union([flank_collar, poly_cam_arm])
     
     m_cam_raw = trimesh.creation.extrude_polygon(poly_cam, height=cam_w_x)
