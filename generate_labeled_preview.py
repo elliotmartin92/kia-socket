@@ -107,11 +107,11 @@ for angle_deg in CLIP_ANGLES:
     ax1.plot(p[0], p[1], 'o', color='#0097a7', markersize=8, markeredgecolor='#006064', markeredgewidth=1.5)
 
 # Shaft Axle & Plunger Top-Down Footprint
-ax1.plot([3.50, 15.00], [10.200, 10.200], color='#ff6f00', linewidth=3.5, label='Ø2.80mm Shaft Axle')
+ax1.plot([3.50, 15.00], [9.279, 9.279], color='#ff6f00', linewidth=3.5, label='Ø2.80mm Shaft Axle (Y=9.28mm)')
 ax1.fill([10.284 - 2.2, 10.284 + 2.2, 10.284 + 2.2, 10.284 - 2.2],
-         [10.200, 10.200, 13.40, 13.40], color='#e65100', alpha=0.85, label='Output Plunger (Through Hole)')
+         [9.279, 9.279, 12.48, 12.48], color='#e65100', alpha=0.85, label='Output Plunger (Through Hole)')
 ax1.fill([7.05 - 1.35, 7.05 + 1.35, 7.05 + 1.35, 7.05 - 1.35],
-         [3.75, 3.75, 10.200, 10.200], color='#ffb300', alpha=0.9, edgecolor='#ff8f00', linewidth=1.5, label='Direct 105° Input Cam')
+         [2.83, 2.83, 9.279, 9.279], color='#ffb300', alpha=0.9, edgecolor='#ff8f00', linewidth=1.5, label='Direct 105° Input Cam')
 
 # ------------------------------------------------------------------------------
 # COMPREHENSIVE 2D SUBPART CALLOUT ANNOTATIONS
@@ -302,12 +302,12 @@ ax3.plot([8.570, 8.570], [-0.1, 1.1], 'r--', linewidth=1.5)
 ax3.plot([13.082, 13.082], [-0.1, 1.1], 'r--', linewidth=1.5)
 
 # Shaft Pivot Center
-y_axle, z_axle = 10.200, 12.590
-ax3.plot(y_axle, z_axle, 'r+', markersize=14, markeredgewidth=2.5, label='Shaft Axis (Y=10.20, Z=12.59)')
+y_axle, z_axle = 9.279, 12.590
+ax3.plot(y_axle, z_axle, 'r+', markersize=14, markeredgewidth=2.5, label='Shaft Axis (Y=9.28, Z=12.59)')
 
-# Plunger Arm Profile (Rest Position - Z = -6.50mm, Y = 11.40mm)
-y_rest, z_rest = 11.40, -6.50
-ax3.plot([y_axle, y_rest, y_rest], [z_axle, 4.0, z_rest], color='#e65100', linewidth=4.5, label='Output Plunger (Rest: Y=11.40mm)')
+# Plunger Arm Profile (Rest Position - Z = -6.50mm, Y = 10.48mm)
+y_rest, z_rest = 10.479, -6.50
+ax3.plot([y_axle, y_rest, y_rest], [z_axle, 4.0, z_rest], color='#e65100', linewidth=4.5, label='Output Plunger (Rest: Y=10.48mm)')
 
 # Plunger Arm Profile (Actuated Position - rotated 7 deg CW)
 theta_act = np.radians(7)
@@ -320,7 +320,7 @@ z_act = z_axle + p_arm_act[1]
 ax3.plot([y_axle, y_act], [z_axle, z_act], color='#d32f2f', linestyle='--', linewidth=3.0, label=f'Actuated Plunger (Swings -Y to {y_act:.2f}mm)')
 
 # Input Cam Profile (105° Bellcrank Angle, direct off shaft)
-y_input, z_input = 3.75, 10.42
+y_input, z_input = 2.83, 10.42
 ax3.plot([y_axle, y_input], [z_axle, z_input], color='#ffb300', linewidth=4.5, label='Direct 105° Input Cam')
 
 # Y-Axis Oriented Switch (Right-angle switch facing +Y at Z = -6.5mm)
