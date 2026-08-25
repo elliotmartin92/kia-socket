@@ -240,9 +240,11 @@ py -3 generate_labeled_preview.py
   - Wide flat face of the input cam tab ($2.7\text{ mm} \times 6.8\text{ mm}$) rests directly on the build bed ($Z = 0.00\text{ mm}$), increasing bed contact area **$7\times$** ($25.48\text{ mm}^2$).
   - 3-rib fork array points upward, **completely eliminating trapped support material inside the narrow inter-rib slots**.
   - Pivot axle pins remain horizontal for maximum tensile/bending strength with zero support scars on the cylindrical bearing surfaces.
-- **Sacrificial Cooling / Heat Break Tower Height**:
-  - Increased cooling tower height from $14.50\text{ mm}$ to **$20.50\text{ mm}$** ($\varnothing 8.00\text{ mm}$).
-  - Fully covers the complete $19.86\text{ mm}$ build height of the reoriented shaft rocker, ensuring dedicated layer cooling time for the high delicate tips of both the baseplate towers ($Z = 14.09\text{ mm}$) and the shaft rocker ($Z = 19.86\text{ mm}$).
+
+### Version 7 (v7)
+- **Printed v7 Lever & Extended Heat Break Tower**:
+  - Validated 3D printing of the reoriented v7 shaft/lever mechanism (`shaft_rocker.stl`).
+  - Extended sacrificial cooling / heat break tower to **$20.50\text{ mm}$** ($\varnothing 8.00\text{ mm}$) to match and exceed the full $19.86\text{ mm}$ build height of the v7 lever, providing dedicated per-layer nozzle travel and thermal stabilization for the finest tips of both the lever plunger and baseplate retention towers.
 
 
 
