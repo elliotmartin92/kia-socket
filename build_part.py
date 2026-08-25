@@ -1,5 +1,14 @@
 """
-Build 3D Printable STL using the EXACT non-circular vector paths directly from part.svg.
+build_part.py
+Parametric 3D CAD generator for the automotive 120V AC outlet sub-housing baseplate.
+
+Dual Functional Roles:
+1) Current-Carrying Busbar & Terminal Retention: Retains conductive metal pieces inside
+   guide brackets (Brackets 1-4) and backside slit channels to route 120V AC power from the
+   rear electronics board to the front outlet receptacle.
+2) Safety Interlock & Rocker Cradle Support: Mounts the pivot shaft rocker mechanism.
+   When the right plug prong is inserted, the rocker actuates a PCB momentary switch,
+   ensuring the outlet is energized only when a plug is engaged.
 """
 
 import re
@@ -66,7 +75,7 @@ TOWER_Y_BASE_LEN = 6.60      # 6.60mm flared base in Y (Y in [6.250, 12.850]mm, 
 TOWER_Y_TOP_LEN = 5.63       # 5.63mm flared top in Y (Y in [7.471, 13.101]mm, +45% solid material around cradle)
 TOWER_INTERNAL_GAP = 7.70    # 7.70mm internal gap between reinforced tower inner faces (X: 5.40 to 13.10mm)
 TOWER_WALL_THICK = 1.50      # 1.50mm heavy-duty wall thickness in X (+50% column strength)
-TOWER_THROAT_W = 2.05        # 2.05mm tight-lock snap throat (0.75mm positive snap interference with Ø2.80mm shaft, 273.8 deg wrap angle)
+TOWER_THROAT_W = 2.60        # 2.60mm optimized snap throat (0.20mm positive snap interference with Ø2.80mm shaft, 240.0 deg wrap angle)
 
 # Side Ears (Mating with 8.30mm enclosure guide slot/gap)
 EAR_GAP = 8.30             # 8.30mm enclosure guide slot/gap
@@ -507,7 +516,7 @@ def create_shaft_support_towers_poly():
 def build_clean_shaft_towers_mesh():
     """Directly extrudes the reinforced 2D U-cradle profile in (Y, Z) along X.
     - Flared trapezoidal profile in Y-Z: Base Y in [6.250, 12.850] (6.60mm wide), Top Y in [6.550, 12.180] (5.63mm wide).
-    - Tuned 2.05mm tight-lock retention throat constriction (0.75mm positive snap with Ø2.80mm shaft, 273.8 deg wrap angle).
+    - Tuned 2.60mm snap-fit retention throat constriction (0.20mm positive snap with Ø2.80mm shaft, 240.0 deg wrap angle).
     - 1.50mm heavy-duty wall thickness in X.
     - Shaft axis at Y = 9.279mm (shifted -0.921mm so front buttress/tower base aligns with top inner wall of Bracket 3 at Y = 6.250mm).
     """

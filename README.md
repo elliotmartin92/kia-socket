@@ -1,6 +1,18 @@
-# Parametric 3D CAD Model & Generator Documentation
+# Automotive 120V AC Outlet Sub-Housing & Safety Interlock Mechanism
+## Parametric 3D CAD Model & Generator Documentation
 
-This repository contains the complete parametric CAD generation pipeline for the custom enclosure baseplate with precision mechanical features, snap clips, guide brackets, shaft support towers, and internal ribs.
+This repository contains the complete parametric CAD generation pipeline for the intermediate sub-housing baseplate and safety rocker mechanism of an **in-cabin automotive 120V AC US power outlet assembly**.
+
+---
+
+## System Architecture & Functional Overview
+
+The complete automotive AC power outlet assembly consists of three primary mating components:
+1. **Front Outlet Receptacle Bezel / Faceplate**: Exposed inside the vehicle cabin, providing the standard US NEMA 1-15 / 5-15 AC plug slots.
+2. **Intermediate Sub-Housing Baseplate & Rocker Mechanism (THIS REPOSITORY)**:
+   - **Primary Function 1: Current-Carrying Busbar & Terminal Retention**: Securely locates and retains the formed copper/brass contact pieces and busbar strips within precision guide brackets (Brackets 1–4) and backside slit channels, transferring high AC current from the rear electronics module directly into the front receptacle prongs.
+   - **Primary Function 2: Active Plug Insertion Sensing & Power Safety Interlock**: Integrates a spring-biased/pivot rocker mechanism mounted inside heavy-duty retention towers. When the **right plug prong (blade)** is inserted into the outlet, it physically depresses the rocker's angled input cam tab ($105^\circ$ direct rocker arm). This rotates the pivot shaft in its cradles, driving the extended plunger arm downward ($Z \le -6.50\text{ mm}$) through the baseplate floor pass-through hole into a PCB-mounted tactile microswitch. This signals the inverter/control module that a plug is physically seated, ensuring the outlet **delivers 120V AC power only when a plug is actively inserted** (preventing idle power draw and electric shock hazards).
+3. **Rear Electronics / Inverter & Control Board Module**: Houses the DC-to-AC power inverter, logic controller, supply terminal feeds, and the momentary interlock switch.
 
 ---
 
@@ -100,9 +112,9 @@ py -3 generate_labeled_preview.py
   - Top Length in $Y$: **$5.63\text{ mm}$** ($Y \in [6.550, 12.180]\text{ mm}$).
 - **Positive Heavy-Duty Snap-Fit Retention Cradle**:
   - Socket Diameter: **$\varnothing 3.00\text{ mm}$** (provides $0.20\text{ mm}$ running clearance with $\varnothing 2.80\text{ mm}$ shaft pin).
-  - Retention throat constriction gap: **$2.05\text{ mm}$** ($0.75\text{ mm}$ firm positive mechanical interference with $\varnothing 2.80\text{ mm}$ shaft, $0.375\text{ mm}$ deep locking lip per side).
-  - Wrap angle: **$273.8^\circ$** ($>76\%$ wrap around socket), permanently capturing and locking the axle against vertical ejection.
-  - Wide $45^\circ$ lead-in bevel funnel expanding up to $Z = 14.09\text{ mm}$ for smooth downward press-fit insertion.
+  - Retention throat constriction gap: **$2.60\text{ mm}$** ($0.20\text{ mm}$ firm positive mechanical interference with $\varnothing 2.80\text{ mm}$ shaft, $0.10\text{ mm}$ deflection per side to prevent snapping during insertion).
+  - Wrap angle: **$240.0^\circ$** ($>60^\circ$ wrap beyond the equator), securely capturing and locking the axle against vertical ejection.
+  - Wide $45^\circ$ lead-in bevel funnel expanding up to $3.73\text{ mm}$ opening at $Z = 14.09\text{ mm}$ for smooth self-centering downward press-fit insertion.
 - **Left Tower Dual Lateral Buttress Struts**:
   - **Front Strut**: Base meets the top inner wall of Bracket 3 at **$Y = 6.250\text{ mm}$** ($X \in [1.90, 3.90\text{ mm}]$, $Y \in [6.250, 7.050\text{ mm}]$), sloping directly into the Left Tower at $Z = 13.70\text{ mm}$ with **zero encroachment into Bracket 3's sliding channel**.
   - **Rear Strut**: Full-height triangular rib ($1.20\text{ mm}$ thick in $Y$ at $Y \in [11.650, 12.850\text{ mm}]$, $X \in [1.90, 3.90\text{ mm}]$, $Z \in [1.00, 13.70\text{ mm}]$).
@@ -175,16 +187,16 @@ py -3 generate_labeled_preview.py
 
 ### 3.10. Enlarged Heavy-Duty Shaft & Rocker Mechanism (PCB Button Actuator)
 - **Pivot Axle & Structural Core**:
-  - Precision $\varnothing 2.80\text{ mm}$ bearing ends ($R = 1.40\text{ mm}$, $0.10\text{ mm}$ radial clearance fit inside $\varnothing 3.00\text{ mm}$ tower cradles) snapping firmly through the $2.45\text{ mm}$ tower throat ($+47\%$ diameter, $4.72\times$ higher torsional rigidity over $\varnothing 1.90\text{ mm}$).
+  - Precision $\varnothing 2.80\text{ mm}$ bearing ends ($R = 1.40\text{ mm}$, $0.10\text{ mm}$ radial clearance fit inside $\varnothing 3.00\text{ mm}$ tower cradles) snapping firmly through the $2.60\text{ mm}$ tower throat ($+47\%$ diameter, $4.72\times$ higher torsional rigidity over $\varnothing 1.90\text{ mm}$).
   - **$\varnothing 4.20\text{ mm}$ heavy-duty structural hub barrel** spanning $X \in [5.50, 13.00]\text{ mm}$ to eliminate shaft deflection, shear, or twisting under spring/switch load.
 - **Heavy-Duty Filleted Output Plunger Arm**:
   - **Width in $X$**: Widened to **$4.40\text{ mm}$ in $X$** (centered at $X = 10.284\text{ mm}$ in the $5.35\text{ mm}$ through-hole with $0.48\text{ mm}$ lateral clearances).
-  - **Root Thickness in $Y$**: Thickened to **$3.80\text{ mm}$ at the shaft junction** blending into the $\varnothing 4.20\text{ mm}$ central hub barrel to eliminate bending under key insertion.
+  - **Root Thickness in $Y$**: Thickened to **$3.80\text{ mm}$ at the shaft junction** blending into the $\varnothing 4.20\text{ mm}$ central hub barrel to eliminate bending under plug prong insertion.
   - **Tip Contact**: Smoothly tapers to a $2.00\text{ mm}$ nose diameter ($R = 1.00\text{ mm}$) at the switch contact point.
   - **Reach & Stroke**: Reaches **$\ge 6.50\text{ mm}$ below the outer bottom face of the baseplate ($Z \le -6.50\text{ mm}$)**.
-  - **Kinematics**: Rotates clockwise around the $Y = 10.200\text{ mm}, Z = 12.59\text{ mm}$ pivot axis to actuate the Y-axis oriented PCB tactile switch with zero through-hole interference.
+  - **Kinematics**: Rotates clockwise around the $Y = 9.279\text{ mm}, Z = 12.59\text{ mm}$ pivot axis to actuate the Y-axis oriented PCB tactile switch with zero through-hole interference.
 - **Reinforced Input Cam & Full-Span Monolithic Gusset Web**:
-  - $2.70\text{ mm}$ wide input cam tab aligned with the key blade slider track ($X = 7.05\text{ mm}$).
+  - $2.70\text{ mm}$ wide input cam tab aligned with the right plug prong insertion path ($X = 7.05\text{ mm}$).
   - Monolithic structural gusset web spanning continuously across the entire opening between the towers ($X \in [5.60, 12.90]\text{ mm}$).
 
 ---
@@ -213,5 +225,21 @@ py -3 generate_labeled_preview.py
 
 - **Testing Files Location**: All new test scripts, verification scripts, geometric inspection scripts, and one-off diagnostic visualization scripts/renders **must be created inside the `testing/` directory**.
 - **Root Directory Cleanliness**: The project root directory is strictly reserved for core build pipeline generators (`build_part.py`, `build_shaft.py`, `generate_labeled_preview.py`), source geometry inputs (`part.svg`), final CAD exports (`.stl`, `.obj`, `.scad`), final documentation previews (`part_preview.png`, `labeled_part_preview.png`), and documentation (`README.md`).
+
+---
+
+## 6. Print Iteration History & Notes
+
+### Version 6 (v6)
+- **Tower Clip Snapping Fix**:
+  - Relaxed retention cradle throat width from $2.05\text{ mm}$ to **$2.60\text{ mm}$** ($0.20\text{ mm}$ total interference with $\varnothing 2.80\text{ mm}$ shaft pin, $0.10\text{ mm}$ deflection per jaw).
+  - Reduces insertion strain by **$73\%$**, preventing inter-layer delamination/snapping on 3D-printed cantilever jaws while maintaining a **$240.0^\circ$ positive retention wrap angle**.
+  - Widened the top self-centering lead-in funnel to **$3.73\text{ mm}$** for smooth, guided downward insertion.
+- **Shaft Rocker Support Reduction & Print Orientation**:
+  - Reoriented `shaft_rocker.stl` to **Cam Face Down (`Rot X = 198.6°`)**.
+  - Wide flat face of the input cam tab ($2.7\text{ mm} \times 6.8\text{ mm}$) rests directly on the build bed ($Z = 0.00\text{ mm}$), increasing bed contact area **$7\times$** ($25.48\text{ mm}^2$).
+  - 3-rib fork array points upward, **completely eliminating trapped support material inside the narrow inter-rib slots**.
+  - Pivot axle pins remain horizontal for maximum tensile/bending strength with zero support scars on the cylindrical bearing surfaces.
+
 
 

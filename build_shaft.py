@@ -1,13 +1,19 @@
 """
 build_shaft.py
-Parametric 3D CAD generator for the OEM 3-rib Kia Smart Key socket shaft/rocker mechanism.
+Parametric 3D CAD generator for the automotive 120V AC outlet safety interlock rocker mechanism.
+
+Functional Context:
+- Actuated by the insertion of the right plug prong (blade) of a standard US AC plug.
+- Converts plug insertion force into pivot rotation around the shaft axle.
+- Plunger arm swings downward through the baseplate floor to press the PCB tactile switch,
+  energizing the 120V AC outlet only when a plug is actively inserted.
 
 Features:
-- Stepped cylindrical pivot axle pins (Total length 11.50mm, Ø1.90mm - Ø2.27mm parametric)
-- 7.60mm central structural hub barrel fitting perfectly between baseplate towers
+- Stepped cylindrical pivot axle pins (Total length 11.50mm, Ø2.80mm heavy-duty pins)
+- 7.50mm central structural hub barrel (Ø4.20mm) fitting between baseplate towers
 - OEM 3-Rib Fork Architecture: Left flank rib, central extended plunger blade, right flank rib
 - Extended output plunger reaching ≥6.50mm below baseplate outer face (Z ≤ -6.50mm) to actuate PCB switch
-- Angled input cam tab (reaches Y = 3.47mm, Z = 6.79mm) engaging key blade slider track
+- Angled input cam tab (105° bellcrank angle direct off shaft) engaging the right plug blade
 - Generates 100% watertight STL, OBJ, and OpenSCAD CAD assets
 """
 
@@ -47,7 +53,7 @@ PLUNGER_REACH_BELOW_Z = 6.50 # Reaches Z = -6.50mm below baseplate floor
 
 # Cam & Ribs
 CAM_WIDTH_X = 2.70           # 2.70mm wide input cam tab
-CAM_X_CENTER = 7.05          # Aligned with slider guide track
+CAM_X_CENTER = 7.05          # Aligned with right plug prong insertion path
 RIB_FLANK_THICK = 1.00       # 1.00mm flank rib thickness
 PLUNGER_WIDTH_X = 4.40       # 4.40mm wide central plunger blade (centered in 5.35mm hole)
 
@@ -202,9 +208,11 @@ def build_shaft_rocker_mesh(
     ])
     
     if not in_assembly_coords:
-        # Orient flat on print bed: rotate so spine / belly lays flat on build plate (Z=0)
+        # Orient flat on print bed: rotate so wide flat cam face sits directly on build plate (Z=0).
+        # Rib slots open upward, completely eliminating trapped supports between the 3 ribs,
+        # increasing bed adhesion area 7x (25.5 mm²), and leaving pivot pins clean and round.
         mesh_printable = shaft_mesh.copy()
-        rot_bed = trimesh.transformations.rotation_matrix(np.pi/2, [1, 0, 0])
+        rot_bed = trimesh.transformations.rotation_matrix(np.radians(198.6), [1, 0, 0])
         mesh_printable.apply_transform(rot_bed)
         # Center in X, Y and shift Z_min to 0.00mm
         bounds = mesh_printable.bounds

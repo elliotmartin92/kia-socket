@@ -329,11 +329,11 @@ ax3.fill([8.5, 9.2, 9.2, 8.5], [-6.8, -6.8, -6.2, -6.2], color='#2e7d32', alpha=
 ax3.plot([2.0, 10.0], [-7.8, -7.8], color='#1b5e20', linewidth=3, label='PCB Surface (Z = -7.8mm)')
 
 # Annotations
-ax3.annotate('Key Insertion Push\n(Moves along +Y)', xy=(y_input, z_input), xytext=(y_input - 3.5, z_input + 2.5),
+ax3.annotate('Plug Prong Insertion Push\n(Right Blade Moves +Y)', xy=(y_input, z_input), xytext=(y_input - 3.5, z_input + 2.5),
              arrowprops=dict(facecolor='#d32f2f', edgecolor='#b71c1c', width=2.2, headwidth=7),
              fontweight='bold', color='#b71c1c', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#b71c1c'))
 
-ax3.annotate('Tight-Lock Retention Cradle (2.05mm Throat)\nØ3.00mm Socket / Ø2.80mm Axle Snap (0.75mm Lock)', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
+ax3.annotate('Optimized Snap-Fit Cradle (2.60mm Throat)\nØ3.00mm Socket / Ø2.80mm Axle Snap (0.20mm Lock)', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
              arrowprops=dict(arrowstyle='->', color='#ad1457', lw=1.5),
              fontweight='bold', color='#ad1457', fontsize=8, bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
