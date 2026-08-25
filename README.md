@@ -37,7 +37,7 @@ py -3 generate_labeled_preview.py
 | **`shaft_rocker.scad`** | OpenSCAD parametric source file for the shaft/rocker mechanism. |
 | **`slit_insert.stl`** / **`slit_insert.obj`** | Separate 3D-printable backside slit wall insert with integrated indexing registration key. |
 | **`slit_inserts_pair.stl`** | Two inserts pre-arranged side-by-side on a single build plate for 1-click 3D printing. |
-| **`cooling_tower.stl`** / **`cooling_tower.obj`** | Sacrificial cooling column ($\varnothing 8.00\text{ mm} \times 14.50\text{ mm}$ tall) to guarantee dedicated cooling time per layer on delicate tower tips. |
+| **`cooling_tower.stl`** / **`cooling_tower.obj`** | Sacrificial cooling column ($\varnothing 8.00\text{ mm} \times 20.50\text{ mm}$ tall) to guarantee dedicated cooling time per layer on delicate baseplate tower tips ($Z = 14.09\text{ mm}$) and shaft rocker tips ($Z = 19.86\text{ mm}$). |
 | **`complete_assembly.stl`** / **`complete_assembly.obj`** | Complete 1-click 3D print plate with the main baseplate, both separate slit inserts, shaft rocker, and sacrificial cooling tower pre-arranged side-by-side on the **same flat print plane ($Z = 0.00\text{ mm}$)**. |
 | **`part.scad`** | OpenSCAD source file representing the exact baseplate geometry. |
 | **`labeled_part_preview.png`** | 3-panel blueprint showing top-down dimensioned feature map, 3D isometric assembly, and kinematic stroke cross-section. |
@@ -240,6 +240,9 @@ py -3 generate_labeled_preview.py
   - Wide flat face of the input cam tab ($2.7\text{ mm} \times 6.8\text{ mm}$) rests directly on the build bed ($Z = 0.00\text{ mm}$), increasing bed contact area **$7\times$** ($25.48\text{ mm}^2$).
   - 3-rib fork array points upward, **completely eliminating trapped support material inside the narrow inter-rib slots**.
   - Pivot axle pins remain horizontal for maximum tensile/bending strength with zero support scars on the cylindrical bearing surfaces.
+- **Sacrificial Cooling / Heat Break Tower Height**:
+  - Increased cooling tower height from $14.50\text{ mm}$ to **$20.50\text{ mm}$** ($\varnothing 8.00\text{ mm}$).
+  - Fully covers the complete $19.86\text{ mm}$ build height of the reoriented shaft rocker, ensuring dedicated layer cooling time for the high delicate tips of both the baseplate towers ($Z = 14.09\text{ mm}$) and the shaft rocker ($Z = 19.86\text{ mm}$).
 
 
 

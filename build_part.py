@@ -815,10 +815,10 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=S
     m_insert = m_body.union(m_key, engine='manifold')
     return m_insert
 
-def build_cooling_tower_mesh(radius=4.0, height=14.50):
-    """Builds a sacrificial cylindrical cooling tower (Ø8mm x 14.50mm tall) for 1-click print plate placement.
-    Forces the nozzle to travel away from the delicate shaft support towers on high layers (Z > 10mm),
-    giving each layer of the tower tips dedicated time to cool and solidify."""
+def build_cooling_tower_mesh(radius=4.0, height=20.50):
+    """Builds a sacrificial cylindrical cooling tower (Ø8mm x 20.50mm tall) for 1-click print plate placement.
+    Forces the nozzle to travel away from the delicate shaft support towers (Z = 14.09mm) and shaft rocker (Z = 19.86mm)
+    on high layers, giving each layer of the delicate tips dedicated time to cool and solidify."""
     tower = trimesh.creation.cylinder(radius=radius, height=height, sections=32)
     tower.apply_translation([0, 0, height / 2.0])  # Base flat at Z = 0.00mm
     return tower
@@ -841,7 +841,7 @@ def build_indexed_assembly_mesh(main_mesh, insert_mesh, shaft_mesh=None, include
         meshes.append(shaft_plate)
         
     if include_cooling_tower:
-        cool_tower = build_cooling_tower_mesh(radius=4.0, height=14.50)
+        cool_tower = build_cooling_tower_mesh(radius=4.0, height=20.50)
         cool_tower.apply_translation([27.50, -16.00, 0.00])
         meshes.append(cool_tower)
         
