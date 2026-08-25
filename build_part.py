@@ -45,7 +45,7 @@ CLIP_GAP_DEPTH = 3.70     # Depth of flex slot in wall
 CLIP_ARM_THICK = 1.20     # Exactly matches OUTER_WALL_THICK (1.20mm) for flush interior alignment
 CLIP_ARM_WIDTH = 4.20     # 4.20mm wide snap beam (leaves 0.80mm total margin / 0.40mm per side for 5.0mm mating holes)
 CLIP_SLOT_CLEARANCE = 0.35 # 0.35mm minimal printable gap for 0.4mm nozzle (prevents fusion while minimizing air gap)
-CLIP_HOOK_DEPTH = 1.59    # 1.59mm radial overhang from wall
+CLIP_HOOK_DEPTH = 2.59    # 2.59mm radial overhang from wall (+1.00mm extension)
 CLIP_HOOK_HEIGHT = 1.80
 # 4 Clip positions: Top clips (45°, 135°) halfway to top tab; Bottom clips (211.3°, 327.5°) 4.42mm from ears, 8.47mm from bottom tabs
 CLIP_ANGLES = [45.0, 135.0, 211.3, 327.5]
@@ -758,22 +758,22 @@ def build_clip_supports_mesh(base_poly):
         n_dir = p / r_wall
         
         # Position support tower under the center of the outer hook shelf
-        r_supp = r_wall + CLIP_HOOK_DEPTH * 0.60
+        r_supp = r_wall + CLIP_HOOK_DEPTH * 0.50
         pos_center = n_dir * r_supp
         
-        # 1. Main vertical support pillar (0.90mm radial x 2.00mm tangential x support_top_z tall)
-        pillar = trimesh.creation.box([0.90, 2.00, support_top_z])
+        # 1. Main vertical support pillar (1.20mm radial x 2.20mm tangential x support_top_z tall)
+        pillar = trimesh.creation.box([1.20, 2.20, support_top_z])
         rot = trimesh.transformations.rotation_matrix(rad, [0, 0, 1])
         pillar.apply_transform(rot)
         pillar.apply_translation([pos_center[0], pos_center[1], support_top_z / 2.0])
         
-        # 2. Bed adhesion foot (0.40mm tall, 1.50mm x 2.80mm)
-        foot = trimesh.creation.box([1.50, 2.80, 0.40])
+        # 2. Bed adhesion foot (0.40mm tall, 1.80mm x 3.00mm)
+        foot = trimesh.creation.box([1.80, 3.00, 0.40])
         foot.apply_transform(rot)
         foot.apply_translation([pos_center[0], pos_center[1], 0.20])
         
         # 3. Chisel breakaway contact tip (0.12mm tall, reaches Z = 4.94mm)
-        tip = trimesh.creation.box([0.40, 1.60, 0.12])
+        tip = trimesh.creation.box([0.50, 1.80, 0.12])
         tip.apply_transform(rot)
         tip.apply_translation([pos_center[0], pos_center[1], support_top_z + 0.06])
         

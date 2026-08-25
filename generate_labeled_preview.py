@@ -319,9 +319,9 @@ y_act = y_axle + p_arm_act[0]
 z_act = z_axle + p_arm_act[1]
 ax3.plot([y_axle, y_act], [z_axle, z_act], color='#d32f2f', linestyle='--', linewidth=3.0, label=f'Actuated Plunger (Swings -Y to {y_act:.2f}mm)')
 
-# Input Cam Profile (105° Bellcrank Angle, direct off shaft)
+# Input Cam Profile (105° Bellcrank Angle, convex crowned rolling contact)
 y_input, z_input = 2.83, 10.42
-ax3.plot([y_axle, y_input], [z_axle, z_input], color='#ffb300', linewidth=4.5, label='Direct 105° Input Cam')
+ax3.plot([y_axle, y_input], [z_axle, z_input], color='#ffb300', linewidth=4.5, label='Direct 105° Convex Crowned Cam')
 
 # Y-Axis Oriented Switch (Right-angle switch facing +Y at Z = -6.5mm)
 ax3.fill([5.5, 8.5, 8.5, 5.5], [-7.5, -7.5, -5.5, -5.5], color='#4caf50', alpha=0.85, label='Y-Axis Switch Body')

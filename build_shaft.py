@@ -185,6 +185,14 @@ def build_shaft_rocker_mesh(
     p_bot_tip = p_top_tip - u_perp_up * cam_arm_thick
     p_tangent_bot = p_tangent_top - u_perp_up * cam_arm_thick
     
+    # Top line features a smooth convex crowned arc (+0.45mm crown) for continuous rolling tangency with straight plug blade
+    t_crown = np.linspace(0, 1, 33)
+    cam_top_crowned = []
+    crown_height = 0.45  # 0.45mm convex crown apex
+    for tc in t_crown:
+        pt = (1-tc)*p_tangent_top + tc*p_top_tip + 4*tc*(1-tc)*u_perp_up*crown_height
+        cam_top_crowned.append((pt[0], pt[1]))
+        
     half_t = cam_arm_thick / 2.0
     p_tip_mid = (p_top_tip + p_bot_tip) / 2.0
     cam_tip_pts = []
@@ -192,7 +200,7 @@ def build_shaft_rocker_mesh(
         pt = p_tip_mid + u_dir * (half_t * np.cos(a)) + u_perp_up * (half_t * np.sin(a))
         cam_tip_pts.append((pt[0], pt[1]))
         
-    poly_cam_arm = Polygon([p_tangent_top] + cam_tip_pts + [p_tangent_bot, p_tangent_top])
+    poly_cam_arm = Polygon(cam_top_crowned + cam_tip_pts + [p_tangent_bot, p_tangent_top])
     poly_cam = unary_union([flank_collar, poly_cam_arm])
     
     m_cam_raw = trimesh.creation.extrude_polygon(poly_cam, height=cam_w_x)

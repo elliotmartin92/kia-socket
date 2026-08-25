@@ -128,12 +128,12 @@ py -3 generate_labeled_preview.py
 - **Beam Dimensions**: **$4.20\text{ mm}$ wide curved beam** (leaves $0.80\text{ mm}$ total margin / $0.40\text{ mm}$ per side for smooth insertion into $5.00\text{ mm}$ mating holes).
 - **Flex Isolation**: Two $0.35\text{ mm}$ vertical through-slots (minimal printable clearance for a $0.4\text{ mm}$ nozzle) from $Z = 3.07\text{ mm}$ to $Z = 6.77\text{ mm}$ isolating the cantilever beam.
 - **Hook Geometry ($Z \in [4.97, 6.77\text{ mm}$)**:
-  - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting $+1.59\text{ mm}$ radially outward.
+  - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting **$+2.59\text{ mm}$ radially outward** (+1.00mm extension for deeper engagement into mating female enclosure slots).
   - Sloped lead-in ramp tapering up to top outer wall apex at $Z = 6.77\text{ mm}$.
   - Inner wall face: 100% flush, smooth, continuous cylinder.
 - **Built-In Sacrificial Support Towers (4x Breakaway Mini-Pillars)**:
-  - Small vertical support tower ($0.90\text{ mm} \times 2.00\text{ mm}$) directly under the horizontal overhang shelf of each clip.
-  - Base flat on the print bed ($Z = 0.00\text{ mm}$) with an adhesion foot ($1.50\text{ mm} \times 2.80\text{ mm}$).
+  - Small vertical support tower ($1.20\text{ mm} \times 2.20\text{ mm}$) directly centered under the $2.59\text{ mm}$ horizontal overhang shelf of each clip.
+  - Base flat on the print bed ($Z = 0.00\text{ mm}$) with an adhesion foot ($1.80\text{ mm} \times 3.00\text{ mm}$).
   - Rises to $Z = 4.82\text{ mm}$ with a small chisel contact interface ($0.15\text{ mm}$ breakaway gap under the $Z = 4.97\text{ mm}$ shelf) for effortless snap-off removal without marring.
 
 ### 3.4. Center Curved Feature with Dividing Rib (Option 1A)
@@ -195,8 +195,9 @@ py -3 generate_labeled_preview.py
   - **Tip Contact**: Smoothly tapers to a $2.00\text{ mm}$ nose diameter ($R = 1.00\text{ mm}$) at the switch contact point.
   - **Reach & Stroke**: Reaches **$\ge 6.50\text{ mm}$ below the outer bottom face of the baseplate ($Z \le -6.50\text{ mm}$)**.
   - **Kinematics**: Rotates clockwise around the $Y = 9.279\text{ mm}, Z = 12.59\text{ mm}$ pivot axis to actuate the Y-axis oriented PCB tactile switch with zero through-hole interference.
-- **Reinforced Input Cam & Full-Span Monolithic Gusset Web**:
+- **Reinforced Convex Crowned Input Cam & Full-Span Monolithic Gusset Web**:
   - $2.70\text{ mm}$ wide input cam tab aligned with the right plug prong insertion path ($X = 7.05\text{ mm}$).
+  - **Convex Crowned Profile ($+0.45\text{ mm}$ crown arc)**: Acts as a true kinematic cam profile against the straight downward-moving plug blade, maintaining continuous rolling tangency and uniform normal force across all $0^\circ \to 10^\circ$ actuation angles without edge-digging or stick-slip friction.
   - Monolithic structural gusset web spanning continuously across the entire opening between the towers ($X \in [5.60, 12.90]\text{ mm}$).
 
 ---
@@ -245,6 +246,12 @@ py -3 generate_labeled_preview.py
 - **Printed v7 Lever & Extended Heat Break Tower**:
   - Validated 3D printing of the reoriented v7 shaft/lever mechanism (`shaft_rocker.stl`).
   - Extended sacrificial cooling / heat break tower to **$20.50\text{ mm}$** ($\varnothing 8.00\text{ mm}$) to match and exceed the full $19.86\text{ mm}$ build height of the v7 lever, providing dedicated per-layer nozzle travel and thermal stabilization for the finest tips of both the lever plunger and baseplate retention towers.
+- **Perimeter Snap Clips +1.00mm Radial Extension**:
+  - Increased snap clip hook overhang depth from $1.59\text{ mm}$ to **$2.59\text{ mm}$** (`CLIP_HOOK_DEPTH`), providing deeper latch engagement into the mating female enclosure windows.
+  - Centered and widened built-in breakaway sacrificial support pillars ($1.20\text{ mm} \times 2.20\text{ mm}$) directly beneath the $2.59\text{ mm}$ horizontal shelf overhang.
+- **Convex Crowned Input Cam Profile**:
+  - Upgraded the straight linear cam ramp on the shaft rocker to a **$+0.45\text{ mm}$ convex crown arc**.
+  - Maintains continuous rolling tangency with the straight-inserted plug blade throughout dynamic rotation ($0^\circ \to 10^\circ$), preventing edge-digging and providing smooth, linear mechanical advantage.
 
 
 
