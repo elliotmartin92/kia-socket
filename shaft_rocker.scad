@@ -20,20 +20,15 @@ x_c = 9.25;
 y_axle = 9.279;
 z_axle = 12.59;
 
-// 2D Profile: Arched Cam
+// 2D Profile: Option 1 Direct Straight Belly Cam
 poly_cam_pts = [
-    [9.279, 14.69],
-    [6.80, 17.80],
-    [4.20, 18.00],
-    [2.00, 17.40],
-    [1.45, 13.00],
-    [2.05, 12.80],
-    [2.20, 13.40],
-    [2.20, 16.70],
-    [4.20, 17.20],
-    [6.80, 16.00],
-    [8.079, 13.59],
-    [7.779, 12.59]
+    [9.279, 12.59],
+    [9.279, 15.19],
+    [5.00, 9.80],
+    [1.50, 7.20],
+    [1.80, 5.00],
+    [4.50, 5.20],
+    [7.779, 10.09]
 ];
 
 module oem_shaft_rocker() {
@@ -52,7 +47,7 @@ module oem_shaft_rocker() {
         rotate([0, 90, 0])
             cylinder(r = hub_d/2, h = hub_w, center = true);
             
-    // Arched Input Cam Tab
+    // Direct Straight Belly Cam Tab
     translate([cam_x_c - cam_w/2, 0, 0])
         rotate([0, -90, 0])
             rotate([0, 0, 90])

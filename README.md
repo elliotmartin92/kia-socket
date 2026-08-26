@@ -254,12 +254,12 @@ py -3 generate_labeled_preview.py
   - Maintains continuous rolling tangency with the straight-inserted plug blade throughout dynamic rotation ($0^\circ \to 10^\circ$), preventing edge-digging and providing smooth, linear mechanical advantage.
 
 ### Version 8 (v8)
-- **Arched Full-Width Cam for OEM Brass Pinching Mechanism**:
+- **Direct Straight Belly Cam for OEM Brass Pinching Mechanism**:
   - Direct integration with the physical OEM stamped brass pinching contact clips in Brackets 3 & 4 (Hot Terminal: $6.74\text{ mm}$ wide in $X$, $14.40\text{ mm}$ tall above floor, $5.00\text{ mm}$ internal belly cavity, $1.00\text{ mm}$ pinch throat, $4.30\text{ mm}$ top V-flare opening).
   - **Re-centered on Hot Blade Axis**: Input cam centered precisely at **$X = 6.28\text{ mm}$**.
   - **100% Full Structural Width Preserved**: Retains the full **$2.70\text{ mm}$ width** in $X$ with $+2.02\text{ mm}$ lateral clearance inside the $6.74\text{ mm}$ brass strip boundaries (zero need to narrow the rocker).
-  - **Arched Over-the-Lip Cam Neck Profile**: The cam neck arches smoothly over the $Z = 15.40\text{ mm}, Y = 3.85\text{ mm}$ rear flare lip ($>1.4\text{ mm}$ clearance at rest, $+0.43\text{ mm}$ min margin during stroke) and dips into the $4.30\text{ mm}$ top V-funnel opening.
-  - **Kinematic Safety Interlock**: Contact initializes at $Z_{\text{tip}} = 17.00\text{ mm}$ and fully triggers the PCB tactile switch at **$Z_{\text{tip}} = 16.60\text{ mm}$ ($\theta = 6.10^\circ$)**, providing **$12.00\text{ mm}$ of safety lead-in** before the plug blade makes electrical contact with the busbars ($Z \le 4.60\text{ mm}$).
+  - **Direct Solid $2.80\text{ mm}$ Cantilever Beam**: Eliminates arched sections in favor of a straight, rigid structural beam sloping directly from the $\varnothing 4.20\text{ mm}$ hub barrel down into the $5.00\text{ mm}$ wide internal belly cavity ($Z \in [5.0, 7.5]\text{ mm}$).
+  - **Kinematic Safety Interlock**: Contact initializes as the plug blade tip emerges from the $Z = 9.40\text{ mm}$ pinch throat at **$Z_{\text{tip}} = 7.20\text{ mm}$**, fully triggering the PCB tactile switch at **$Z_{\text{tip}} = 6.40\text{ mm}$ ($\theta = 6.15^\circ$)**.
 
 ---
 
