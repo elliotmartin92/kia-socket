@@ -9,6 +9,10 @@ Dual Functional Roles:
 2) Safety Interlock & Rocker Cradle Support: Mounts the pivot shaft rocker mechanism.
    When the right plug prong is inserted, the rocker actuates a PCB momentary switch,
    ensuring the outlet is energized only when a plug is engaged.
+
+Data Sources & Reverse-Engineering References:
+- Reddit OEM Diagnostic Thread: https://www.reddit.com/r/KiaEV6/comments/1n9e8ex/internal_outlet_fix_for_free/p5gh9tp/?screen_view_count=2
+- Imgur 18-Photo Teardown Album: https://imgur.com/a/pbAzoX3
 """
 
 import re

@@ -12,25 +12,52 @@ hub_d = 4.2;
 
 plunger_reach_below_z = 6.5;
 plunger_w = 4.4;
-plunger_y_c = 11.4;
+hole_x_c = 10.284;
 
 cam_w = 2.7;
-cam_x_c = 7.05;
+cam_x_c = 6.28;
+x_c = 9.25;
+y_axle = 9.279;
+z_axle = 12.59;
+
+// 2D Profile: Arched Cam
+poly_cam_pts = [
+    [9.279, 14.69],
+    [6.80, 17.80],
+    [4.20, 18.00],
+    [2.00, 17.40],
+    [1.45, 13.00],
+    [2.05, 12.80],
+    [2.20, 13.40],
+    [2.20, 16.70],
+    [4.20, 17.20],
+    [6.80, 16.00],
+    [8.079, 13.59],
+    [7.779, 12.59]
+];
 
 module oem_shaft_rocker() {
     // Left Pivot Pin
-    translate([-(total_axle_len/2 - pin_len/2), 0, 0])
+    translate([x_c - hub_w/2 - pin_len/2, y_axle, z_axle])
         rotate([0, 90, 0])
             cylinder(r = pin_d/2, h = pin_len, center = true);
             
     // Right Pivot Pin
-    translate([(total_axle_len/2 - pin_len/2), 0, 0])
+    translate([x_c + hub_w/2 + pin_len/2, y_axle, z_axle])
         rotate([0, 90, 0])
             cylinder(r = pin_d/2, h = pin_len, center = true);
             
     // Central Hub Barrel
-    rotate([0, 90, 0])
-        cylinder(r = hub_d/2, h = hub_w, center = true);
+    translate([x_c, y_axle, z_axle])
+        rotate([0, 90, 0])
+            cylinder(r = hub_d/2, h = hub_w, center = true);
+            
+    // Arched Input Cam Tab
+    translate([cam_x_c - cam_w/2, 0, 0])
+        rotate([0, -90, 0])
+            rotate([0, 0, 90])
+                linear_extrude(height = cam_w)
+                    polygon(poly_cam_pts);
 }
 
 oem_shaft_rocker();

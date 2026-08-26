@@ -1,6 +1,10 @@
 """
 Generate a comprehensive, beautifully labeled part preview diagram
 with all named features, dimensions, subpart callouts, shaft/rocker kinematics, and Y-axis button actuation.
+
+Data Sources & Reverse-Engineering References:
+- Reddit OEM Diagnostic Thread: https://www.reddit.com/r/KiaEV6/comments/1n9e8ex/internal_outlet_fix_for_free/p5gh9tp/?screen_view_count=2
+- Imgur 18-Photo Teardown Album: https://imgur.com/a/pbAzoX3
 """
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection

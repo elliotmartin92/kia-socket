@@ -253,6 +253,14 @@ py -3 generate_labeled_preview.py
   - Upgraded the straight linear cam ramp on the shaft rocker to a **$+0.45\text{ mm}$ convex crown arc**.
   - Maintains continuous rolling tangency with the straight-inserted plug blade throughout dynamic rotation ($0^\circ \to 10^\circ$), preventing edge-digging and providing smooth, linear mechanical advantage.
 
+### Version 8 (v8)
+- **Arched Full-Width Cam for OEM Brass Pinching Mechanism**:
+  - Direct integration with the physical OEM stamped brass pinching contact clips in Brackets 3 & 4 (Hot Terminal: $6.74\text{ mm}$ wide in $X$, $14.40\text{ mm}$ tall above floor, $5.00\text{ mm}$ internal belly cavity, $1.00\text{ mm}$ pinch throat, $4.30\text{ mm}$ top V-flare opening).
+  - **Re-centered on Hot Blade Axis**: Input cam centered precisely at **$X = 6.28\text{ mm}$**.
+  - **100% Full Structural Width Preserved**: Retains the full **$2.70\text{ mm}$ width** in $X$ with $+2.02\text{ mm}$ lateral clearance inside the $6.74\text{ mm}$ brass strip boundaries (zero need to narrow the rocker).
+  - **Arched Over-the-Lip Cam Neck Profile**: The cam neck arches smoothly over the $Z = 15.40\text{ mm}, Y = 3.85\text{ mm}$ rear flare lip ($>1.4\text{ mm}$ clearance at rest, $+0.43\text{ mm}$ min margin during stroke) and dips into the $4.30\text{ mm}$ top V-funnel opening.
+  - **Kinematic Safety Interlock**: Contact initializes at $Z_{\text{tip}} = 17.00\text{ mm}$ and fully triggers the PCB tactile switch at **$Z_{\text{tip}} = 16.60\text{ mm}$ ($\theta = 6.10^\circ$)**, providing **$12.00\text{ mm}$ of safety lead-in** before the plug blade makes electrical contact with the busbars ($Z \le 4.60\text{ mm}$).
+
 ---
 
 ## 7. Future Optimization & Tweak Candidates
@@ -270,6 +278,33 @@ py -3 generate_labeled_preview.py
   - `testing/curved_feature_blade_clearance.png`: 2D planar dimensioned clearance map between blade prongs and the Center Curved Feature.
   - `testing/3d_plug_insertion_view.png`: 3D isometric overview and closeup of plug blade engagement.
 
+---
 
+## 8. Data Sources & OEM Teardown References
 
+The reverse-engineering, geometric reconstruction, and reinforcement redesign in this repository are based on physical teardowns and community diagnostic data from the Kia EV6 in-cabin 120V AC (V2L) power outlet assembly:
 
+### 8.1. Reddit Community Teardown & Diagnostic Thread
+- **Post URL**: [r/KiaEV6 - Internal outlet fix (for free)](https://www.reddit.com/r/KiaEV6/comments/1n9e8ex/internal_outlet_fix_for_free/p5gh9tp/?screen_view_count=2)
+- **Discussion Context**:
+  - Documents the primary OEM failure mode of the under-rear-seat 120V AC Vehicle-to-Load (V2L) receptacle.
+  - **Failure Mechanism**: The factory OEM plastic interlock lever is prone to fatigue, bending, or hinge spreading, which prevents the actuator arm from reaching down to depress the PCB-mounted tactile microswitch upon plug insertion. Because the onboard inverter requires switch closure to energize the high-voltage busbars, the outlet fails to provide power.
+  - **Reverse Engineering & Pinout Details**: [Comment p5gh9tp](https://www.reddit.com/r/KiaEV6/comments/1n9e8ex/internal_outlet_fix_for_free/p5gh9tp/) and community contributions document the 6-pin low-voltage connector wiring, vehicle V2L interlock loop, seat removal steps ([Seat Disassembly Video Guide](https://www.youtube.com/watch?v=jpA-26kksXE)), and multimeter diagnostic checks across switch terminals to verify switch closure.
+  - Establishes the motivation for engineering a heavy-duty, reinforced 3D-printable replacement sub-housing baseplate and shaft rocker rather than bypassing the safety switch.
+
+### 8.2. Imgur Teardown Photo Album
+- **Album URL**: [Kia EV6 Internal 120V Outlet Complete Teardown Album](https://imgur.com/a/pbAzoX3)
+- **Annotated Image Reference Breakdown**:
+  - `IaPuDNn` ([Photo 1](https://i.imgur.com/IaPuDNn.jpeg)): Assembled outlet front bezel and receptacle faceplate.
+  - `pwVL1Z3` ([Photo 2](https://i.imgur.com/pwVL1Z3.jpeg)): Assembled outlet bottom housing showing fascia release clips.
+  - `qxmFKgz` ([Photo 3](https://i.imgur.com/qxmFKgz.jpeg)): Rear connector interface showing high-voltage inverter plug socket and low-voltage harness connector.
+  - `44mUCFQ` ([Photo 4](https://i.imgur.com/44mUCFQ.jpeg)): Front fascia trim plate detached.
+  - `SjSNtO0` ([Photo 5](https://i.imgur.com/SjSNtO0.jpeg)): Main housing top perimeter locking clips.
+  - `grxBHsa` ([Photo 6](https://i.imgur.com/grxBHsa.jpeg)): Main housing bottom perimeter locking clips.
+  - `Pdtbqbm`, `FjVlOF3`, `sKEneQZ`, `6eXiu5F` ([Photos 7–10](https://i.imgur.com/6eXiu5F.jpeg)): Perimeter latch release and housing separation sequence.
+  - `IoqkvCh` ([Photo 11](https://i.imgur.com/IoqkvCh.jpeg)): Rear housing shell removed, revealing PCB power terminals and connector interface.
+  - `o7b2HIs`, `pAvdBUj` ([Photos 12–13](https://i.imgur.com/pAvdBUj.jpeg)): Full exploded disassembly showing the intermediate sub-housing baseplate, conductive busbar contacts, and PCB.
+  - `QmMDxbP` ([Photo 14](https://i.imgur.com/QmMDxbP.jpeg)): Front plug contact assembly showing high-current copper contact clips and the OEM safety rocker mechanism positioned beneath the hot prong channel.
+  - `fpuwcJR` ([Photo 15](https://i.imgur.com/fpuwcJR.jpeg)): Sub-housing baseplate aligned with PCB, demonstrating the plunger stroke path entering the pass-through window directly above the tactile microswitch.
+  - `VVKc3SP` ([Photo 16](https://i.imgur.com/VVKc3SP.jpeg)): PCB tactile switch closeup and multimeter test points (switch leg to data pin #2) for interlock verification.
+  - `drXwtPB`, `EuqSTMx` ([Photos 17–18](https://i.imgur.com/drXwtPB.png)): Internal wiring schematics and structural dimensional reference.

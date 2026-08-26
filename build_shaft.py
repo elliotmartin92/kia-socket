@@ -15,6 +15,10 @@ Features:
 - Extended output plunger reaching ≥6.50mm below baseplate outer face (Z ≤ -6.50mm) to actuate PCB switch
 - Angled input cam tab (105° bellcrank angle direct off shaft) engaging the right plug blade
 - Generates 100% watertight STL, OBJ, and OpenSCAD CAD assets
+
+Data Sources & Reverse-Engineering References:
+- Reddit OEM Diagnostic Thread: https://www.reddit.com/r/KiaEV6/comments/1n9e8ex/internal_outlet_fix_for_free/p5gh9tp/?screen_view_count=2
+- Imgur 18-Photo Teardown Album: https://imgur.com/a/pbAzoX3
 """
 
 import sys
@@ -52,8 +56,8 @@ HUB_DIAMETER = 4.20          # Ø4.20mm central structural hub barrel
 PLUNGER_REACH_BELOW_Z = 6.50 # Reaches Z = -6.50mm below baseplate floor
 
 # Cam & Ribs
-CAM_WIDTH_X = 2.70           # 2.70mm wide input cam tab
-CAM_X_CENTER = 7.05          # Aligned with right plug prong insertion path
+CAM_WIDTH_X = 2.70           # 2.70mm wide full-strength input cam tab
+CAM_X_CENTER = 6.28          # Aligned with hot plug prong centerline (X = 6.28 mm)
 RIB_FLANK_THICK = 1.00       # 1.00mm flank rib thickness
 PLUNGER_WIDTH_X = 4.40       # 4.40mm wide central plunger blade (centered in 5.35mm hole)
 
@@ -75,7 +79,7 @@ def build_shaft_rocker_mesh(
     - Stepped cylindrical pivot pins (Ø2.80mm) with central structural hub (Ø4.20mm)
     - 3-rib fork array: Left & right stiffener flanks + widened 4.40mm central plunger
     - Smooth continuous filleted plunger arm reaching Z <= -6.50mm
-    - Angled input cam tab matching OEM bellcrank angle (~105 deg)
+    - Arched full-width (2.70mm) input cam tab operating inside OEM brass pinching contact gap
     """
     y_axle = Y_AXLE
     z_axle = Z_AXLE
@@ -167,40 +171,23 @@ def build_shaft_rocker_mesh(
     v_web = np.column_stack([v_w[:, 2] + (x_c - hub_w/2.0 + 0.10), v_w[:, 0], v_w[:, 1]])
     mesh_web = trimesh.Trimesh(vertices=v_web, faces=m_web_raw.faces.copy(), process=True)
     
-    # 4. Direct 105° Input Cam Tab (100% FLUSH with top apex of shaft hub)
-    # Centerline of plunger is at angle theta_p = atan2(-19.09, 1.20) = -86.40°
-    # 105° bellcrank angle -> angle of cam centerline = -86.40° - 75.0° = -161.40°
-    theta_cam = np.radians(-161.40)
-    u_dir = np.array([np.cos(theta_cam), np.sin(theta_cam)]) # [-0.948, -0.319]
-    u_perp_up = np.array([u_dir[1], -u_dir[0]])
-    if u_perp_up[1] < 0:
-        u_perp_up = -u_perp_up # [-0.319, 0.948] -> normal pointing up/forward
-        
-    cam_reach = 6.80     # Total length from shaft center
-    cam_arm_thick = 2.80 # Solid 2.80mm beam thickness
-    
-    # Top line starts TANGENT to cylinder top (100% flush with shaft top apex at Z = z_axle + r_hub = 14.69mm)
-    p_tangent_top = np.array([y_axle, z_axle]) + u_perp_up * r_hub
-    p_top_tip = p_tangent_top + u_dir * cam_reach
-    p_bot_tip = p_top_tip - u_perp_up * cam_arm_thick
-    p_tangent_bot = p_tangent_top - u_perp_up * cam_arm_thick
-    
-    # Top line features a smooth convex crowned arc (+0.45mm crown) for continuous rolling tangency with straight plug blade
-    t_crown = np.linspace(0, 1, 33)
-    cam_top_crowned = []
-    crown_height = 0.45  # 0.45mm convex crown apex
-    for tc in t_crown:
-        pt = (1-tc)*p_tangent_top + tc*p_top_tip + 4*tc*(1-tc)*u_perp_up*crown_height
-        cam_top_crowned.append((pt[0], pt[1]))
-        
-    half_t = cam_arm_thick / 2.0
-    p_tip_mid = (p_top_tip + p_bot_tip) / 2.0
-    cam_tip_pts = []
-    for a in np.linspace(np.pi/2, -np.pi/2, 17):
-        pt = p_tip_mid + u_dir * (half_t * np.cos(a)) + u_perp_up * (half_t * np.sin(a))
-        cam_tip_pts.append((pt[0], pt[1]))
-        
-    poly_cam_arm = Polygon(cam_top_crowned + cam_tip_pts + [p_tangent_bot, p_tangent_top])
+    # 4. Arched Full-Width Input Cam Tab (operating inside OEM brass contact gap)
+    lip_z = 17.20
+    poly_pts_cam = [
+        (y_axle, z_axle + r_hub),     # (9.28, 14.69)
+        (6.80, lip_z + 0.6),
+        (4.20, lip_z + 0.8),
+        (2.00, lip_z + 0.2),
+        (1.45, 13.00),                 # Nose tip contact on blade
+        (2.05, 12.80),                 # Nose bottom rounded
+        (2.20, 13.40),                 # Nose rear in upper funnel
+        (2.20, lip_z - 0.5),          # Rising inside funnel
+        (4.20, lip_z),                # Over the lip (Z = 17.2 mm > 15.4 mm)
+        (6.80, lip_z - 1.2),
+        (y_axle - 1.20, z_axle + 1.00),
+        (y_axle - 1.50, z_axle)
+    ]
+    poly_cam_arm = Polygon(poly_pts_cam)
     poly_cam = unary_union([flank_collar, poly_cam_arm])
     
     m_cam_raw = trimesh.creation.extrude_polygon(poly_cam, height=cam_w_x)
@@ -217,8 +204,6 @@ def build_shaft_rocker_mesh(
     
     if not in_assembly_coords:
         # Orient flat on print bed: rotate so wide flat cam face sits directly on build plate (Z=0).
-        # Rib slots open upward, completely eliminating trapped supports between the 3 ribs,
-        # increasing bed adhesion area 7x (25.5 mm²), and leaving pivot pins clean and round.
         mesh_printable = shaft_mesh.copy()
         rot_bed = trimesh.transformations.rotation_matrix(np.radians(198.6), [1, 0, 0])
         mesh_printable.apply_transform(rot_bed)
@@ -235,6 +220,7 @@ def build_shaft_rocker_mesh(
 
 def export_shaft_scad(filename="shaft_rocker.scad"):
     """Exports OpenSCAD source file for parametric customization."""
+    lip_z = 17.20
     scad_content = f"""// Parametric OEM 3-Rib Shaft & Rocker Mechanism for Kia Socket Enclosure
 // Generated by build_shaft.py
 
@@ -249,25 +235,52 @@ hub_d = {HUB_DIAMETER};
 
 plunger_reach_below_z = {PLUNGER_REACH_BELOW_Z};
 plunger_w = {PLUNGER_WIDTH_X};
-plunger_y_c = {11.40};
+hole_x_c = {HOLE_X_CENTER};
 
 cam_w = {CAM_WIDTH_X};
 cam_x_c = {CAM_X_CENTER};
+x_c = {X_TOWER_CENTER};
+y_axle = {Y_AXLE};
+z_axle = {Z_AXLE};
+
+// 2D Profile: Arched Cam
+poly_cam_pts = [
+    [{Y_AXLE}, {Z_AXLE + HUB_DIAMETER/2.0}],
+    [6.80, {lip_z + 0.6:.2f}],
+    [4.20, {lip_z + 0.8:.2f}],
+    [2.00, {lip_z + 0.2:.2f}],
+    [1.45, 13.00],
+    [2.05, 12.80],
+    [2.20, 13.40],
+    [2.20, {lip_z - 0.5:.2f}],
+    [4.20, {lip_z:.2f}],
+    [6.80, {lip_z - 1.2:.2f}],
+    [{Y_AXLE - 1.20}, {Z_AXLE + 1.00}],
+    [{Y_AXLE - 1.50}, {Z_AXLE}]
+];
 
 module oem_shaft_rocker() {{
     // Left Pivot Pin
-    translate([-(total_axle_len/2 - pin_len/2), 0, 0])
+    translate([x_c - hub_w/2 - pin_len/2, y_axle, z_axle])
         rotate([0, 90, 0])
             cylinder(r = pin_d/2, h = pin_len, center = true);
             
     // Right Pivot Pin
-    translate([(total_axle_len/2 - pin_len/2), 0, 0])
+    translate([x_c + hub_w/2 + pin_len/2, y_axle, z_axle])
         rotate([0, 90, 0])
             cylinder(r = pin_d/2, h = pin_len, center = true);
             
     // Central Hub Barrel
-    rotate([0, 90, 0])
-        cylinder(r = hub_d/2, h = hub_w, center = true);
+    translate([x_c, y_axle, z_axle])
+        rotate([0, 90, 0])
+            cylinder(r = hub_d/2, h = hub_w, center = true);
+            
+    // Arched Input Cam Tab
+    translate([cam_x_c - cam_w/2, 0, 0])
+        rotate([0, -90, 0])
+            rotate([0, 0, 90])
+                linear_extrude(height = cam_w)
+                    polygon(poly_cam_pts);
 }}
 
 oem_shaft_rocker();
