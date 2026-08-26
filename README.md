@@ -253,5 +253,23 @@ py -3 generate_labeled_preview.py
   - Upgraded the straight linear cam ramp on the shaft rocker to a **$+0.45\text{ mm}$ convex crown arc**.
   - Maintains continuous rolling tangency with the straight-inserted plug blade throughout dynamic rotation ($0^\circ \to 10^\circ$), preventing edge-digging and providing smooth, linear mechanical advantage.
 
+---
+
+## 7. Future Optimization & Tweak Candidates
+
+### 7.1. Center Curved Feature Active Guide Funnel
+- **Current Geometry**: The $10.50\text{ mm}$ tall Center Curved Feature (Option 1A, Apex at $Y = -2.45\text{ mm}$) has a **$+2.16\text{ mm}$ clear air gap** from the inserted hot plug blade ($Y \in [-0.29, +6.07]\text{ mm}$), acting as a low-friction dielectric barrier and fail-safe backstop at $>7.5^\circ$ tilt without causing insertion drag or 3-point kinematic binding.
+- **Potential Tweak**: If physical blade guidance toward the cam needs to be tightened in future revisions without relying solely on the front faceplate bezel slots:
+  - Add a **$30^\circ$ lead-in funnel bevel** to the top rim of the feature ($Z \in [8.00, 10.50]\text{ mm}$).
+  - Optionally extend the curved wings $+1.00\text{ mm}$ in $+Y$ (reducing the gap from $2.16\text{ mm}$ to $1.16\text{ mm}$) to serve as an active entry funnel while preserving bottom clearance for the electrical contact clips.
+
+### 7.2. Plug Insertion Kinematics & Dynamic Verification Suite
+- **Kinematic Simulation Script**: [`testing/model_plug_insertion.py`](file:///c:/Users/Elliot/Documents/antigravity/kind-bardeen/testing/model_plug_insertion.py) models the complete step-by-step NEMA 5-15 plug insertion, computing shaft rotation $\theta(Z)$, mechanical advantage ($4.64\times$), jamming margin ($\tan\alpha = 0.416 \ll 1/\mu$), and switch actuation ($Z_{\text{trip}} = 13.30\text{ mm}$ with $8.70\text{ mm}$ lead-in before electrical busbar entry at $Z \le 4.60\text{ mm}$).
+- **Inspection Blueprints**:
+  - `testing/plug_insertion_simulation.png`: 4-panel comprehensive dynamic simulation blueprint.
+  - `testing/curved_feature_blade_clearance.png`: 2D planar dimensioned clearance map between blade prongs and the Center Curved Feature.
+  - `testing/3d_plug_insertion_view.png`: 3D isometric overview and closeup of plug blade engagement.
+
+
 
 
