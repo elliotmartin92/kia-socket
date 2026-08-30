@@ -144,30 +144,42 @@ py -3 generate_labeled_preview.py
 - **Wall & Rib Thickness**: $0.60\text{ mm}$ wall + $0.60\text{ mm}$ internal dividing rib along $X = 6.279\text{ mm}$.
 - **Total Height**: **$10.50\text{ mm}$** ($Z \in [1.00, 10.50]\text{ mm}$).
 
-### 3.5. Guide Brackets (4 Brackets / 2 Pairs - Adjusted Top Gaps)
-- **Left Pair (Brackets 1 & 2)**: $X \in [-10.79, -1.77]\text{ mm}$.
-- **Right Pair (Brackets 3 & 4)**: $X \in [+1.77, +10.79]\text{ mm}$.
-- **Bracket 3 Full Geometry (Identical to Bracket 1)**:
-  - Slot width: **$0.86\text{ mm}$** ($X \in [2.851, 3.708]\text{ mm}$, identical to Bracket 1).
-  - Hook lip width: **$1.00\text{ mm}$** ($X \in [3.708, 4.705]\text{ mm}$, identical to Bracket 1).
-  - Lower face of top hook raised to $Y = 4.800\text{ mm}$ (giving $+0.22\text{ mm}$ extra vertical fit clearance).
-  - Upper pocket depth extended to $Y = 6.250\text{ mm}$ (giving $+0.20\text{ mm}$ extra vertical pocket clearance).
-- **Height**: $4.60\text{ mm}$ ($Z \in [1.00, 4.60]\text{ mm}$).
-- **Wall Thickness**: $0.84\text{ mm}$ nominal.
+### 3.5. Guide Brackets & Brass Seating Ribs (Looser Tolerances & 1.15mm Support Ribs)
+- **Left Pair (Brackets 1 & 2)**: $X \in [-10.791, -1.766]\text{ mm}$.
+- **Right Pair (Brackets 3 & 4)**: $X \in [+1.766, +10.791]\text{ mm}$.
+- **Relaxed Looser Interior Tolerances (Brackets 1–4)**:
+  - **Spine Channel Width ($X$)**: Widened from $6.856\text{ mm}$ to **$7.156\text{ mm}$** (provides **$+0.416\text{ mm}$ total sliding clearance** / $0.208\text{ mm}$ per side for the $6.74\text{ mm}$ OEM stamped brass contact strip, eliminating FDM print friction).
+  - **Top Lead-In Throat Opening ($X$)**: Widened to **$3.500\text{ mm}$** ($+0.32\text{ mm} \text{ to } +0.35\text{ mm}$ wider funnel for smooth contact spring blade entry).
+  - **Bottom Step Opening ($X$)**: Widened to **$3.800\text{ mm}$** ($+0.34\text{ mm}$ wider gap to easily pass the S-curved terminal leg).
+  - **Internal Vertical Span ($Y$)**: Extended from $12.336\text{ mm}$ to **$12.600\text{ mm}$** ($Y \in [-6.200, +6.400]\text{ mm}$) to prevent axial binding.
+  - **Top Hook Lead-In & Pocket ($Y$)**: Lower hook face raised to **$Y = 4.950\text{ mm}$**, upper pocket ceiling raised to **$Y = 6.400\text{ mm}$** (preserving full **$1.450\text{ mm}$** positive retention pocket depth).
+- **Bracket Seating Ribs ($1.15\text{ mm}$ Elevation)**:
+  - **Height**: **$1.15\text{ mm}$** protrusion above the floor ($Z \in [1.00, 2.15]\text{ mm}$) to elevate the brass contact piece.
+  - **Inward Extension**: **$1.80\text{ mm}$** from each interior spine wall on both brackets of each pair.
+  - **Central Open Corridor**: **$3.556\text{ mm}$** wide open central clearance along $X = \pm 6.28\text{ mm}$ for contact blade pinching and terminal pin clearance.
+  - **Four Longitudinal $Y$ Stations**:
+    - **Rib 1 (Top)**: Centered at **$Y = +5.250\text{ mm}$** ($Y \in [4.950, 5.550]\text{ mm}$), bottom edge meets the hook corner at $Y = 4.950\text{ mm}$ flush, forming a square seating corner under each hook.
+    - **Rib 2**: Centered at **$Y = +1.950\text{ mm}$** ($Y \in [1.650, 2.250]\text{ mm}$).
+    - **Rib 3**: Centered at **$Y = -1.350\text{ mm}$** ($Y \in [-1.650, -1.050]\text{ mm}$).
+    - **Rib 4 (Bottom)**: Centered at **$Y = -4.650\text{ mm}$** ($Y \in [-4.950, -4.350]\text{ mm}$).
+- **Bracket Total Height**: $4.60\text{ mm}$ ($Z \in [1.00, 5.60]\text{ mm}$).
+- **Nominal Wall Thickness**: $0.85\text{ mm}$ to $0.93\text{ mm}$.
 
-### 3.6. Backside Slit Protruding Bosses & Press-Fit Detent Inserts (For 0.77mm x 3.10mm Part)
+### 3.6. Backside Slit Protruding Bosses & Press-Fit Detent Inserts (Approach B: 100% Untouched Wall & Polarized Key)
 - **Mating Component Fitment**: Custom engineered to comfortably pass a **$0.77\text{ mm} \text{ (thick in X)} \times 3.10\text{ mm} \text{ (long in Y)}$** metal contact blade.
-- **Continuous Internal Through-Channel**: **$1.20\text{ mm} \text{ (in X)} \times 3.50\text{ mm} \text{ (in Y)}$** through both the insert and baseplate (+0.43mm in X, +0.40mm in Y generous sliding clearance to prevent FDM print shrinkage binding).
-- **Main Baseplate Detent Sockets**: Two **$2.25\text{ mm} \times 4.55\text{ mm}$** female detent sockets cut through the $1.00\text{ mm}$ baseplate floor centered at $X = \pm 8.453\text{ mm}, Y = -13.589\text{ mm}$.
-- **Separate Slit Inserts (`slit_insert.stl`)**:
-  - Base body: $3.80\text{ mm} \times 5.60\text{ mm} \times 2.47\text{ mm}$ outer shroud ($Z \in [-2.47, 0.00]\text{ mm}$).
-  - Male indexing key: $2.00\text{ mm} \times 4.30\text{ mm} \times 0.85\text{ mm}$ tall ($Z \in [0.00, 0.85]\text{ mm}$ in assembly coordinates, $0.40\text{ mm}$ perimeter wall).
-  - Clearances: **$0.25\text{ mm}$ total clearance ($0.125\text{ mm}$ per side)** into the baseplate detent socket for smooth, firm press-fit seating without binding or requiring excessive force.
-  - Flush horizontal seating shoulder: $0.78\text{ mm}$ wide flat seating rim against $Z = 0.00\text{ mm}$ baseplate bottom.
-- **Positioning (Option 1 - Shifted $+1.00\text{ mm}$ in $+Y$)**:
-  - $2.00\text{ mm}$ in $+Y$ from inner face of bottom wall ($Y \in [-15.34, -11.99]\text{ mm}$, centered at $Y = -13.664\text{ mm}$).
-  - Aligned with leftmost wall of right bracket ($X = +7.853\text{ mm}$) and rightmost wall of left bracket ($X = -7.853\text{ mm}$).
-  - Reduces the lead-in gap to the bracket entrance from $5.82\text{ mm}$ to $4.82\text{ mm}$.
+- **Continuous Internal Through-Channel**: Sized at **$1.20\text{ mm} \text{ (in X)} \times 3.40\text{ mm} \text{ (in Y)}$** through both the insert and baseplate (**$+0.43\text{ mm}$ in X, $+0.30\text{ mm}$ in Y** generous sliding clearance to eliminate FDM print shrinkage binding).
+- **Exact Slit Alignments**:
+  - Left Slit Socket: Centered at **$X = -7.853\text{ mm}, Y = -13.589\text{ mm}$** (centered on Bracket 1 datum line).
+  - Right Slit Socket: Centered at **$X = +8.453\text{ mm}, Y = -13.589\text{ mm}$** (exact OEM design alignment matching the vehicle mating plug).
+- **100% UNTOUCHED Main Housing Perimeter Wall**:
+  - The outer perimeter wall is **100% solid, continuous, and uniform $1.20\text{ mm}$ thick everywhere from $Z = 1.00\text{ mm}$ to $6.77\text{ mm}$** with **zero pockets, zero reliefs, and zero notches**.
+  - All clearance routing is handled entirely on the insert indexing key and matching baseplate floor socket.
+- **Main Baseplate Detent Sockets**: Two **$2.20\text{ mm} \times 4.40\text{ mm}$** female detent sockets cut through the $1.00\text{ mm}$ baseplate floor with a **$45^\circ$ corner chamfer** on the bottom-right of the right socket (and bottom-left of the left socket) to contour along the inner perimeter wall with a **$0.35\text{ mm}$ clean clearance margin**.
+- **Separate Slit Inserts (`slit_insert.stl` & `slit_inserts_pair.stl`)**:
+  - **$2.20\text{ mm}$ Sloped Outer Shroud Body**: $15.8^\circ$ draft angle tapering from a $2.70\text{ mm} \times 4.80\text{ mm}$ base shoulder down to **$2.20\text{ mm} \text{ (width)} \times 4.20\text{ mm} \text{ (length)}$** at the outer bottom face ($Z = 0.00\text{ mm}$), ensuring the shroud sits flush inside the $X = 9.812\text{ mm}$ outer perimeter wall edge with zero collision.
+  - **1-Way Polarized Chamfered Indexing Key**: $1.80\text{ mm} \times 4.00\text{ mm}$ raised boss ($0.85\text{ mm}$ tall, $Z \in [2.47, 3.32]\text{ mm}$) featuring a **$45^\circ$ chamfered indexing corner** that prevents inserting the part backwards or rotated $180^\circ$.
+  - **Fit Clearance**: **$0.40\text{ mm}$ total clearance ($0.20\text{ mm}$ per side)** into the baseplate detent socket for smooth, firm press-fit seating without binding.
+  - **Flush Horizontal Seating Shoulder**: Sits flat against the baseplate bottom face ($Z = 0.00\text{ mm}$).
 - **Complete Assembly Build Plate Layout**: `complete_assembly.stl` arranges the main baseplate, both separate slit inserts, shaft rocker, and sacrificial cooling tower flat on the **same build plane ($Z = 0.00\text{ mm}$)** side-by-side for 1-click support-free 3D printing.
 
 ### 3.7. Left and Right Side Ears (8.20mm Width for 8.30mm Enclosure Gap)

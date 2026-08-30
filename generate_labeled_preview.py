@@ -14,6 +14,7 @@ from shapely.ops import unary_union
 
 from build_part import (
     build_exact_3d_model, get_exact_base_polygon, create_all_brackets_poly,
+    create_bracket_seating_ribs_poly, BRACKET_SEATING_RIB_HEIGHT, BRACKET_SEATING_RIB_EXT,
     create_grid_ribs_poly, create_shaft_support_towers_poly,
     create_backside_slit_bosses_poly, build_left_tower_struts_mesh,
     create_arch_wall_poly,
@@ -56,6 +57,12 @@ brackets_poly = create_all_brackets_poly()
 for geom in (brackets_poly.geoms if hasattr(brackets_poly, 'geoms') else [brackets_poly]):
     bx, by = geom.exterior.xy
     ax1.plot(bx, by, color='#2e7d32', linewidth=2.0)
+
+# Bracket Seating Ribs (1.15mm tall)
+seating_ribs_poly = create_bracket_seating_ribs_poly()
+for geom in (seating_ribs_poly.geoms if hasattr(seating_ribs_poly, 'geoms') else [seating_ribs_poly]):
+    sx, sy = geom.exterior.xy
+    ax1.fill(sx, sy, color='#d32f2f', alpha=0.85, edgecolor='#b71c1c', linewidth=1.0)
 
 # Ribs (Connected Grid)
 all_ribs_poly = create_grid_ribs_poly(base_poly, outer_body_poly)
@@ -207,14 +214,14 @@ ax1.annotate('Inset Bottom Wall Notch\n(Aligned with Arch Interior)', xy=(0, -16
              fontsize=8, fontweight='bold', color='#0d47a1', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#0d47a1'))
 
 # Left Slit Detent Socket
-ax1.annotate('Left Detent Socket\n(2.15x4.45mm for Insert)', xy=(-8.38, -13.66), xytext=(-29.5, -17.0),
+ax1.annotate('Left Polarized Socket (X=-7.85)\nChamfered Key (0.40mm Fit Gap)\n+ 2.2mm Sloped Insert', xy=(-7.853, -13.589), xytext=(-31.5, -17.0),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#7b1fa2'),
-             fontsize=7.5, fontweight='bold', color='#7b1fa2', bbox=dict(boxstyle='round,pad=0.2', fc='#f3e5f5', ec='#7b1fa2'))
+             fontsize=7.2, fontweight='bold', color='#7b1fa2', bbox=dict(boxstyle='round,pad=0.2', fc='#f3e5f5', ec='#7b1fa2'))
 
 # Right Slit Detent Socket
-ax1.annotate('Right Detent Socket\n(2.15x4.45mm for Insert)', xy=(8.38, -13.66), xytext=(17.5, -17.0),
+ax1.annotate('Right Polarized Socket (X=+8.45)\nChamfered Key + Untouched Wall\n+ 2.2mm Sloped Insert', xy=(8.453, -13.589), xytext=(17.5, -17.0),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#7b1fa2'),
-             fontsize=7.5, fontweight='bold', color='#7b1fa2', bbox=dict(boxstyle='round,pad=0.2', fc='#f3e5f5', ec='#7b1fa2'))
+             fontsize=7.2, fontweight='bold', color='#7b1fa2', bbox=dict(boxstyle='round,pad=0.2', fc='#f3e5f5', ec='#7b1fa2'))
 
 # Bottom Tabs
 ax1.annotate('Bottom-Left Tab', xy=(-14.0, -18.54), xytext=(-26.0, -22.0),

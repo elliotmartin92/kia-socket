@@ -14,6 +14,8 @@ rib_thick           = 0.6;
 rib_grid_x          = 5.2;
 rib_grid_y          = 3.2;
 bracket_h           = 4.6;
+bracket_seating_rib_h = 1.15;
+bracket_seating_rib_ext = 1.8;
 clip_height         = 6.77;
 clip_gap_depth      = 3.7;
 clip_arm_thick      = 1.2;
@@ -259,12 +261,40 @@ module base_plate_2d() {
         translate([10.28 - 5.35/2, 10.83 - 4.51/2])
             square([5.35, 4.51]);
             
-        // Left Detent Socket (Centered on X = -7.853mm)
-        translate([-7.853 - 2.25/2, -13.589 - 4.55/2])
-            square([2.25, 4.55]);
-        // Right Detent Socket (Original outer alignment)
-        translate([8.453 - 2.25/2, -13.589 - 4.55/2])
-            square([2.25, 4.55]);
+        // Left Polarized Detent Socket (X = -7.853mm, bottom-left chamfer)
+        translate([-7.853, -13.589])
+            polygon(points = [
+                [-1.100 + 0.85, -2.200],
+                [1.100, -2.200],
+                [1.100, 2.200],
+                [-1.100, 2.200],
+                [-1.100, -2.200 + 0.85]
+            ]);
+            
+        // Right Polarized Detent Socket (X = +8.453mm, bottom-right chamfer)
+        translate([8.453, -13.589])
+            polygon(points = [
+                [-1.100, -2.200],
+                [1.100 - 0.85, -2.200],
+                [1.100, -2.200 + 0.85],
+                [1.100, 2.200],
+                [-1.100, 2.200]
+            ]);
+    }
+}
+
+module bracket_seating_ribs_2d() {
+    for (y = [5.25, 1.95, -1.35, -4.65]) {
+        // Left Pair
+        translate([-9.857, y - 0.6/2])
+            square([1.8, 0.6]);
+        translate([-4.501, y - 0.6/2])
+            square([1.8, 0.6]);
+        // Right Pair
+        translate([2.701, y - 0.6/2])
+            square([1.8, 0.6]);
+        translate([8.057, y - 0.6/2])
+            square([1.8, 0.6]);
     }
 }
 
@@ -274,7 +304,7 @@ module complete_part() {
         linear_extrude(height = base_thickness)
             base_plate_2d();
             
-        // Outer Wall with constant thickness following exact non-circular perimeter
+        // 100% UNTOUCHED Outer Wall with constant thickness following exact perimeter
         difference() {
             linear_extrude(height = outer_wall_height)
                 base_plate_2d();
@@ -283,6 +313,11 @@ module complete_part() {
                     offset(r = -outer_wall_thick)
                         base_plate_2d();
         }
+        
+        // Bracket Seating Ribs (1.15mm tall on 1.0mm base)
+        translate([0, 0, base_thickness])
+            linear_extrude(height = bracket_seating_rib_h)
+                bracket_seating_ribs_2d();
     }
 }
 

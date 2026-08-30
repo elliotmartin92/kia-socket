@@ -42,6 +42,10 @@ RIB_GRID_X = 5.20
 RIB_GRID_Y = 3.20
 
 BRACKET_HEIGHT = 4.60
+BRACKET_SEATING_RIB_HEIGHT = 1.15   # 1.15mm protrusion above baseplate floor (Z in [1.00, 2.15]mm)
+BRACKET_SEATING_RIB_EXT = 1.80      # 1.80mm extension into channel from interior spine walls
+BRACKET_SEATING_RIB_THICK = 0.60    # 0.60mm thickness in Y (matching floor ribs)
+BRACKET_SEATING_RIB_Y = [5.25, 1.95, -1.35, -4.65]  # 4 Y-stations (Rib 1 bottom corner meets hook corner at Y=4.95mm)
 
 # Clips (Mating with 5.00mm female holes)
 CLIP_HEIGHT = 6.77        # Flush with outer wall
@@ -55,23 +59,25 @@ CLIP_HOOK_HEIGHT = 1.80
 CLIP_ANGLES = [45.0, 135.0, 211.3, 327.5]
 
 # Bottom Slits / Holes (Clearance fit for 0.77mm x 3.10mm mating part)
-SLIT_W_X = 1.20         # 1.20mm wide in X (+0.43mm clearance for 0.77mm part)
-SLIT_LEN_Y = 3.50       # 3.50mm long in Y (+0.40mm clearance for 3.10mm part)
+SLIT_W_X = 1.20         # 1.20mm wide in X (+0.43mm clearance for 0.77mm brass blade)
+SLIT_LEN_Y = 3.40       # 3.40mm long in Y (+0.30mm clearance for 3.10mm brass blade)
 SLIT_BOSS_HEIGHT = 2.47 # 2.47mm protrusion on back side (-Z)
 SLIT_BOSS_WALL = 0.80   # 0.8mm thick wall around slits
 # Slit Y positioning: Option 1 (+1.00mm shift in +Y, 2.00mm offset from inner bottom wall, was 1.00mm)
 SLIT_OFFSET_FROM_WALL = 2.00
 
 # Slit Insert Detent Socket (Press-fit registration in main baseplate floor)
-INSERT_KEY_W_X = 2.00     # Male key width in X on separate insert (0.40mm single perimeter wall around 1.20mm slit)
-INSERT_KEY_LEN_Y = 4.30   # Male key length in Y on separate insert (0.40mm single perimeter wall around 3.50mm slit)
+INSERT_KEY_W_X = 1.80     # Male key width in X
+INSERT_KEY_LEN_Y = 4.00   # Male key length in Y
 INSERT_KEY_HEIGHT = 0.85  # Male key height in Z on separate insert
-INSERT_CLEARANCE = 0.25   # 0.25mm total clearance (0.125mm per side) for smooth, snug press-fit without binding
-SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.25mm female detent socket width in X
-SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 4.55mm female detent socket length in Y
+INSERT_CLEARANCE = 0.40   # 0.40mm total clearance (0.20mm per side) for smooth, snug press-fit without binding
+SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.20mm female detent socket width in X
+SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 4.40mm female detent socket length in Y
 
-INSERT_BODY_W_X = 3.80    # 3.80mm outer shroud body width in X
-INSERT_BODY_LEN_Y = 5.60  # 5.60mm outer shroud body length in Y
+INSERT_BODY_W_X = 2.70    # 2.70mm outer shroud body width in X at base shoulder (fits inside perimeter wall X_max=9.812mm)
+INSERT_BODY_LEN_Y = 4.80  # 4.80mm outer shroud body length in Y at base shoulder
+INSERT_BODY_W_TIP = 2.20  # 2.20mm exact outer end width in X (15.8° sloped draft walls)
+INSERT_BODY_LEN_TIP = 4.20 # 4.20mm outer end length in Y
 
 # Shaft Support Towers (Top-Right Above Hole) - Heavy-Duty Reinforced
 TOWER_HEIGHT = 13.09         # 13.09mm protrusion above face (Total Z_top = 14.09mm, cradle center Z = 12.59mm)
@@ -199,28 +205,31 @@ else:
 # ==============================================================================
 # GEOMETRY GENERATION (Shapely)
 # ==============================================================================
-# 1. Exact Bracket Polygons (Adjusted for Part Tolerance & Zero Tower Interference)
-# - Top hook gap in all brackets enlarged for part tolerance (+0.22mm vertical clearance, +0.20mm pocket depth)
-# - Bracket 3 top-right hook tip pulled back to X=4.150mm (0.10mm clearance left of Left Tower at X=4.250mm)
+# 1. Exact Bracket Polygons (Looser Interior Clearances & Zero Tower Interference)
+# - Spine channel gap widened from 6.856mm to 7.156mm (+0.42mm sliding clearance for 6.74mm brass contact)
+# - Top lead-in throat gap widened to 3.500mm (+0.32mm to +0.35mm lead-in opening)
+# - Bottom step gap widened to 3.800mm (+0.34mm clearance for S-curved terminal leg)
+# - Vertical interior span extended to 12.600mm (Y in [-6.200, +6.400]mm)
+# - Top hook face raised to Y=4.950mm, pocket ceiling raised to Y=6.400mm (1.45mm capture depth)
 bracket_4_raw_pts = [
-    (10.791,  7.171), (7.853,  7.171), (7.853,  4.800), (8.850,  4.800),
-    (8.850,  6.250), (9.707,  6.250), (9.707, -6.051), (8.028, -6.051),
-    (8.028, -7.136), (10.791, -7.136), (10.791,  7.171)
+    (10.791,  7.171), (8.000,  7.171), (8.000,  4.950), (8.900,  4.950),
+    (8.900,  6.400), (9.857,  6.400), (9.857, -6.200), (8.150, -6.200),
+    (8.150, -7.136), (10.791, -7.136), (10.791,  7.171)
 ]
 bracket_3_raw_pts = [
-    (1.766,  7.171), (4.705,  7.171), (4.705,  4.800), (3.708,  4.800),
-    (3.708,  6.250), (2.851,  6.250), (2.851, -6.086), (4.565, -6.086),
-    (4.565, -7.171), (1.766, -7.171), (1.766,  7.171)
+    (1.766,  7.171), (4.500,  7.171), (4.500,  4.950), (3.650,  4.950),
+    (3.650,  6.400), (2.701,  6.400), (2.701, -6.200), (4.350, -6.200),
+    (4.350, -7.171), (1.766, -7.171), (1.766,  7.171)
 ]
 bracket_2_raw_pts = [
-    (-1.766,  7.171), (-4.670,  7.171), (-4.670,  4.800), (-3.650,  4.800),
-    (-3.650,  6.250), (-2.851,  6.250), (-2.851, -6.051), (-4.530, -6.051),
-    (-4.530, -7.136), (-1.766, -7.136), (-1.766,  7.171)
+    (-1.766,  7.171), (-4.500,  7.171), (-4.500,  4.950), (-3.650,  4.950),
+    (-3.650,  6.400), (-2.701,  6.400), (-2.701, -6.200), (-4.350, -6.200),
+    (-4.350, -7.136), (-1.766, -7.136), (-1.766,  7.171)
 ]
 bracket_1_raw_pts = [
-    (-10.791,  7.136), (-7.853,  7.136), (-7.853,  4.800), (-8.850,  4.800),
-    (-8.850,  6.250), (-9.707,  6.250), (-9.707, -6.086), (-7.993, -6.086),
-    (-7.993, -7.171), (-10.791, -7.171), (-10.791,  7.136)
+    (-10.791,  7.136), (-8.000,  7.136), (-8.000,  4.950), (-8.900,  4.950),
+    (-8.900,  6.400), (-9.857,  6.400), (-9.857, -6.200), (-8.150, -6.200),
+    (-8.150, -7.171), (-10.791, -7.171), (-10.791,  7.136)
 ]
 
 def to_mm_poly(raw_pts):
@@ -233,6 +242,34 @@ def create_all_brackets_poly():
     b3 = to_mm_poly(bracket_3_raw_pts)
     b4 = to_mm_poly(bracket_4_raw_pts)
     return unary_union([b1, b2, b3, b4])
+
+def create_bracket_seating_ribs_poly(ext=BRACKET_SEATING_RIB_EXT, thick=BRACKET_SEATING_RIB_THICK, y_stations=BRACKET_SEATING_RIB_Y):
+    """Creates 2D polygons for the 4 sets of 1.15mm tall seating ribs in both bracket pairs.
+    - Left Pair (B1 & B2):
+      - Ribs on B1 extend from spine X = -9.857 to X = -9.857 + ext = -8.057
+      - Ribs on B2 extend from spine X = -2.701 to X = -2.701 - ext = -4.501
+    - Right Pair (B3 & B4):
+      - Ribs on B3 extend from spine X = +2.701 to X = +2.701 + ext = +4.501
+      - Ribs on B4 extend from spine X = +9.857 to X = +9.857 - ext = +8.057
+    - Rib 1 bottom edge sits flush with the bracket hook corner at Y = 4.950mm.
+    """
+    boxes = []
+    b1_spine = -9.857
+    b2_spine = -2.701
+    b3_spine = 2.701
+    b4_spine = 9.857
+    
+    for y_c in y_stations:
+        y_min = y_c - thick / 2.0
+        y_max = y_c + thick / 2.0
+        # Left Pair
+        boxes.append(box(b1_spine, y_min, b1_spine + ext, y_max))
+        boxes.append(box(b2_spine - ext, y_min, b2_spine, y_max))
+        # Right Pair
+        boxes.append(box(b3_spine, y_min, b3_spine + ext, y_max))
+        boxes.append(box(b4_spine - ext, y_min, b4_spine, y_max))
+        
+    return unary_union(boxes)
 
 def create_arch_wall_poly():
     """Creates a clean geometric U-arch wall (1.20mm thick) with 5.00mm interior width at base.
@@ -321,23 +358,28 @@ def get_exact_base_polygon():
     # 2. Outer Solid Body: complete perimeter including 1.88mm inset bottom wall aligned to arch
     outer_body_poly = raw_poly
     
-    # 3. Two Bottom Detent Sockets for Press-Fit Slit Inserts (2.25mm x 4.55mm)
-    # Left slit / detent: Centered on Bracket 1 datum line (X = -7.853mm, shifted 0.60mm inward)
-    # Right slit / detent: Kept at outer alignment (X = +8.453mm) for testing
-    b1_pts = bracket_1_raw_pts
-    b4_pts = bracket_4_raw_pts
-    b1_rightmost_x = max(p[0] for p in b1_pts)  # -7.853mm
-    b4_leftmost_x = min(p[0] for p in b4_pts)   # +7.853mm
+    # 3. Two Bottom Detent Sockets for Press-Fit Slit Inserts (Approach B: Polarized Chamfered Sockets)
+    # Left slit / detent: Centered on Bracket 1 datum line (X = -7.853mm, Y = -13.589mm)
+    # Right slit / detent: Centered on OEM datum line (X = +8.453mm, Y = -13.589mm)
+    cx_left = -7.853
+    cx_right = 8.453
+    cy = -13.589
     
-    slit_y_bot = -18.539 + OUTER_WALL_THICK + SLIT_OFFSET_FROM_WALL  # -15.339mm
-    slit_y_top = slit_y_bot + SLIT_LEN_Y                             # -11.839mm
+    # Left socket (bottom-left chamfer)
+    x_l_min = cx_left - SOCKET_W_X/2
+    y_l_bot = cy - SOCKET_LEN_Y/2
+    chamfer_left_tri = Polygon([[x_l_min + 1.85, y_l_bot - 0.1],
+                                [x_l_min - 0.1, y_l_bot + 1.45],
+                                [x_l_min - 0.1, y_l_bot - 0.1]])
+    detent_left = box(cx_left - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_left + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2).difference(chamfer_left_tri)
     
-    cx_left = b1_rightmost_x                        # -7.853mm (centered on bracket line, shifted 0.60mm inward)
-    cx_right = b4_leftmost_x + SLIT_W_X / 2.0       # +8.453mm (original outer alignment)
-    cy = (slit_y_bot + slit_y_top) / 2.0            # -13.589mm
-    
-    detent_left = box(cx_left - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_left + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2)
-    detent_right = box(cx_right - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_right + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2)
+    # Right socket (bottom-right chamfer following untouched wall curve)
+    x_r_max = cx_right + SOCKET_W_X/2
+    y_r_bot = cy - SOCKET_LEN_Y/2
+    chamfer_right_tri = Polygon([[x_r_max - 1.85, y_r_bot - 0.1],
+                                 [x_r_max + 0.1, y_r_bot + 1.45],
+                                 [x_r_max + 0.1, y_r_bot - 0.1]])
+    detent_right = box(cx_right - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_right + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2).difference(chamfer_right_tri)
     
     # Base plate floor (with all through-holes and detent sockets cut through 1mm floor)
     base_poly = outer_body_poly.difference(unary_union([hole_box, detent_left, detent_right]))
@@ -614,6 +656,7 @@ def build_exact_3d_model():
     mesh_base = extrude_shapely_geom(base_poly, height=BASE_THICK)
     
     # 2. Outer Rim Wall + Arch Wall (Z: BASE_THICK to OUTER_WALL_HEIGHT = 6.77mm)
+    # 100% UNTOUCHED, continuous, solid 1.20mm wall across the entire perimeter!
     inner_poly = outer_body_poly.buffer(-OUTER_WALL_THICK)
     wall_poly = outer_body_poly.difference(inner_poly)
     arch_wall_poly = create_arch_wall_poly()
@@ -640,6 +683,11 @@ def build_exact_3d_model():
     brackets_poly = create_all_brackets_poly()
     mesh_brackets = extrude_shapely_geom(brackets_poly, height=BRACKET_HEIGHT)
     mesh_brackets.apply_translation([0, 0, BASE_THICK])
+    
+    # 4b. Bracket Seating Ribs (Z: BASE_THICK to BASE_THICK + BRACKET_SEATING_RIB_HEIGHT = 1.00 to 2.15mm)
+    seating_ribs_poly = create_bracket_seating_ribs_poly()
+    mesh_seating_ribs = extrude_shapely_geom(seating_ribs_poly, height=BRACKET_SEATING_RIB_HEIGHT)
+    mesh_seating_ribs.apply_translation([0, 0, BASE_THICK])
     
     # 5. Backside Slit Protruding Walls (Z: -SLIT_BOSS_HEIGHT to 0)
     bosses_poly = create_backside_slit_bosses_poly()
@@ -742,7 +790,7 @@ def build_exact_3d_model():
     mesh_clip_supports = build_clip_supports_mesh(base_poly)
     
     # Main part is 100% planar at Z = 0.00mm for direct support-free 3D printing
-    full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_towers_assembly, mesh_curved_feat, mesh_clip_supports] + hook_meshes)
+    full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_seating_ribs, mesh_towers_assembly, mesh_curved_feat, mesh_clip_supports] + hook_meshes)
     return full_part, base_poly
 
 def build_clip_supports_mesh(base_poly):
@@ -786,38 +834,71 @@ def build_clip_supports_mesh(base_poly):
         
     return trimesh.util.concatenate(support_meshes)
 
-def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=SLIT_LEN_Y):
-    """Builds a single 100% monolithic, watertight 3D-printable slit insert part with indexing key.
-    - Flat print bed face at Z = 0
-    - Wall body: 3.80mm x 5.60mm outer, height = 2.47mm (Z: 0 to 2.47mm)
-    - Continuous solid horizontal shoulder at Z = 2.47mm (0.78mm wide contact rim)
-    - Raised indexing registration key: 2.00mm x 4.30mm outer, height = 0.85mm (Z: 2.47 to 3.32mm)
-    - Continuous inner through-hole: 1.20mm x 3.50mm from Z = 0 to 3.32mm (clearance for 0.77x3.10mm part)
+def create_frustum_mesh(w_bot, l_bot, w_top, l_top, z_bot, z_top):
+    """Creates a solid watertight 6-faced rectangular frustum."""
+    v_bot = np.array([
+        [-w_bot/2, -l_bot/2, z_bot],
+        [ w_bot/2, -l_bot/2, z_bot],
+        [ w_bot/2,  l_bot/2, z_bot],
+        [-w_bot/2,  l_bot/2, z_bot],
+    ])
+    v_top = np.array([
+        [-w_top/2, -l_top/2, z_top],
+        [ w_top/2, -l_top/2, z_top],
+        [ w_top/2,  l_top/2, z_top],
+        [-w_top/2,  l_top/2, z_top],
+    ])
+    verts = np.vstack([v_bot, v_top])
+    faces = [
+        [0, 3, 2], [0, 2, 1],       # Bottom face (normal -Z)
+        [4, 5, 6], [4, 6, 7],       # Top face (normal +Z)
+        [0, 1, 5], [0, 5, 4],       # Front face (-Y)
+        [1, 2, 6], [1, 6, 5],       # Right face (+X)
+        [2, 3, 7], [2, 7, 6],       # Back face (+Y)
+        [3, 0, 4], [3, 4, 7],       # Left face (-X)
+    ]
+    return trimesh.Trimesh(vertices=verts, faces=np.array(faces), process=True)
+
+def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=SLIT_LEN_Y, is_right=True):
+    """Builds a single 100% monolithic, watertight 3D-printable slit insert part with polarized chamfered key.
+    - Flat print bed face at Z = 0 (2.20mm wide x 4.20mm long outer end tip).
+    - Sloped wall body: 15.8° draft angle expanding from 2.20x4.20mm at Z=0 to 2.70x4.80mm at shoulder Z=2.47mm.
+    - Continuous solid horizontal shoulder at Z = 2.47mm (flush mating face against baseplate floor).
+    - Raised indexing registration key: 1.80mm x 4.00mm with 45° chamfered corner for 1-way polarized anti-reverse insertion.
+    - Continuous inner through-hole: 1.20mm x 3.40mm from Z = 0 to 3.32mm (generous clearance for 0.77x3.10mm brass blade).
     """
-    outer_body_w = INSERT_BODY_W_X  # 3.80mm
-    outer_body_l = INSERT_BODY_LEN_Y  # 5.60mm
-    outer_key_w = INSERT_KEY_W_X    # 2.00mm
-    outer_key_l = INSERT_KEY_LEN_Y    # 4.30mm
+    z0 = 0.00
+    z1 = SLIT_BOSS_HEIGHT  # 2.47mm
+    z2 = z1 + INSERT_KEY_HEIGHT  # 3.32mm
     
-    outer_body = box(-outer_body_w/2, -outer_body_l/2, outer_body_w/2, outer_body_l/2)
-    inner_hole = box(-inner_hole_w/2, -inner_hole_l/2, inner_hole_w/2, inner_hole_l/2)
+    # 1. Shroud body: Frustum from Z=0 to Z=2.47mm
+    m_body = create_frustum_mesh(INSERT_BODY_W_TIP, INSERT_BODY_LEN_TIP, INSERT_BODY_W_X, INSERT_BODY_LEN_Y, z0, z1)
+    
+    # 2. Polarized Chamfered Key on Top (Z: 2.47 to 3.32mm):
+    key_poly_raw = box(-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2, INSERT_KEY_W_X/2, INSERT_KEY_LEN_Y/2)
+    if is_right:
+        # Chamfer bottom-right corner
+        chamfer_tri = Polygon([[INSERT_KEY_W_X/2 - 1.65, -INSERT_KEY_LEN_Y/2 - 0.05],
+                               [INSERT_KEY_W_X/2 + 0.05, -INSERT_KEY_LEN_Y/2 + 1.25],
+                               [INSERT_KEY_W_X/2 + 0.05, -INSERT_KEY_LEN_Y/2 - 0.05]])
+    else:
+        # Chamfer bottom-left corner
+        chamfer_tri = Polygon([[-INSERT_KEY_W_X/2 + 1.65, -INSERT_KEY_LEN_Y/2 - 0.05],
+                               [-INSERT_KEY_W_X/2 - 0.05, -INSERT_KEY_LEN_Y/2 + 1.25],
+                               [-INSERT_KEY_W_X/2 - 0.05, -INSERT_KEY_LEN_Y/2 - 0.05]])
+    key_poly = key_poly_raw.difference(chamfer_tri)
+    
+    m_key = extrude_shapely_geom(key_poly, height=INSERT_KEY_HEIGHT + 0.05)
+    m_key.apply_translation([0, 0, z1 - 0.05])
+    
+    m_solid = m_body.union(m_key, engine='manifold')
     
     if is_hollow:
-        poly_body = outer_body.difference(inner_hole)
-    else:
-        poly_body = outer_body
-    m_body = extrude_shapely_geom(poly_body, height=SLIT_BOSS_HEIGHT)
-    
-    outer_key = box(-outer_key_w/2, -outer_key_l/2, outer_key_w/2, outer_key_l/2)
-    if is_hollow:
-        poly_key = outer_key.difference(inner_hole)
-    else:
-        poly_key = outer_key
-    m_key = extrude_shapely_geom(poly_key, height=0.85 + 0.10)
-    m_key.apply_translation([0, 0, SLIT_BOSS_HEIGHT - 0.10])
-    
-    m_insert = m_body.union(m_key, engine='manifold')
-    return m_insert
+        slit_poly_raw = box(-inner_hole_w/2, -inner_hole_l/2, inner_hole_w/2, inner_hole_l/2)
+        slit_cutter = extrude_shapely_geom(slit_poly_raw, height=z2 + 2.0)
+        slit_cutter.apply_translation([0, 0, -0.5])
+        return m_solid.difference(slit_cutter, engine='manifold')
+    return m_solid
 
 def build_cooling_tower_mesh(radius=4.0, height=20.50):
     """Builds a sacrificial cylindrical cooling tower (Ø8mm x 20.50mm tall) for 1-click print plate placement.
@@ -827,15 +908,15 @@ def build_cooling_tower_mesh(radius=4.0, height=20.50):
     tower.apply_translation([0, 0, height / 2.0])  # Base flat at Z = 0.00mm
     return tower
 
-def build_indexed_assembly_mesh(main_mesh, insert_mesh, shaft_mesh=None, include_cooling_tower=True):
+def build_indexed_assembly_mesh(main_mesh, insert_mesh=None, shaft_mesh=None, include_cooling_tower=True):
     """Creates the complete 3D build-plate layout with the main part, both separate inserts,
     the shaft rocker mechanism, and a sacrificial cooling tower arranged on the same plane (Z = 0.00mm)
     for 1-click support-free 3D printing."""
-    # Place inserts side by side to the right of the main baseplate on the build plate (Z = 0.00mm)
-    ins_left = insert_mesh.copy()
+    # Build left and right polarized inserts
+    ins_left = build_slit_insert_mesh(is_right=False)
     ins_left.apply_translation([27.50, -5.00, 0.00])
     
-    ins_right = insert_mesh.copy()
+    ins_right = build_slit_insert_mesh(is_right=True)
     ins_right.apply_translation([27.50, 5.00, 0.00])
     
     meshes = [main_mesh, ins_left, ins_right]
@@ -875,6 +956,13 @@ def render_plots(mesh, base_poly):
     for geom in (brackets_poly.geoms if hasattr(brackets_poly, 'geoms') else [brackets_poly]):
         bx, by = geom.exterior.xy
         ax1.plot(bx, by, color='#2ca02c', linewidth=1.5)
+        
+    # Bracket Seating Ribs (1.15mm tall)
+    seating_ribs_poly = create_bracket_seating_ribs_poly()
+    for geom in (seating_ribs_poly.geoms if hasattr(seating_ribs_poly, 'geoms') else [seating_ribs_poly]):
+        sx, sy = geom.exterior.xy
+        ax1.fill(sx, sy, color='#d32f2f', alpha=0.85, label='1.15mm Seating Ribs' if min(sy) < -4.0 else "")
+        ax1.plot(sx, sy, color='#b71c1c', linewidth=1.0)
         
     # Center Curved Feature (10.5mm tall)
     c_feat_poly = create_center_curved_feature_poly()
@@ -970,6 +1058,8 @@ rib_thick           = {RIB_THICK};
 rib_grid_x          = {RIB_GRID_X};
 rib_grid_y          = {RIB_GRID_Y};
 bracket_h           = {BRACKET_HEIGHT};
+bracket_seating_rib_h = {BRACKET_SEATING_RIB_HEIGHT};
+bracket_seating_rib_ext = {BRACKET_SEATING_RIB_EXT};
 clip_height         = {CLIP_HEIGHT};
 clip_gap_depth      = {CLIP_GAP_DEPTH};
 clip_arm_thick      = {CLIP_ARM_THICK};
@@ -997,12 +1087,40 @@ module base_plate_2d() {{
         translate([10.28 - 5.35/2, 10.83 - 4.51/2])
             square([5.35, 4.51]);
             
-        // Left Detent Socket (Centered on X = -7.853mm)
-        translate([{-7.853:.3f} - {SOCKET_W_X}/2, {(-15.339*2 + SLIT_LEN_Y)/2:.3f} - {SOCKET_LEN_Y}/2])
-            square([{SOCKET_W_X}, {SOCKET_LEN_Y}]);
-        // Right Detent Socket (Original outer alignment)
-        translate([{7.853 + SLIT_W_X/2:.3f} - {SOCKET_W_X}/2, {(-15.339*2 + SLIT_LEN_Y)/2:.3f} - {SOCKET_LEN_Y}/2])
-            square([{SOCKET_W_X}, {SOCKET_LEN_Y}]);
+        // Left Polarized Detent Socket (X = -7.853mm, bottom-left chamfer)
+        translate([{-7.853:.3f}, {-13.589:.3f}])
+            polygon(points = [
+                [{-SOCKET_W_X/2:.3f} + 0.85, {-SOCKET_LEN_Y/2:.3f}],
+                [{SOCKET_W_X/2:.3f}, {-SOCKET_LEN_Y/2:.3f}],
+                [{SOCKET_W_X/2:.3f}, {SOCKET_LEN_Y/2:.3f}],
+                [{-SOCKET_W_X/2:.3f}, {SOCKET_LEN_Y/2:.3f}],
+                [{-SOCKET_W_X/2:.3f}, {-SOCKET_LEN_Y/2:.3f} + 0.85]
+            ]);
+            
+        // Right Polarized Detent Socket (X = +8.453mm, bottom-right chamfer)
+        translate([{8.453:.3f}, {-13.589:.3f}])
+            polygon(points = [
+                [{-SOCKET_W_X/2:.3f}, {-SOCKET_LEN_Y/2:.3f}],
+                [{SOCKET_W_X/2:.3f} - 0.85, {-SOCKET_LEN_Y/2:.3f}],
+                [{SOCKET_W_X/2:.3f}, {-SOCKET_LEN_Y/2:.3f} + 0.85],
+                [{SOCKET_W_X/2:.3f}, {SOCKET_LEN_Y/2:.3f}],
+                [{-SOCKET_W_X/2:.3f}, {SOCKET_LEN_Y/2:.3f}]
+            ]);
+    }}
+}}
+
+module bracket_seating_ribs_2d() {{
+    for (y = [{", ".join(f"{y:.2f}" for y in BRACKET_SEATING_RIB_Y)}]) {{
+        // Left Pair
+        translate([{-9.857:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
+            square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
+        translate([{-2.701 - BRACKET_SEATING_RIB_EXT:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
+            square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
+        // Right Pair
+        translate([{2.701:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
+            square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
+        translate([{9.857 - BRACKET_SEATING_RIB_EXT:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
+            square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
     }}
 }}
 
@@ -1012,7 +1130,7 @@ module complete_part() {{
         linear_extrude(height = base_thickness)
             base_plate_2d();
             
-        // Outer Wall with constant thickness following exact non-circular perimeter
+        // 100% UNTOUCHED Outer Wall with constant thickness following exact perimeter
         difference() {{
             linear_extrude(height = outer_wall_height)
                 base_plate_2d();
@@ -1021,6 +1139,11 @@ module complete_part() {{
                     offset(r = -outer_wall_thick)
                         base_plate_2d();
         }}
+        
+        // Bracket Seating Ribs (1.15mm tall on 1.0mm base)
+        translate([0, 0, base_thickness])
+            linear_extrude(height = bracket_seating_rib_h)
+                bracket_seating_ribs_2d();
     }}
 }}
 
