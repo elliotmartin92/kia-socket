@@ -184,9 +184,13 @@ def build_shaft_rocker_mesh(
     poly_cam_arm = Polygon(poly_pts_cam)
     poly_cam = unary_union([flank_collar, poly_cam_arm])
     
-    m_cam_raw = trimesh.creation.extrude_polygon(poly_cam, height=cam_w_x)
+    # Constrain cam tab in X so it stays cleanly within the central hub barrel (X in [5.50, 13.00])
+    # and leaves guaranteed 0.10mm clearance to the Left Tower (X <= 5.40).
+    x_cam_start = max(x_c - hub_w/2.0, cam_x_c - cam_w_x/2.0)
+    actual_cam_w = min(cam_w_x, (x_c + hub_w/2.0) - x_cam_start)
+    m_cam_raw = trimesh.creation.extrude_polygon(poly_cam, height=actual_cam_w)
     v_c = m_cam_raw.vertices.copy()
-    v_cam = np.column_stack([v_c[:, 2] + (cam_x_c - cam_w_x/2.0), v_c[:, 0], v_c[:, 1]])
+    v_cam = np.column_stack([v_c[:, 2] + x_cam_start, v_c[:, 0], v_c[:, 1]])
     mesh_cam = trimesh.Trimesh(vertices=v_cam, faces=m_cam_raw.faces.copy(), process=True)
     
     # Assembly mesh in place

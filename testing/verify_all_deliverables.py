@@ -12,6 +12,8 @@ files = [
     "slit_insert.stl",
     "slit_inserts_pair.stl",
     "cooling_tower.stl",
+    "tower_clamp.stl",
+    "tower_clamps_pair.stl",
     "complete_assembly.stl"
 ]
 

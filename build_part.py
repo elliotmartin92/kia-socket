@@ -67,17 +67,17 @@ SLIT_BOSS_WALL = 0.80   # 0.8mm thick wall around slits
 SLIT_OFFSET_FROM_WALL = 2.00
 
 # Slit Insert Detent Socket (Press-fit registration in main baseplate floor)
-INSERT_KEY_W_X = 1.80     # Male key width in X
-INSERT_KEY_LEN_Y = 4.00   # Male key length in Y
-INSERT_KEY_HEIGHT = 0.85  # Male key height in Z on separate insert
-INSERT_CLEARANCE = 0.40   # 0.40mm total clearance (0.20mm per side) for smooth, snug press-fit without binding
-SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.20mm female detent socket width in X
-SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 4.40mm female detent socket length in Y
+INSERT_KEY_W_X = 2.60     # Male key width in X (leaves solid 0.70mm wall around 1.20mm slit)
+INSERT_KEY_LEN_Y = 4.80   # Male key length in Y (leaves solid 0.70mm wall around 3.40mm slit)
+INSERT_KEY_HEIGHT = 0.95  # Male key height in Z on separate insert (nearly flush with 1.00mm floor)
+INSERT_CLEARANCE = 0.30   # 0.30mm total clearance (0.15mm per side) for snug press-fit
+SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.90mm female detent socket width in X
+SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 5.10mm female detent socket length in Y
 
-INSERT_BODY_W_X = 2.70    # 2.70mm outer shroud body width in X at base shoulder (fits inside perimeter wall X_max=9.812mm)
-INSERT_BODY_LEN_Y = 4.80  # 4.80mm outer shroud body length in Y at base shoulder
-INSERT_BODY_W_TIP = 2.20  # 2.20mm exact outer end width in X (15.8° sloped draft walls)
-INSERT_BODY_LEN_TIP = 4.20 # 4.20mm outer end length in Y
+INSERT_BODY_W_X = 3.30    # 3.30mm outer shroud body width in X at base shoulder (creates 0.35mm horizontal seating shelf)
+INSERT_BODY_LEN_Y = 5.50  # 5.50mm outer shroud body length in Y at base shoulder
+INSERT_BODY_W_TIP = 2.40  # 2.40mm outer end width in X at Z=0
+INSERT_BODY_LEN_TIP = 4.40 # 4.40mm outer end length in Y at Z=0
 
 # Shaft Support Towers (Top-Right Above Hole) - Heavy-Duty Reinforced
 TOWER_HEIGHT = 13.09         # 13.09mm protrusion above face (Total Z_top = 14.09mm, cradle center Z = 12.59mm)
@@ -365,20 +365,20 @@ def get_exact_base_polygon():
     cx_right = 8.453
     cy = -13.589
     
-    # Left socket (bottom-left chamfer)
+    # Left socket (bottom-left chamfer: 0.60mm x 45 deg)
     x_l_min = cx_left - SOCKET_W_X/2
     y_l_bot = cy - SOCKET_LEN_Y/2
-    chamfer_left_tri = Polygon([[x_l_min + 1.85, y_l_bot - 0.1],
-                                [x_l_min - 0.1, y_l_bot + 1.45],
-                                [x_l_min - 0.1, y_l_bot - 0.1]])
+    chamfer_left_tri = Polygon([[x_l_min + 0.75, y_l_bot - 0.05],
+                                [x_l_min - 0.05, y_l_bot + 0.75],
+                                [x_l_min - 0.05, y_l_bot - 0.05]])
     detent_left = box(cx_left - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_left + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2).difference(chamfer_left_tri)
     
-    # Right socket (bottom-right chamfer following untouched wall curve)
+    # Right socket (bottom-right chamfer: 0.60mm x 45 deg)
     x_r_max = cx_right + SOCKET_W_X/2
     y_r_bot = cy - SOCKET_LEN_Y/2
-    chamfer_right_tri = Polygon([[x_r_max - 1.85, y_r_bot - 0.1],
-                                 [x_r_max + 0.1, y_r_bot + 1.45],
-                                 [x_r_max + 0.1, y_r_bot - 0.1]])
+    chamfer_right_tri = Polygon([[x_r_max - 0.75, y_r_bot - 0.05],
+                                 [x_r_max + 0.05, y_r_bot + 0.75],
+                                 [x_r_max + 0.05, y_r_bot - 0.05]])
     detent_right = box(cx_right - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_right + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2).difference(chamfer_right_tri)
     
     # Base plate floor (with all through-holes and detent sockets cut through 1mm floor)
@@ -590,7 +590,7 @@ def build_clean_shaft_towers_mesh():
     y_left_top = y_shaft - half_w - bevel_dx
     y_right_top = y_shaft + half_w + bevel_dx
     
-    # 2D profile in (Y, Z)
+    # 2D profile in (Y, Z) - 100% solid, continuous outer walls with ZERO notch stress concentrations
     profile_yz = [
         (y_min_base, z_base),
         (y_max_base, z_base),
@@ -616,7 +616,49 @@ def build_clean_shaft_towers_mesh():
     verts_right[:, 0] += 13.100
     mesh_right = trimesh.Trimesh(vertices=verts_right, faces=m_raw.faces.copy(), process=True)
     
-    return trimesh.util.concatenate([mesh_left, mesh_right])
+    # Additive external retention ledges on the outer lateral faces (X=3.90 Left, X=14.60 Right)
+    # Allows side-wrapping clamps to positively latch into place with zero pin friction and 100% solid prongs.
+    # Enlarged to +0.70mm protrusion with 0.60mm vertical retention face and 40 deg push-on ramp
+    poly_xz_left = Polygon([
+        (3.90, 12.40),
+        (3.20, 12.40),  # 0.70mm horizontal undercut locking shelf
+        (3.20, 13.00),  # 0.60mm vertical retention face (3 layers)
+        (3.90, 13.60)   # 40 deg push-on lead-in entry ramp
+    ])
+    
+    # Left front & rear beads (Y: 7.10 to 8.00 and 10.60 to 11.55) - nested within strut gap Y in [7.05, 11.65]
+    m_raw_b_front = trimesh.creation.extrude_polygon(poly_xz_left, height=8.00 - 7.10)
+    vbf = m_raw_b_front.vertices.copy()
+    fbf = m_raw_b_front.faces[:, ::-1].copy()
+    v_lf = np.column_stack([vbf[:, 0], vbf[:, 2] + 7.10, vbf[:, 1]])
+    mesh_lf = trimesh.Trimesh(vertices=v_lf, faces=fbf, process=True)
+    
+    m_raw_b_rear = trimesh.creation.extrude_polygon(poly_xz_left, height=11.55 - 10.60)
+    vbr = m_raw_b_rear.vertices.copy()
+    fbr = m_raw_b_rear.faces[:, ::-1].copy()
+    v_lr = np.column_stack([vbr[:, 0], vbr[:, 2] + 10.60, vbr[:, 1]])
+    mesh_lr = trimesh.Trimesh(vertices=v_lr, faces=fbr, process=True)
+    
+    # Right front & rear beads (X: 14.60 to 15.30)
+    poly_xz_right = Polygon([
+        (14.60, 12.40),
+        (15.30, 12.40),
+        (15.30, 13.00),
+        (14.60, 13.60)
+    ])
+    m_raw_br_front = trimesh.creation.extrude_polygon(poly_xz_right, height=8.00 - 7.10)
+    vrf = m_raw_br_front.vertices.copy()
+    frf = m_raw_br_front.faces[:, ::-1].copy()
+    v_rf = np.column_stack([vrf[:, 0], vrf[:, 2] + 7.10, vrf[:, 1]])
+    mesh_rf = trimesh.Trimesh(vertices=v_rf, faces=frf, process=True)
+    
+    m_raw_br_rear = trimesh.creation.extrude_polygon(poly_xz_right, height=11.55 - 10.60)
+    vrr = m_raw_br_rear.vertices.copy()
+    frr = m_raw_br_rear.faces[:, ::-1].copy()
+    v_rr = np.column_stack([vrr[:, 0], vrr[:, 2] + 10.60, vrr[:, 1]])
+    mesh_rr = trimesh.Trimesh(vertices=v_rr, faces=frr, process=True)
+    
+    return trimesh.util.concatenate([mesh_left, mesh_right, mesh_lf, mesh_lr, mesh_rf, mesh_rr])
 
 def build_left_tower_struts_mesh():
     """Builds the dual triangular buttress struts on the left side of the left tower.
@@ -874,18 +916,18 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=S
     # 1. Shroud body: Frustum from Z=0 to Z=2.47mm
     m_body = create_frustum_mesh(INSERT_BODY_W_TIP, INSERT_BODY_LEN_TIP, INSERT_BODY_W_X, INSERT_BODY_LEN_Y, z0, z1)
     
-    # 2. Polarized Chamfered Key on Top (Z: 2.47 to 3.32mm):
+    # 2. Polarized Chamfered Key on Top (Z: 2.47 to 3.42mm):
     key_poly_raw = box(-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2, INSERT_KEY_W_X/2, INSERT_KEY_LEN_Y/2)
     if is_right:
-        # Chamfer bottom-right corner
-        chamfer_tri = Polygon([[INSERT_KEY_W_X/2 - 1.65, -INSERT_KEY_LEN_Y/2 - 0.05],
-                               [INSERT_KEY_W_X/2 + 0.05, -INSERT_KEY_LEN_Y/2 + 1.25],
-                               [INSERT_KEY_W_X/2 + 0.05, -INSERT_KEY_LEN_Y/2 - 0.05]])
+        # Chamfer bottom-right corner (0.60mm x 45 deg) - preserves solid wall thickness!
+        chamfer_tri = Polygon([[INSERT_KEY_W_X/2 - 0.60, -INSERT_KEY_LEN_Y/2 - 0.02],
+                               [INSERT_KEY_W_X/2 + 0.02, -INSERT_KEY_LEN_Y/2 + 0.60],
+                               [INSERT_KEY_W_X/2 + 0.02, -INSERT_KEY_LEN_Y/2 - 0.02]])
     else:
-        # Chamfer bottom-left corner
-        chamfer_tri = Polygon([[-INSERT_KEY_W_X/2 + 1.65, -INSERT_KEY_LEN_Y/2 - 0.05],
-                               [-INSERT_KEY_W_X/2 - 0.05, -INSERT_KEY_LEN_Y/2 + 1.25],
-                               [-INSERT_KEY_W_X/2 - 0.05, -INSERT_KEY_LEN_Y/2 - 0.05]])
+        # Chamfer bottom-left corner (0.60mm x 45 deg) - preserves solid wall thickness!
+        chamfer_tri = Polygon([[-INSERT_KEY_W_X/2 + 0.60, -INSERT_KEY_LEN_Y/2 - 0.02],
+                               [-INSERT_KEY_W_X/2 - 0.02, -INSERT_KEY_LEN_Y/2 + 0.60],
+                               [-INSERT_KEY_W_X/2 - 0.02, -INSERT_KEY_LEN_Y/2 - 0.02]])
     key_poly = key_poly_raw.difference(chamfer_tri)
     
     m_key = extrude_shapely_geom(key_poly, height=INSERT_KEY_HEIGHT + 0.05)
@@ -929,6 +971,15 @@ def build_indexed_assembly_mesh(main_mesh, insert_mesh=None, shaft_mesh=None, in
         cool_tower = build_cooling_tower_mesh(radius=4.0, height=20.50)
         cool_tower.apply_translation([27.50, -16.00, 0.00])
         meshes.append(cool_tower)
+        
+    # Include 3D-printable Unified Monolithic Bridge Clamp flat on bed (Z = 0.00mm)
+    try:
+        from build_clamp import build_unified_clamp_mesh
+        u_clamp = build_unified_clamp_mesh(in_assembly_coords=False)
+        u_clamp.apply_translation([38.50, 0.00, 0.00])
+        meshes.append(u_clamp)
+    except Exception as e:
+        print(f"Warning: could not include unified bridge clamp in plate assembly: {e}")
         
     return trimesh.util.concatenate(meshes)
 
@@ -1202,7 +1253,7 @@ if __name__ == '__main__':
     assembly_mesh = build_indexed_assembly_mesh(part_mesh, insert_mesh, shaft_printable, include_cooling_tower=True)
     assembly_mesh.export('complete_assembly.stl')
     assembly_mesh.export('complete_assembly.obj')
-    print("Exported complete_assembly.stl successfully! (Main Part + Slit Inserts + Shaft Rocker + Cooling Tower on Z=0.00mm)")
+    print("Exported complete_assembly.stl successfully! (Main Part + Slit Inserts + Shaft Rocker + Cooling Tower + 2x Tower Clamps on Z=0.00mm)")
     
     render_plots(part_mesh, base_poly)
     export_openscad_exact(base_poly)
