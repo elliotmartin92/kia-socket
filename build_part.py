@@ -703,7 +703,8 @@ def build_exact_3d_model():
     wall_poly = outer_body_poly.difference(inner_poly)
     arch_wall_poly = create_arch_wall_poly()
     all_walls_poly = unary_union([wall_poly, arch_wall_poly])
-    mesh_wall = extrude_shapely_geom(all_walls_poly, height=OUTER_WALL_HEIGHT)
+    mesh_wall = extrude_shapely_geom(all_walls_poly, height=OUTER_WALL_HEIGHT - BASE_THICK)
+    mesh_wall.apply_translation([0, 0, BASE_THICK])
     
     # 3. Floor Grid Ribbing (Z: BASE_THICK to BASE_THICK + RIB_HEIGHT)
     # Plus bridge ribs to the right of the right tower extruded to OUTER_WALL_HEIGHT (6.77mm)
@@ -913,39 +914,35 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=S
     z1 = SLIT_BOSS_HEIGHT  # 2.47mm
     z2 = z1 + INSERT_KEY_HEIGHT  # 3.32mm
     
-    # 1. Shroud body: Frustum from Z=0 to Z=2.47mm
+    # 1. Shroud body: Frustum from Z=0 to Z=2.47mm (100% monolithic, untouched 4-sided frustum)
     m_body = create_frustum_mesh(INSERT_BODY_W_TIP, INSERT_BODY_LEN_TIP, INSERT_BODY_W_X, INSERT_BODY_LEN_Y, z0, z1)
     
-    # 2. Polarized Chamfered Key on Top (Z: 2.47 to 3.42mm):
+    # 2. Polarized Chamfered Key / Lip on Top (Z: 2.47 to 3.42mm):
+    # Only the lip which inserts into the assembly floor is chamfered for polarized indexing.
     key_poly_raw = box(-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2, INSERT_KEY_W_X/2, INSERT_KEY_LEN_Y/2)
+    d_chamfer = 0.75  # 0.75mm x 45 deg chamfer matching 0.75mm socket chamfer
     if is_right:
-        # Chamfer bottom-right corner (0.60mm x 45 deg) - preserves solid wall thickness!
-        p1 = [INSERT_KEY_W_X/2 - 0.60, -INSERT_KEY_LEN_Y/2]
-        p2 = [INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + 0.60]
+        # Chamfer bottom-right corner of the lip
+        p1 = [INSERT_KEY_W_X/2 - d_chamfer, -INSERT_KEY_LEN_Y/2]
+        p2 = [INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + d_chamfer]
         chamfer_tri = Polygon([[p1[0], p1[1] - 0.02],
                                [p2[0] + 0.02, p2[1]],
                                [p2[0] + 0.02, p1[1] - 0.02]])
-        corner_cutter_poly = Polygon([[-2.0, -5.10], [5.0, 1.90], [5.0, -5.10]])
     else:
-        # Chamfer bottom-left corner (0.60mm x 45 deg) - preserves solid wall thickness!
-        p1 = [-INSERT_KEY_W_X/2 + 0.60, -INSERT_KEY_LEN_Y/2]
-        p2 = [-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + 0.60]
+        # Chamfer bottom-left corner of the lip
+        p1 = [-INSERT_KEY_W_X/2 + d_chamfer, -INSERT_KEY_LEN_Y/2]
+        p2 = [-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + d_chamfer]
         chamfer_tri = Polygon([[p1[0], p1[1] - 0.02],
                                [p2[0] - 0.02, p2[1]],
                                [p2[0] - 0.02, p1[1] - 0.02]])
-        corner_cutter_poly = Polygon([[2.0, -5.10], [-5.0, 1.90], [-5.0, -5.10]])
         
     key_poly = key_poly_raw.difference(chamfer_tri)
     
     m_key = extrude_shapely_geom(key_poly, height=INSERT_KEY_HEIGHT + 0.05)
     m_key.apply_translation([0, 0, z1 - 0.05])
     
+    # Solid insert: body is 100% untouched, only the lip has the polarized chamfer
     m_solid = m_body.union(m_key, engine='manifold')
-    
-    # Trim the corner of the shroud body flush with the key chamfer (removes interfering corner lip)
-    m_corner_cutter = extrude_shapely_geom(corner_cutter_poly, height=z2 + 2.0)
-    m_corner_cutter.apply_translation([0, 0, -0.5])
-    m_solid = m_solid.difference(m_corner_cutter, engine='manifold')
     
     if is_hollow:
         slit_poly_raw = box(-inner_hole_w/2, -inner_hole_l/2, inner_hole_w/2, inner_hole_l/2)
