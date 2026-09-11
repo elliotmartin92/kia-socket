@@ -920,20 +920,32 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=S
     key_poly_raw = box(-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2, INSERT_KEY_W_X/2, INSERT_KEY_LEN_Y/2)
     if is_right:
         # Chamfer bottom-right corner (0.60mm x 45 deg) - preserves solid wall thickness!
-        chamfer_tri = Polygon([[INSERT_KEY_W_X/2 - 0.60, -INSERT_KEY_LEN_Y/2 - 0.02],
-                               [INSERT_KEY_W_X/2 + 0.02, -INSERT_KEY_LEN_Y/2 + 0.60],
-                               [INSERT_KEY_W_X/2 + 0.02, -INSERT_KEY_LEN_Y/2 - 0.02]])
+        p1 = [INSERT_KEY_W_X/2 - 0.60, -INSERT_KEY_LEN_Y/2]
+        p2 = [INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + 0.60]
+        chamfer_tri = Polygon([[p1[0], p1[1] - 0.02],
+                               [p2[0] + 0.02, p2[1]],
+                               [p2[0] + 0.02, p1[1] - 0.02]])
+        corner_cutter_poly = Polygon([[-2.0, -5.10], [5.0, 1.90], [5.0, -5.10]])
     else:
         # Chamfer bottom-left corner (0.60mm x 45 deg) - preserves solid wall thickness!
-        chamfer_tri = Polygon([[-INSERT_KEY_W_X/2 + 0.60, -INSERT_KEY_LEN_Y/2 - 0.02],
-                               [-INSERT_KEY_W_X/2 - 0.02, -INSERT_KEY_LEN_Y/2 + 0.60],
-                               [-INSERT_KEY_W_X/2 - 0.02, -INSERT_KEY_LEN_Y/2 - 0.02]])
+        p1 = [-INSERT_KEY_W_X/2 + 0.60, -INSERT_KEY_LEN_Y/2]
+        p2 = [-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + 0.60]
+        chamfer_tri = Polygon([[p1[0], p1[1] - 0.02],
+                               [p2[0] - 0.02, p2[1]],
+                               [p2[0] - 0.02, p1[1] - 0.02]])
+        corner_cutter_poly = Polygon([[2.0, -5.10], [-5.0, 1.90], [-5.0, -5.10]])
+        
     key_poly = key_poly_raw.difference(chamfer_tri)
     
     m_key = extrude_shapely_geom(key_poly, height=INSERT_KEY_HEIGHT + 0.05)
     m_key.apply_translation([0, 0, z1 - 0.05])
     
     m_solid = m_body.union(m_key, engine='manifold')
+    
+    # Trim the corner of the shroud body flush with the key chamfer (removes interfering corner lip)
+    m_corner_cutter = extrude_shapely_geom(corner_cutter_poly, height=z2 + 2.0)
+    m_corner_cutter.apply_translation([0, 0, -0.5])
+    m_solid = m_solid.difference(m_corner_cutter, engine='manifold')
     
     if is_hollow:
         slit_poly_raw = box(-inner_hole_w/2, -inner_hole_l/2, inner_hole_w/2, inner_hole_l/2)
@@ -1217,12 +1229,12 @@ if __name__ == '__main__':
     insert_mesh.export('slit_insert.obj')
     print("Exported slit_insert.stl and slit_insert.obj successfully!")
     
-    # Export pair of inserts for single build-plate 3D printing
-    ins_1 = insert_mesh.copy()
-    ins_1.apply_translation([-4.0, 0, 0])
-    ins_2 = insert_mesh.copy()
-    ins_2.apply_translation([4.0, 0, 0])
-    pair_mesh = trimesh.util.concatenate([ins_1, ins_2])
+    # Export pair of inserts (Left + Right polarized) for single build-plate 3D printing
+    ins_left_print = build_slit_insert_mesh(is_right=False)
+    ins_left_print.apply_translation([-4.0, 0, 0])
+    ins_right_print = build_slit_insert_mesh(is_right=True)
+    ins_right_print.apply_translation([4.0, 0, 0])
+    pair_mesh = trimesh.util.concatenate([ins_left_print, ins_right_print])
     pair_mesh.export('slit_inserts_pair.stl')
     print("Exported slit_inserts_pair.stl successfully!")
     
