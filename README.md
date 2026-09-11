@@ -280,17 +280,23 @@ py -3 generate_labeled_preview.py
   - **Direct Solid $2.80\text{ mm}$ Cantilever Beam**: Eliminates arched sections in favor of a straight, rigid structural beam sloping directly from the $\varnothing 4.20\text{ mm}$ hub barrel down into the $5.00\text{ mm}$ wide internal belly cavity ($Z \in [5.0, 7.5]\text{ mm}$).
   - **Kinematic Safety Interlock**: Contact initializes as the plug blade tip emerges from the $Z = 9.40\text{ mm}$ pinch throat at **$Z_{\text{tip}} = 7.20\text{ mm}$**, fully triggering the PCB tactile switch at **$Z_{\text{tip}} = 6.40\text{ mm}$ ($\theta = 6.15^\circ$)**.
 
-### Version 9 (v9)
-- **Side-Wrapping Anti-Spreading Tower Prong Clamps (`tower_clamp_left.stl`, `tower_clamp_right.stl`)**:
+### Version 9 (v9) & Reinforced Clamps
+- **Side-Wrapping Anti-Spreading Tower Prong Clamps (`tower_clamp_left.stl`, `tower_clamp_right.stl`, `tower_clamp_bridge.stl`)**:
   - **Root Cause Remediation**: Permanently eliminates the primary OEM failure mode where the retention cradle prongs flex and spread apart in $Y$ under repeated plug insertion loads and EV cabin summer heat, allowing the shaft to unseat in $+Z$ and the interlock switch to fail.
   - **100% Solid Un-Notched Tower Prongs**: Zero cuts, notches, or grooves are added to the tower prongs. The prongs retain their full $1.50\text{ mm}$ wall thickness and monolithic structural integrity with zero notch stress concentrations at the root.
-  - **Additive External Side Retention Ledges**: Adds a subtle horizontal retention bead ($+0.30\text{ mm}$ in $X$, $Z \in [12.60, 13.15]\text{ mm}$) to the *outer lateral faces* of the towers ($X = 3.90\text{ mm}$ Left, $X = 14.60\text{ mm}$ Right). Because it is an additive outward bump on the lateral face, it adds material rather than thinning the prongs in their bending direction.
-  - **Positive Lateral Undercut Snap-Lock**: The clamp features an outer side cheek ($0.90\text{ mm}$ thick) that extends down the outer lateral face, with dual inward snap hooks at $Z = 12.60\text{ mm}$ featuring a $45^\circ$ push-on lead-in chamfer. Once pushed down, it snaps under the additive side ledge with an audible, positive click, making it **physically impossible to fall off or vibrate loose**.
-  - **Zero Axle Pin Friction (Clearance Arch)**: The outer side cheek incorporates a generous clearance arch of radius $R = 1.70\text{ mm}$ centered over the $\varnothing 2.80\text{ mm}$ axle pin, maintaining **$\ge 0.30\text{ mm}$ radial air gap** all the way around the pin. The pin rotates with complete, untouched freedom and **zero extra friction**.
-  - **Tensile Hoop Constraint**: Features an inverted U-saddle clamp ($1.15\text{ mm}$ thick solid legs, $0.90\text{ mm}$ bridge roof) that clasps the outer front ($Y \le 6.55\text{ mm}$) and rear ($Y \ge 12.18\text{ mm}$) faces of the tower prongs in pure tension, physically preventing outward prong spreading.
-  - **Positive Pin Hold-Down**: Includes a central stabilizing keel descending to $Z = 14.02\text{ mm}$ directly into the throat funnel, maintaining a $0.03\text{ mm}$ running gap above the $\varnothing 2.80\text{ mm}$ pivot pin inside the cradle to completely stop the pin from lifting or riding up out of the cradle.
-  - **1-Click Support-Free Printing**: Pre-oriented flat on print bed with top bridge roof down ($Z = 0.00\text{ mm}$). Zero overhangs, vertical walls, 100% support-free 3D printing in $\sim 2.5\text{ minutes}$.
-  - **Complete Assembly Build Plate**: `complete_assembly.stl` includes a pair of pre-arranged tower clamps (1 Left, 1 Right) at $X = 38.50\text{ mm}, Y = \pm 6.00\text{ mm}$ on $Z = 0.00\text{ mm}$ for 1-click printing.
+  - **Additive External Side Retention Ledges**: Adds a horizontal retention bead ($+0.70\text{ mm}$ in $X$, $Z \in [12.40, 13.60]\text{ mm}$) to the *outer lateral faces* of the towers ($X = 3.90\text{ mm}$ Left, $X = 14.60\text{ mm}$ Right). Because it is an additive outward bump on the lateral face, it adds material rather than thinning the prongs in their bending direction.
+  - **Reinforced Heavy-Duty Anti-Flex Architecture**:
+    - **Thickened Bridge Roof**: Increased from $0.90\text{ mm}$ to **$1.60\text{ mm}$** ($+78\%$ thickness, $>5.6\times$ higher out-of-plane bending stiffness).
+    - **Reinforced Outer Cheeks**: Increased from $1.00\text{ mm}$ to **$1.60\text{ mm}$** (4 solid perimeters on a 0.4mm nozzle).
+    - **Dual-Layer Continuous Backplate**: Outer $0.80\text{ mm}$ cheek is a 100% continuous solid plate spanning the entire $4.45\text{ mm}$ length in $Y$, backed by an inner $0.80\text{ mm}$ arched plate, completely eliminating the thin-wall hinge flexure.
+    - **Thickened U-Saddle Tension Walls**: Increased from $1.15\text{ mm}$ to **$1.40\text{ mm}$** for extreme hoop constraint.
+    - **Precision Snug Fit Across Prongs**: $5.67\text{ mm}$ inner span hugging the $5.63\text{ mm}$ tower top span with zero rattle.
+  - **Positive Lateral Undercut Snap-Lock**: Dual inward snap hooks at $Z = 12.35\text{ mm}$ ($0.05\text{ mm}$ clearance past the $Z = 12.40\text{ mm}$ tower ledge) featuring a $35^\circ$ push-on lead-in chamfer. Once pushed down, it snaps under the additive side ledge with an audible, positive mechanical click.
+  - **Zero Axle Pin Friction**: Pin tips end at $X = 3.45\text{ mm}$ (Left) and $X = 15.05\text{ mm}$ (Right), maintaining $\ge 0.25\text{ mm}$ clear air gap from the side cheeks. The pin rotates with complete, untouched freedom and **zero extra friction**.
+  - **Positive Pin Hold-Down Keel**: Includes a central stabilizing keel descending to $Z = 14.02\text{ mm}$ directly into the throat funnel, maintaining a $0.07\text{ mm}$ running gap above the $\varnothing 2.80\text{ mm}$ pivot pin inside the cradle to stop the pin from lifting out of the cradle.
+  - **Unified Monolithic Bridge Gantry (`tower_clamp_bridge.stl`)**: Features a heavy-duty $1.50\text{ mm} \times 2.19\text{ mm}$ rear tie bar linking Left and Right towers across a rigid monolithic gantry frame.
+  - **1-Click Support-Free Printing**: Pre-oriented flat on print bed with top bridge roof down ($Z = 0.00\text{ mm}$). Zero overhangs, vertical walls, 100% support-free 3D printing.
+  - **Complete Assembly Build Plate**: `complete_assembly.stl` includes the unified monolithic bridge clamp pre-positioned on the $Z = 0.00\text{ mm}$ print plane alongside the baseplate, inserts, rocker, and cooling tower.
 
 ---
 

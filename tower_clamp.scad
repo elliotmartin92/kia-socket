@@ -5,10 +5,10 @@ $fn = 64;
 
 // Global parameters
 z_top = 14.09;
-roof_thick = 0.9;
-wall_thick = 1.15;
-side_thick = 1.0;
-pin_clearance_r = 1.7;
+roof_thick = 1.6;
+wall_thick = 1.4;
+side_thick = 1.6;
+pin_clearance_r = 1.85;
 y_axle = 9.279;
 z_axle = 12.59;
 
