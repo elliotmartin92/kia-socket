@@ -194,7 +194,7 @@ ax1.annotate('Bracket Pair 3 & 4\n(Height: 4.60mm)', xy=(7.25, -0.5), xytext=(17
              fontsize=8, fontweight='bold', color='#2e7d32', bbox=dict(boxstyle='round,pad=0.2', fc='#e8f5e9', ec='#2e7d32'))
 
 # Center Curved Feature & Dividing Rib
-ax1.annotate('Center Curved Feature (10.50mm H)\n+ Internal Dividing Rib (0.6mm)', xy=(6.28, -3.0), xytext=(-9.0, -5.5),
+ax1.annotate('Center Curved Feature (10.50mm H)\nSolid D-Core & Flat Base', xy=(6.28, -3.0), xytext=(-9.0, -5.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#6a1b9a'),
              fontsize=8, fontweight='bold', color='#6a1b9a', bbox=dict(boxstyle='round,pad=0.2', fc='#f3e5f5', ec='#8e24aa'))
 
@@ -279,7 +279,7 @@ add_3d_callout(ax2, [-7.25, 0.0, 4.60], [-28.0, -12.0, 14.0], "Guide Brackets 1 
 add_3d_callout(ax2, [7.25, 0.0, 4.60], [28.0, -12.0, 14.0], "Guide Brackets 3 & 4\n(4.60mm H)", color='#2e7d32', bgcolor='#e8f5e9')
 add_3d_callout(ax2, [-21.075, 0.0, 3.5], [-30.0, -2.0, -2.0], "Left Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
 add_3d_callout(ax2, [20.200, 0.0, 3.5], [30.0, -2.0, -2.0], "Right Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
-add_3d_callout(ax2, [6.28, -3.2, 10.50], [16.0, 0.0, 20.0], "Center Curved Feature\n(10.50mm H + Rib)", color='#6a1b9a', bgcolor='#f3e5f5')
+add_3d_callout(ax2, [6.28, -3.2, 10.50], [16.0, 0.0, 20.0], "Center Curved Feature\n(10.50mm H Solid D-Core)", color='#6a1b9a', bgcolor='#f3e5f5')
 add_3d_callout(ax2, [0, -8.7, 6.77], [0.0, -34.0, -6.0], "Bottom Central U-Arch\n(7.95mm H, 5mm Inner W)", color='#0d47a1', bgcolor='white')
 add_3d_callout(ax2, [-8.38, -13.66, 0.0], [-17.0, -28.0, -6.0], "Left Slit Detent Socket\n(Press-Fit Insert)", color='#7b1fa2', bgcolor='#f3e5f5')
 add_3d_callout(ax2, [8.38, -13.66, 0.0], [17.0, -28.0, -6.0], "Right Slit Detent Socket\n(Press-Fit Insert)", color='#7b1fa2', bgcolor='#f3e5f5')

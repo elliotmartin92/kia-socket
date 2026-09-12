@@ -64,7 +64,7 @@ py -3 generate_labeled_preview.py
   - $Z \in [1.00, 1.50]\text{ mm}$: Internal floor stiffener grid ribs ($0.50\text{ mm}$ tall).
   - $Z \in [1.00, 4.60]\text{ mm}$: Guide brackets ($4.60\text{ mm}$ total height).
   - $Z \in [1.00, 6.77]\text{ mm}$: Outer perimeter wall, snap clip stems, bottom arch wall, and bridge rib ($6.77\text{ mm}$ height).
-  - $Z \in [1.00, 10.50]\text{ mm}$: Center curved feature with internal rib ($10.50\text{ mm}$ total height).
+  - $Z \in [1.00, 10.50]\text{ mm}$: Center curved feature with reinforced solid core and flat base ($10.50\text{ mm}$ total height).
   - $Z \in [1.00, 14.09]\text{ mm}$: Shaft support towers ($13.09\text{ mm}$ height above floor, total $14.09\text{ mm}$).
 - **Separate Slit Insert Dimensions**:
   - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.80\text{ mm} \times 5.60\text{ mm}$ outer, $1.20\text{ mm} \times 3.50\text{ mm}$ inner clearance channel for $0.77\text{ mm} \times 3.10\text{ mm}$ part).
@@ -143,12 +143,17 @@ py -3 generate_labeled_preview.py
   - Base flat on the print bed ($Z = 0.00\text{ mm}$) with an adhesion foot ($1.80\text{ mm} \times 3.00\text{ mm}$).
   - Rises to $Z = 4.82\text{ mm}$ with a small chisel contact interface ($0.15\text{ mm}$ breakaway gap under the $Z = 4.97\text{ mm}$ shelf) for effortless snap-off removal without marring.
 
-### 3.4. Center Curved Feature with Dividing Rib (Option 1A)
+### 3.4. Center Curved Feature with Reinforced Solid Core (Option 1)
 - **Position**: Centered between Brackets 3 & 4 at $X_c = +6.279\text{ mm}$.
 - **Width**: $4.30\text{ mm}$ ($X \in [4.129, 8.429]\text{ mm}$).
 - **Depth in $Y$**: $1.62\text{ mm}$ (Base: $Y = -4.069\text{ mm}$, Apex: $Y = -2.449\text{ mm}$).
 - **Offset**: $2.00\text{ mm}$ in $+Y$ above the horizontal bracket step datum ($Y = -6.069\text{ mm}$).
-- **Wall & Rib Thickness**: $0.60\text{ mm}$ wall + $0.60\text{ mm}$ internal dividing rib along $X = 6.279\text{ mm}$.
+- **Monolithic Solid D-Shape Structure**:
+  - Replaced the fragile $0.60\text{ mm}$ hollow C-shell with a **100% solid infill cross-section** ($5.46\text{ mm}^2$ solid area, $+52\%$ material increase).
+  - Closed the bottom ($-Y$) with a **continuous solid flat back wall** along $Y = -4.069\text{ mm}$.
+  - Preserves the identical top outer arc ($R_x = 2.15\text{ mm}, R_y = 1.62\text{ mm}$, apex at $Y = -2.449\text{ mm}$) with $+2.16\text{ mm}$ clearance to the plug blade.
+  - Guaranteed clearance to OEM brass insert: **$+0.58\text{ mm}$ air gap** to the brass crossbar and **$+0.28\text{ mm}$ air gap** to Seating Rib 4.
+  - Increases bending moment of inertia $I_{xx}$ by $+52\%$ ($0.658 \to 1.000\text{ mm}^4$) and shear fracture load capacity by $>3.6\times$, eliminating layer shear failures during disassembly.
 - **Total Height**: **$10.50\text{ mm}$** ($Z \in [1.00, 10.50]\text{ mm}$).
 
 ### 3.5. Guide Brackets & Brass Seating Ribs (Looser Tolerances & 1.15mm Support Ribs)

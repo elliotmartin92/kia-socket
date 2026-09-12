@@ -514,29 +514,27 @@ def create_backside_slit_bosses_poly():
     return unary_union([boss_left, boss_right])
 
 def create_center_curved_feature_poly():
-    """Returns the 2D polygon of the 10.5mm tall curved feature between Brackets 3 & 4.
+    """Returns the 2D polygon of the 10.5mm tall reinforced curved feature between Brackets 3 & 4.
+    - Solid D-shape cross-section (100% solid core): eliminates fragile 0.60mm hollow shell failure.
     - Width: 4.30mm (centered at X = 6.279mm -> X in [4.129, 8.429]mm).
-    - Depth in Y: 1.62mm (Base at Y = -4.069mm, Apex at Y = -2.449mm, 2mm above bracket step).
-    - Wall thickness: 0.60mm.
-    - Central internal rib: 0.60mm thick along X = 6.279mm."""
+    - Depth in Y: 1.62mm (Base at Y = -4.069mm, Apex at Y = -2.449mm, 2.00mm above bracket step datum).
+    - Top arc: Preserves exact outer ellipse curvature (contacts/guides blade on insertion).
+    - Bottom base: Flat solid wall at Y = -4.069mm (maintains +0.58mm gap to brass insert, +0.28mm to Rib 4).
+    """
     cx = 6.279
     w_x = 4.30
     h_y = 1.62
     rx = w_x / 2.0
     ry = h_y
-    wall_t = 0.60
-    rib_t = 0.60
     
     datum_y = -17.339 + 11.27  # -6.069 mm
     base_y = datum_y + 2.00    # -4.069 mm
     
     angles = np.linspace(np.pi, 0, 32)
     out_arc = [(cx + rx * np.cos(a), base_y + ry * np.sin(a)) for a in angles]
-    in_arc = [(cx + (rx - wall_t) * np.cos(a), base_y + (ry - wall_t) * np.sin(a)) for a in angles]
     
-    wall_poly = Polygon(out_arc + list(reversed(in_arc)))
-    rib_poly = box(cx - rib_t/2.0, base_y, cx + rib_t/2.0, base_y + ry)
-    return unary_union([wall_poly, rib_poly])
+    # 100% Solid D-shape: outer arc at +Y closed by a continuous flat solid back wall at Y = base_y
+    return Polygon(out_arc + [(cx - rx, base_y)])
 
 def create_shaft_support_towers_poly():
     """Returns 2D bounding boxes for the two reinforced shaft support towers and left tower buttress struts."""
