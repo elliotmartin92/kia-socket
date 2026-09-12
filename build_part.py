@@ -53,7 +53,7 @@ CLIP_GAP_DEPTH = 3.70     # Depth of flex slot in wall
 CLIP_ARM_THICK = 1.20     # Exactly matches OUTER_WALL_THICK (1.20mm) for flush interior alignment
 CLIP_ARM_WIDTH = 4.20     # 4.20mm wide snap beam (leaves 0.80mm total margin / 0.40mm per side for 5.0mm mating holes)
 CLIP_SLOT_CLEARANCE = 0.35 # 0.35mm minimal printable gap for 0.4mm nozzle (prevents fusion while minimizing air gap)
-CLIP_HOOK_DEPTH = 2.59    # 2.59mm radial overhang from wall (+1.00mm extension)
+CLIP_HOOK_DEPTH = 2.49    # 2.49mm radial overhang from wall (refined -0.10mm from 2.59mm to eliminate protrusion interference)
 CLIP_HOOK_HEIGHT = 1.80
 # 4 Clip positions: Top clips (45°, 135°) halfway to top tab; Bottom clips (211.3°, 327.5°) 4.42mm from ears, 8.47mm from bottom tabs
 CLIP_ANGLES = [45.0, 135.0, 211.3, 327.5]
@@ -835,13 +835,23 @@ def build_exact_3d_model():
     return full_part, base_poly
 
 def build_clip_supports_mesh(base_poly):
-    """Builds very small vertical sacrificial support towers directly under the 4 snap clip hook overhangs.
-    - Base sits flat on the print bed at Z = 0.00mm with a small foot for bed adhesion.
-    - Rises vertically to Z = 4.82mm (0.15mm breakaway gap below the Z = 4.97mm horizontal hook shelf).
-    - Features a small breakaway chisel contact interface for effortless snap-off removal with zero marring.
+    """Builds twin-prong sacrificial breakaway support towers directly under the 4 snap clip hook overhangs.
+    - Base sits flat on the print bed at Z = 0.00mm with a wide foot (1.80mm radial x 3.80mm tangential) for bed adhesion.
+    - Solid lower trunk (1.20mm radial x 3.40mm tangential) from Z = 0.40mm to Z = 3.20mm prevents wobble.
+    - Central prying arch window (1.80mm wide open relief from Z = 3.20mm to 4.82mm) allows effortless tool leverage.
+    - Twin vertical prongs at lateral edges (Y = +/- 1.40mm) rise to Z = 4.82mm, directly supporting the shelf corners.
+    - Twin chisel breakaway contact tips (each 0.50mm radial x 0.90mm tangential x 0.12mm tall) reach Z = 4.94mm.
+    - Total contact area = 2 * (0.50 * 0.90) = 0.90 mm² (identically matches previous contact area, but eliminates edge droop).
     """
     stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT  # 4.97mm
     support_top_z = stem_h - 0.15           # 4.82mm (0.15mm breakaway gap)
+    
+    y_prongs = [-1.40, 1.40]
+    prong_w_tang = 0.90
+    prong_t_rad = 1.10
+    
+    # Radial position: 60% of hook depth (reduces outer cantilever to ~0.75mm while maintaining air gap to inner wall)
+    r_supp_radial = CLIP_HOOK_DEPTH * 0.60
     
     support_meshes = []
     for angle_deg in CLIP_ANGLES:
@@ -850,27 +860,41 @@ def build_clip_supports_mesh(base_poly):
         r_wall = np.linalg.norm(p)
         n_dir = p / r_wall
         
-        # Position support tower under the center of the outer hook shelf
-        r_supp = r_wall + CLIP_HOOK_DEPTH * 0.50
-        pos_center = n_dir * r_supp
-        
-        # 1. Main vertical support pillar (1.20mm radial x 2.20mm tangential x support_top_z tall)
-        pillar = trimesh.creation.box([1.20, 2.20, support_top_z])
+        pos_center = n_dir * (r_wall + r_supp_radial)
         rot = trimesh.transformations.rotation_matrix(rad, [0, 0, 1])
-        pillar.apply_transform(rot)
-        pillar.apply_translation([pos_center[0], pos_center[1], support_top_z / 2.0])
         
-        # 2. Bed adhesion foot (0.40mm tall, 1.80mm x 3.00mm)
-        foot = trimesh.creation.box([1.80, 3.00, 0.40])
+        # 1. Wide bed adhesion foot (Z in [0, 0.40]mm, 1.80mm radial x 3.80mm tangential)
+        foot = trimesh.creation.box([1.80, 3.80, 0.40])
         foot.apply_transform(rot)
         foot.apply_translation([pos_center[0], pos_center[1], 0.20])
         
-        # 3. Chisel breakaway contact tip (0.12mm tall, reaches Z = 4.94mm)
-        tip = trimesh.creation.box([0.50, 1.80, 0.12])
-        tip.apply_transform(rot)
-        tip.apply_translation([pos_center[0], pos_center[1], support_top_z + 0.06])
+        # 2. Lower solid shared trunk (Z in [0.40, 3.20]mm -> height 2.80mm, 1.20mm radial x 3.40mm tangential)
+        z_trunk_h = 2.80
+        trunk = trimesh.creation.box([1.20, 3.40, z_trunk_h])
+        trunk.apply_transform(rot)
+        trunk.apply_translation([pos_center[0], pos_center[1], 0.40 + z_trunk_h / 2.0])
         
-        supp_combined = trimesh.util.concatenate([pillar, foot, tip])
+        # 3. Twin vertical prongs (Z in [3.20, 4.82]mm -> height 1.62mm, at Y = +/- 1.40mm)
+        z_prong_h = support_top_z - 3.20
+        prong_parts = []
+        for yp in y_prongs:
+            prong = trimesh.creation.box([prong_t_rad, prong_w_tang, z_prong_h])
+            prong.apply_translation([0, yp, 0])
+            prong.apply_transform(rot)
+            prong.apply_translation([pos_center[0], pos_center[1], 3.20 + z_prong_h / 2.0])
+            prong_parts.append(prong)
+            
+        # 4. Twin breakaway chisel contact tips (Z in [4.82, 4.94]mm -> height 0.12mm)
+        # Each tip: 0.50mm radial x 0.90mm tangential -> Area = 2 * 0.45 = 0.90 mm²
+        tip_parts = []
+        for yp in y_prongs:
+            tip = trimesh.creation.box([0.50, prong_w_tang, 0.12])
+            tip.apply_translation([0, yp, 0])
+            tip.apply_transform(rot)
+            tip.apply_translation([pos_center[0], pos_center[1], support_top_z + 0.06])
+            tip_parts.append(tip)
+            
+        supp_combined = trimesh.util.concatenate([foot, trunk] + prong_parts + tip_parts)
         support_meshes.append(supp_combined)
         
     return trimesh.util.concatenate(support_meshes)

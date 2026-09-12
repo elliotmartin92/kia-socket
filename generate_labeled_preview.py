@@ -134,12 +134,12 @@ ax1.annotate('Top Tab (Centered)\n8.20mm W (fits 8.33mm gap)', xy=(0, 20.2), xyt
              fontsize=8.5, fontweight='bold', color='#1565c0', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1565c0'))
 
 # Snap Clip 45°
-ax1.annotate('Snap Clip (45.0°)\n4.20mm Beam, 1.59mm Hook', xy=(clip_pts[45.0][0], clip_pts[45.0][1]), xytext=(19.0, 16.5),
+ax1.annotate('Snap Clip (45.0°)\n4.20mm Beam, 2.49mm Hook', xy=(clip_pts[45.0][0], clip_pts[45.0][1]), xytext=(19.0, 16.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 135°
-ax1.annotate('Snap Clip (135.0°)\n4.20mm Beam, 1.59mm Hook', xy=(clip_pts[135.0][0], clip_pts[135.0][1]), xytext=(-30.5, 16.5),
+ax1.annotate('Snap Clip (135.0°)\n4.20mm Beam, 2.49mm Hook', xy=(clip_pts[135.0][0], clip_pts[135.0][1]), xytext=(-30.5, 16.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 

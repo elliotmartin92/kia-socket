@@ -135,13 +135,13 @@ py -3 generate_labeled_preview.py
 - **Beam Dimensions**: **$4.20\text{ mm}$ wide curved beam** (leaves $0.80\text{ mm}$ total margin / $0.40\text{ mm}$ per side for smooth insertion into $5.00\text{ mm}$ mating holes).
 - **Flex Isolation**: Two $0.35\text{ mm}$ vertical through-slots (minimal printable clearance for a $0.4\text{ mm}$ nozzle) from $Z = 3.07\text{ mm}$ to $Z = 6.77\text{ mm}$ isolating the cantilever beam.
 - **Hook Geometry ($Z \in [4.97, 6.77\text{ mm}$)**:
-  - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting **$+2.59\text{ mm}$ radially outward** (+1.00mm extension for deeper engagement into mating female enclosure slots).
+  - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting **$+2.49\text{ mm}$ radially outward** (refined $-0.10\text{ mm}$ from $2.59\text{ mm}$ to eliminate outer housing protrusion interference while maintaining deep engagement).
   - Sloped lead-in ramp tapering up to top outer wall apex at $Z = 6.77\text{ mm}$.
   - Inner wall face: 100% flush, smooth, continuous cylinder.
-- **Built-In Sacrificial Support Towers (4x Breakaway Mini-Pillars)**:
-  - Small vertical support tower ($1.20\text{ mm} \times 2.20\text{ mm}$) directly centered under the $2.59\text{ mm}$ horizontal overhang shelf of each clip.
-  - Base flat on the print bed ($Z = 0.00\text{ mm}$) with an adhesion foot ($1.80\text{ mm} \times 3.00\text{ mm}$).
-  - Rises to $Z = 4.82\text{ mm}$ with a small chisel contact interface ($0.15\text{ mm}$ breakaway gap under the $Z = 4.97\text{ mm}$ shelf) for effortless snap-off removal without marring.
+- **Built-In Sacrificial Support Towers (Twin-Prong Breakaway Fork Supports)**:
+  - Sturdy base sitting flat on print bed ($Z = 0.00\text{ mm}$) with a wide adhesion foot ($1.80\text{ mm} \times 3.80\text{ mm}$) and solid lower trunk ($1.20\text{ mm} \times 3.40\text{ mm}$) up to $Z = 3.20\text{ mm}$.
+  - **Twin Lateral Prongs & Prying Arch**: Splits into two vertical prongs centered at $Y = \pm 1.40\text{ mm}$ spanning across a $1.80\text{ mm}$ wide central prying arch window ($Z \in [3.20, 4.82]\text{ mm}$), directly supporting the outer lateral shelf corners ($0.25\text{ mm}$ margin to edges).
+  - **Equal Contact Area ($0.90\text{ mm}^2$)**: Twin chisel breakaway tips ($2 \times [0.50\text{ mm} \times 0.90\text{ mm}] = 0.90\text{ mm}^2$, matching original area) at $Z = 4.94\text{ mm}$ ($0.03\text{ mm}$ micro-gap under the $Z = 4.97\text{ mm}$ shelf). Completely prevents edge droop while allowing effortless tool prying with zero marring.
 
 ### 3.4. Center Curved Feature with Reinforced Solid Core (Option 1)
 - **Position**: Centered between Brackets 3 & 4 at $X_c = +6.279\text{ mm}$.
@@ -302,6 +302,11 @@ py -3 generate_labeled_preview.py
   - **Unified Monolithic Bridge Gantry (`tower_clamp_bridge.stl`)**: Features a heavy-duty $1.50\text{ mm} \times 2.19\text{ mm}$ rear tie bar linking Left and Right towers across a rigid monolithic gantry frame.
   - **1-Click Support-Free Printing**: Pre-oriented flat on print bed with top bridge roof down ($Z = 0.00\text{ mm}$). Zero overhangs, vertical walls, 100% support-free 3D printing.
   - **Complete Assembly Build Plate**: `complete_assembly.stl` includes the unified monolithic bridge clamp pre-positioned on the $Z = 0.00\text{ mm}$ print plane alongside the baseplate, inserts, rocker, and cooling tower.
+
+- **Refined Snap Clip Radial Protrusion & Twin-Prong Breakaway Fork Supports**:
+  - **-0.10mm Protrusion Calibration**: Refined `CLIP_HOOK_DEPTH` from $2.59\text{ mm}$ to **$2.49\text{ mm}$**, perfectly eliminating slight outer housing interference during enclosure insertion while retaining strong positive latch engagement.
+  - **Twin-Prong Breakaway Fork Support**: Replaced the center chisel support pillar with a bifurcated twin-prong support tower with a $1.80\text{ mm}$ central prying arch window.
+  - **Equal Contact Area ($0.90\text{ mm}^2$) & Edge Support**: Two discrete $0.50\text{ mm} \times 0.90\text{ mm}$ chisel tips directly support the lateral outer shelf edges ($0.25\text{ mm}$ from corners), eliminating overhang droop while matching the original total contact area ($0.90\text{ mm}^2$) and providing an open window for effortless snap-off removal.
 
 ---
 
