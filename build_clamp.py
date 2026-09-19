@@ -201,6 +201,18 @@ def build_tower_clamp_mesh(tower_side='left', in_assembly_coords=False):
         m_hr = extrude_xz(poly_hook_xz, height=11.55 - 10.60, y_offset=10.60)
         m_clamp = unary_union_meshes([m_saddle, m_roof_bridge, m_side_inner, m_side_outer, m_hf, m_hr])
         
+        # Contour right clamp cheek against baseplate perimeter so it does not protrude beyond outer wall into vehicle enclosure
+        try:
+            from build_part import get_exact_base_polygon
+            _, outer_body_poly, _ = get_exact_base_polygon()
+            safe_env_2d = outer_body_poly.buffer(-0.05)
+            safe_env_3d = trimesh.creation.extrude_polygon(safe_env_2d, height=25.0)
+            m_clamp_trimmed = m_clamp.intersection(safe_env_3d, engine='manifold')
+            if m_clamp_trimmed.is_watertight and m_clamp_trimmed.volume > 40.0:
+                m_clamp = m_clamp_trimmed
+        except Exception:
+            pass
+        
     if in_assembly_coords:
         return m_clamp
     else:

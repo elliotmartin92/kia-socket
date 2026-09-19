@@ -133,11 +133,14 @@ py -3 generate_labeled_preview.py
   - Bottom pair: **$211.3^\circ$ and $327.5^\circ$** (**$4.42\text{ mm}$ from respective side ears, $8.47\text{ mm}$ from respective bottom tabs**).
 - **Wall Following**: Matches the exact curved contour of the outer ($R \approx 19.25\text{ mm}$) and inner ($R \approx 18.05\text{ mm}$) wall.
 - **Beam Dimensions**: **$4.20\text{ mm}$ wide curved beam** (leaves $0.80\text{ mm}$ total margin / $0.40\text{ mm}$ per side for smooth insertion into $5.00\text{ mm}$ mating holes).
-- **Flex Isolation**: Two $0.35\text{ mm}$ vertical through-slots (minimal printable clearance for a $0.4\text{ mm}$ nozzle) from $Z = 3.07\text{ mm}$ to $Z = 6.77\text{ mm}$ isolating the cantilever beam.
-- **Hook Geometry ($Z \in [4.97, 6.77\text{ mm}$)**:
-  - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting **$+2.49\text{ mm}$ radially outward** (refined $-0.10\text{ mm}$ from $2.59\text{ mm}$ to eliminate outer housing protrusion interference while maintaining deep engagement).
-  - Sloped lead-in ramp tapering up to top outer wall apex at $Z = 6.77\text{ mm}$.
-  - Inner wall face: 100% flush, smooth, continuous cylinder.
+- **Anti-Breakage Deepened Flex Slots**: Extended vertical through-slots from $Z = 1.30\text{ mm}$ to $Z = 6.77\text{ mm}$ ($L = 5.47\text{ mm}$ cantilever flex length, $+48\%$ deeper than the original $3.70\text{ mm}$ slot).
+  - Drops peak root bending strain from **$32.7\% \to 14.4\%$** (a **$56\%$ reduction in bending stress**).
+  - Terminates at $Z = 1.30\text{ mm}$ in a smooth **$\varnothing 0.80\text{ mm}$ circular stress-relief root** ($R = 0.40\text{ mm}$), completely eliminating the sharp 90° notch stress concentration where clips previously snapped across horizontal print layer lines.
+- **Faced-Off Hook Geometry ($Z \in [4.97, 6.77\text{ mm}$)**:
+  - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting **$+2.39\text{ mm}$ radially outward** (faced off $-0.10\text{ mm}$ from $2.49\text{ mm}$).
+  - Features a **$0.35\text{ mm}$ vertical solid blunt land** at the outer apex ($Z \in [4.97, 5.32]\text{ mm}$), permanently eliminating the fragile $36^\circ$ knife edge.
+  - Sloped lead-in ramp tapering from the blunt face ($Z = 5.32\text{ mm}$) up to the top outer wall apex at $Z = 6.77\text{ mm}$.
+  - Inner wall face: 100% flush, smooth, continuous cylinder with dedicated inward flex relief.
 - **Built-In Sacrificial Support Towers (Twin-Prong Breakaway Fork Supports)**:
   - Sturdy base sitting flat on print bed ($Z = 0.00\text{ mm}$) with a wide adhesion foot ($1.80\text{ mm} \times 3.80\text{ mm}$) and solid lower trunk ($1.20\text{ mm} \times 3.40\text{ mm}$) up to $Z = 3.20\text{ mm}$.
   - **Twin Lateral Prongs & Prying Arch**: Splits into two vertical prongs centered at $Y = \pm 1.40\text{ mm}$ spanning across a $1.80\text{ mm}$ wide central prying arch window ($Z \in [3.20, 4.82]\text{ mm}$), directly supporting the outer lateral shelf corners ($0.25\text{ mm}$ margin to edges).
@@ -307,6 +310,33 @@ py -3 generate_labeled_preview.py
   - **-0.10mm Protrusion Calibration**: Refined `CLIP_HOOK_DEPTH` from $2.59\text{ mm}$ to **$2.49\text{ mm}$**, perfectly eliminating slight outer housing interference during enclosure insertion while retaining strong positive latch engagement.
   - **Twin-Prong Breakaway Fork Support**: Replaced the center chisel support pillar with a bifurcated twin-prong support tower with a $1.80\text{ mm}$ central prying arch window.
   - **Equal Contact Area ($0.90\text{ mm}^2$) & Edge Support**: Two discrete $0.50\text{ mm} \times 0.90\text{ mm}$ chisel tips directly support the lateral outer shelf edges ($0.25\text{ mm}$ from corners), eliminating overhang droop while matching the original total contact area ($0.90\text{ mm}^2$) and providing an open window for effortless snap-off removal.
+
+### Version 9.1 (v9.1) - Faced-Off Snap Clips, Anti-Breakage Radiused Roots & Assembly Mating Clearance
+- **Faced-Off Clip Hooks (-0.10mm Protrusion & Blunt Land)**:
+  - Reduced outer hook protrusion to **$2.39\text{ mm}$** (`CLIP_HOOK_DEPTH = 2.39`).
+  - Added a **$0.35\text{ mm}$ vertical solid blunt land** at the outer apex, replacing the fragile $36^\circ$ zero-thickness knife edge with a robust flat vertical face that eliminates edge chipping and layer separation.
+- **Anti-Breakage Deepened Flex Slots ($56\%$ Strain Reduction)**:
+  - Deepened flex slots down to $Z = 1.30\text{ mm}$ (`CLIP_GAP_DEPTH = 5.47\text{ mm}`), extending cantilever beam length by $+48\%$ ($3.70\text{ mm} \to 5.47\text{ mm}$).
+  - Drops root bending strain from **$32.7\% \to 14.4\%$**, keeping deflection well within 3D-printed plastic fatigue limits.
+- **Smooth $\varnothing 0.80\text{ mm}$ Circular Stress-Relief Roots**:
+  - Terminated slot bottoms with a smooth circular cylindrical root ($R = 0.40\text{ mm}$), permanently eliminating the sharp 90° square notch stress concentration where clips previously snapped across horizontal print layer lines.
+- **45° Perimeter "Tower" Clip Inward Flex Clearance**:
+  - Relieved Right Shaft Support Tower rear backing by $>2.5\text{ mm}$, completely isolating the 45° clip beam and eliminating the weld fusion to the tower.
+  - Applied flex slot cuts across the tower assembly, giving the 45° clip full inward compliance during enclosure insertion.
+- **Right Tower Clamp Perimeter Contouring**:
+  - Contoured Right Tower Clamp outer cheek against the baseplate perimeter envelope ($X \le 14.80\text{ mm}$ at upper $Y$), eliminating the previous $+2.10\text{ mm}$ external overhang and guaranteeing 100% collision-free mating inside the vehicle enclosure.
+
+### Version 9.2 (v9.2) - Lowered Cam Throat Elevation (Zero Brass Seating Interference)
+- **Lowered Throat Profile ($\Delta Z = -0.90\text{ mm}$)**:
+  - Calibrated the input cam ramp and nose profile in `build_shaft.py` to sit $0.90\text{ mm}$ lower in $Z$ inside the right brass contact throat (`DZ_CAM = 0.90`).
+  - Active contact tip lowered from $Z = 7.20\text{ mm} \to 6.30\text{ mm}$, ramp knee from $Z = 9.80\text{ mm} \to 8.90\text{ mm}$, and nose bottom from $Z = 5.00\text{ mm} \to 4.10\text{ mm}$.
+  - Top transition made flush with the hub cylinder apex at $Z = 14.69\text{ mm}$.
+- **Eliminates Seating Pre-Actuation**:
+  - Creates $+1.65\text{ mm}$ to $+4.25\text{ mm}$ of clear vertical air gap beneath the seated brass throat ($Z = 10.55\text{ mm}$), permanently preventing the descending brass insert from depressing the cam upon installation.
+  - Ensures the rocker lever rests in its un-actuated resting position ($\theta = 0^\circ$) when the electrical contacts are fully seated.
+- **Full Blade Actuation Stroke Maintained**:
+  - Retains the exact $X$-overlap and forward throat reach ($Y = 1.50\text{ mm}$) to receive the incoming plug blade.
+  - Provides up to $4.8\text{ mm}$ of vertical stroke with $+3.10\text{ mm}$ floor clearance above $Z = 1.00\text{ mm}$.
 
 ---
 

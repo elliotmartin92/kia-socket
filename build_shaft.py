@@ -171,15 +171,17 @@ def build_shaft_rocker_mesh(
     v_web = np.column_stack([v_w[:, 2] + (x_c - hub_w/2.0 + 0.10), v_w[:, 0], v_w[:, 1]])
     mesh_web = trimesh.Trimesh(vertices=v_web, faces=m_web_raw.faces.copy(), process=True)
     
-    # 4. Direct Straight Belly Cam Tab (Option 1: Solid 2.80mm thick diagonal cantilever into 5.0mm belly)
+    # 4. Direct Straight Belly Cam Tab (calibrated to sit 0.90mm lower in throat to clear seated brass insert)
+    DZ_CAM = 0.90  # 0.90mm lower in Z inside the throat
     poly_pts_cam = [
-        (y_axle, z_axle),                  # Center of hub
-        (y_axle, z_axle + r_hub + 0.5),    # Above hub
-        (5.00, 9.80),                      # Top straight ramp
-        (1.50, 7.20),                      # Active contact tip inside 5.0mm belly
-        (1.80, 5.00),                      # Rounded nose bottom inside belly
-        (4.50, 5.20),                      # Beam underside
-        (y_axle - 1.50, z_axle - 2.50)     # Into hub belly
+        (y_axle, z_axle),                          # Center of hub (9.279, 12.590)
+        (y_axle, z_axle + r_hub),                  # (9.279, 14.690) - Flush tangent at hub top
+        (6.80, 11.50),                             # Smooth blend from hub down toward throat
+        (5.00, 9.80 - DZ_CAM),                     # (5.00, 8.90) - Lowered top ramp
+        (1.50, 7.20 - DZ_CAM),                     # (1.50, 6.30) - Lowered contact tip inside throat
+        (1.80, 5.00 - DZ_CAM),                     # (1.80, 4.10) - Lowered rounded nose bottom
+        (4.50, 5.20 - DZ_CAM),                     # (4.50, 4.30) - Lowered beam underside
+        (y_axle - 1.50, z_axle - 2.50)             # (7.779, 10.090) - Smooth return into hub belly
     ]
     poly_cam_arm = Polygon(poly_pts_cam)
     poly_cam = unary_union([flank_collar, poly_cam_arm])
@@ -240,14 +242,15 @@ x_c = {X_TOWER_CENTER};
 y_axle = {Y_AXLE};
 z_axle = {Z_AXLE};
 
-// 2D Profile: Option 1 Direct Straight Belly Cam
+// 2D Profile: Direct Straight Belly Cam (calibrated 0.90mm lower in throat)
 poly_cam_pts = [
     [{Y_AXLE}, {Z_AXLE}],
-    [{Y_AXLE}, {Z_AXLE + HUB_DIAMETER/2.0 + 0.5}],
-    [5.00, 9.80],
-    [1.50, 7.20],
-    [1.80, 5.00],
-    [4.50, 5.20],
+    [{Y_AXLE}, {Z_AXLE + HUB_DIAMETER/2.0}],
+    [6.80, 11.50],
+    [5.00, 8.90],
+    [1.50, 6.30],
+    [1.80, 4.10],
+    [4.50, 4.30],
     [{Y_AXLE - 1.50}, {Z_AXLE - 2.50}]
 ];
 

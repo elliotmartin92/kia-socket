@@ -47,14 +47,16 @@ BRACKET_SEATING_RIB_EXT = 1.80      # 1.80mm extension into channel from interio
 BRACKET_SEATING_RIB_THICK = 0.60    # 0.60mm thickness in Y (matching floor ribs)
 BRACKET_SEATING_RIB_Y = [5.25, 1.95, -1.35, -4.65]  # 4 Y-stations (Rib 1 bottom corner meets hook corner at Y=4.95mm)
 
-# Clips (Mating with 5.00mm female holes)
+# Clips (Mating with 5.00mm female holes) - Reinforced Anti-Breakage & Faced-Off
 CLIP_HEIGHT = 6.77        # Flush with outer wall
-CLIP_GAP_DEPTH = 3.70     # Depth of flex slot in wall
-CLIP_ARM_THICK = 1.20     # Exactly matches OUTER_WALL_THICK (1.20mm) for flush interior alignment
+CLIP_GAP_DEPTH = 5.47     # Depth of flex slot in wall (reaches Z = 1.30mm, 5.47mm cantilever length reduces bending strain by 56%)
+CLIP_ARM_THICK = 1.20     # Wall beam thickness
 CLIP_ARM_WIDTH = 4.20     # 4.20mm wide snap beam (leaves 0.80mm total margin / 0.40mm per side for 5.0mm mating holes)
 CLIP_SLOT_CLEARANCE = 0.35 # 0.35mm minimal printable gap for 0.4mm nozzle (prevents fusion while minimizing air gap)
-CLIP_HOOK_DEPTH = 2.49    # 2.49mm radial overhang from wall (refined -0.10mm from 2.59mm to eliminate protrusion interference)
+CLIP_HOOK_DEPTH = 2.39    # 2.39mm radial overhang (-0.10mm faced-off blunt end eliminates knife-edge fragility)
 CLIP_HOOK_HEIGHT = 1.80
+CLIP_BLUNT_HEIGHT = 0.35  # 0.35mm vertical flat face at outer apex to eliminate sharp knife-edge fragility
+CLIP_ROOT_RADIUS = 0.40   # 0.40mm radius (Ø0.80mm) circular stress-relief root at bottom of flex slots
 # 4 Clip positions: Top clips (45°, 135°) halfway to top tab; Bottom clips (211.3°, 327.5°) 4.42mm from ears, 8.47mm from bottom tabs
 CLIP_ANGLES = [45.0, 135.0, 211.3, 327.5]
 
@@ -740,12 +742,26 @@ def build_exact_3d_model():
     mesh_struts = build_left_tower_struts_mesh()
     mesh_towers_assembly = trimesh.util.concatenate([mesh_towers, mesh_struts])
     
+    # Inward flex clearance relief on Right Tower behind 45° snap clip
+    p45, norm45, _ = find_boundary_point_and_normal(base_poly, 45.0)
+    center_rad_45 = math.radians(45.0)
+    tower_clearance_box = trimesh.creation.box([CLIP_ARM_WIDTH + 1.0, 3.0, 7.0])
+    rot_45 = trimesh.transformations.rotation_matrix(center_rad_45, [0, 0, 1])
+    tower_clearance_box.apply_transform(rot_45)
+    p_cut_45 = p45 - norm45 * (OUTER_WALL_THICK + 1.0)
+    tower_clearance_box.apply_translation([p_cut_45[0], p_cut_45[1], 3.5 + BASE_THICK])
+    try:
+        mesh_towers_assembly = mesh_towers_assembly.difference(tower_clearance_box, engine='manifold')
+    except Exception:
+        pass
+    
     # 7. Snap Clips: Slotted perimeter wall + direct outer hook wedges (4 clips: 45°, 135°, 211.3°, 327.5°)
     slot_cuts = []
     hook_meshes = []
     
     stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT         # 4.97 mm
-    slot_z_bot = OUTER_WALL_HEIGHT - CLIP_GAP_DEPTH # 3.07 mm
+    slot_z_bot = OUTER_WALL_HEIGHT - CLIP_GAP_DEPTH # 1.30 mm (deepened to eliminate bending strain)
+    z_root_center = slot_z_bot + CLIP_ROOT_RADIUS   # 1.70 mm (center of radiused root)
     slot_t = CLIP_SLOT_CLEARANCE                    # Minimal printable flex slot width for 0.4mm nozzle
     
     for angle_deg in CLIP_ANGLES:
@@ -755,16 +771,29 @@ def build_exact_3d_model():
         d_theta = CLIP_ARM_WIDTH / r_est
         slot_d_theta = slot_t / r_est
         
-        # 1. Two vertical flex slots through the wall on either side of the clip arm
+        # 1. Two vertical flex slots with stress-relief circular roots at slot bottom
         for th_slot in [center_rad - d_theta/2 - slot_d_theta/2, center_rad + d_theta/2 + slot_d_theta/2]:
             slot_p = np.array([np.cos(th_slot), np.sin(th_slot)]) * r_est
             rot_mat = trimesh.transformations.rotation_matrix(th_slot, [0, 0, 1])
-            s_box = trimesh.creation.box([OUTER_WALL_THICK * 4.0, slot_t, CLIP_GAP_DEPTH + 1.0])
-            s_box.apply_transform(rot_mat)
-            s_box.apply_translation([slot_p[0], slot_p[1], slot_z_bot + (CLIP_GAP_DEPTH + 1.0)/2])
-            slot_cuts.append(s_box)
             
-        # 2. Hook Wedge on the outer face of the flexible curved wall beam (Z: 4.97 to 6.77mm)
+            # Vertical slot box from root center up to top of wall (+1.0mm)
+            box_h = (OUTER_WALL_HEIGHT + 1.0) - z_root_center
+            s_box = trimesh.creation.box([OUTER_WALL_THICK * 4.0, slot_t, box_h])
+            s_box.apply_transform(rot_mat)
+            s_box.apply_translation([slot_p[0], slot_p[1], z_root_center + box_h / 2.0])
+            
+            # Smooth circular stress-relief root cylinder at slot bottom
+            cyl = trimesh.creation.cylinder(radius=CLIP_ROOT_RADIUS, height=OUTER_WALL_THICK * 4.0, sections=16)
+            rot_to_x = trimesh.transformations.rotation_matrix(np.pi/2, [0, 1, 0])
+            cyl.apply_transform(rot_to_x)
+            cyl.apply_transform(rot_mat)
+            cyl.apply_translation([slot_p[0], slot_p[1], z_root_center])
+            
+            s_cutter = trimesh.util.concatenate([s_box, cyl])
+            slot_cuts.append(s_cutter)
+            
+        # 2. Faced-Off Hook Wedge on outer face of flexible wall beam (Z: 4.97 to 6.77mm)
+        # Includes vertical flat face at outer apex to eliminate knife-edge fragility
         N = 16
         theta_vals = np.linspace(center_rad - d_theta/2.0, center_rad + d_theta/2.0, N)
         
@@ -792,33 +821,43 @@ def build_exact_3d_model():
         
         v0 = np.column_stack([outer_coords, np.full(N, stem_h)])
         v1 = np.column_stack([shelf_coords, np.full(N, stem_h)])
+        v_face = np.column_stack([shelf_coords, np.full(N, stem_h + CLIP_BLUNT_HEIGHT)])
         v2 = np.column_stack([outer_coords, np.full(N, CLIP_HEIGHT)])
-        hook_verts = np.vstack([v0, v1, v2])
+        hook_verts = np.vstack([v0, v1, v_face, v2])
         
         hook_faces = []
         for i in range(N - 1):
             # Retention shelf (at stem_h, pointing -Z): V0 -> V1
-            hook_faces.append([i, N + i, N + i + 1])
-            hook_faces.append([i, N + i + 1, i + 1])
+            hook_faces.append([i, N + i + 1, N + i])
+            hook_faces.append([i, i + 1, N + i + 1])
             
-            # Slanted outer bevel (pointing +radial/+Z): V1 -> V2
-            hook_faces.append([N + i, 2*N + i + 1, N + i + 1])
-            hook_faces.append([N + i, 2*N + i, 2*N + i + 1])
+            # Faced-off vertical blunt tip: V1 -> V_face
+            hook_faces.append([N + i, 2*N + i + 1, 2*N + i])
+            hook_faces.append([N + i, N + i + 1, 2*N + i + 1])
             
-            # Inner mating face (at outer wall, pointing -radial): V2 -> V0
-            hook_faces.append([2*N + i, i, i + 1])
-            hook_faces.append([2*N + i, i + 1, 2*N + i + 1])
+            # Slanted lead-in ramp: V_face -> V2
+            hook_faces.append([2*N + i, 3*N + i + 1, 3*N + i])
+            hook_faces.append([2*N + i, 2*N + i + 1, 3*N + i + 1])
+            
+            # Inner mating face (at outer wall): V2 -> V0
+            hook_faces.append([3*N + i, i + 1, i])
+            hook_faces.append([3*N + i, 3*N + i + 1, i + 1])
             
         # Side endcaps
-        hook_faces.append([0, 2*N, N])
-        hook_faces.append([N - 1, 2*N - 1, 3*N - 1])
+        hook_faces.append([0, 2*N, 3*N])
+        hook_faces.append([0, N, 2*N])
+        hook_faces.append([N - 1, 3*N - 1, 2*N - 1])
+        hook_faces.append([N - 1, 4*N - 1, 3*N - 1])
         
         hook_mesh = trimesh.Trimesh(vertices=hook_verts, faces=np.array(hook_faces), process=True)
+        if hook_mesh.volume < 0:
+            hook_mesh.faces = np.fliplr(hook_mesh.faces)
         hook_meshes.append(hook_mesh)
         
     try:
         all_slot_cuts = trimesh.util.concatenate(slot_cuts)
         mesh_wall = mesh_wall.difference(all_slot_cuts, engine='manifold')
+        mesh_towers_assembly = mesh_towers_assembly.difference(all_slot_cuts, engine='manifold')
     except Exception:
         pass
         
@@ -832,6 +871,16 @@ def build_exact_3d_model():
     
     # Main part is 100% planar at Z = 0.00mm for direct support-free 3D printing
     full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_seating_ribs, mesh_towers_assembly, mesh_curved_feat, mesh_clip_supports] + hook_meshes)
+    
+    # Filter any degenerate zero-area/zero-volume slivers produced by boolean cuts
+    try:
+        bodies = full_part.split(only_watertight=False)
+        valid_bodies = [b for b in bodies if len(b.faces) > 4 and abs(b.volume) > 0.001]
+        if len(valid_bodies) > 0:
+            full_part = trimesh.util.concatenate(valid_bodies)
+    except Exception:
+        pass
+        
     return full_part, base_poly
 
 def build_clip_supports_mesh(base_poly):

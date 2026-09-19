@@ -20,14 +20,15 @@ x_c = 9.25;
 y_axle = 9.279;
 z_axle = 12.59;
 
-// 2D Profile: Option 1 Direct Straight Belly Cam
+// 2D Profile: Direct Straight Belly Cam (calibrated 0.90mm lower in throat)
 poly_cam_pts = [
     [9.279, 12.59],
-    [9.279, 15.19],
-    [5.00, 9.80],
-    [1.50, 7.20],
-    [1.80, 5.00],
-    [4.50, 5.20],
+    [9.279, 14.69],
+    [6.80, 11.50],
+    [5.00, 8.90],
+    [1.50, 6.30],
+    [1.80, 4.10],
+    [4.50, 4.30],
     [7.779, 10.09]
 ];
 
