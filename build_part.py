@@ -289,7 +289,7 @@ def create_bracket_seating_ribs_poly(ext=BRACKET_SEATING_RIB_EXT, thick=BRACKET_
         
     if len(y_stations) >= 4:
         y_c4 = y_stations[3]
-        boxes.append(box(b3_spine, y_c4 - thick / 2.0, b4_spine, y_c4 + thick / 2.0))
+        boxes.append(box(b3_spine, y_c4 - thick / 2.0, b4_spine, -4.30))
         
     return unary_union(boxes)
 
@@ -301,7 +301,7 @@ def build_chamfered_seating_ribs_mesh():
     - One Pair Below Half Moon (Right Brackets B3 & B4 at Y = -4.65 mm):
       * Extended all the way across from B3 spine (X = 2.701 mm) to B4 spine (X = 9.857 mm) to become ONE continuous rib.
       * Chamfered on -Y flank (ramping smoothly over 0.80mm from Z = 1.00mm to 2.15mm) to eliminate stress concentration.
-      * Flat seating land at Z = 2.15mm meets and fuses seamlessly with the half-moon base at Y = -4.30mm.
+      * Flat seating land at Z = 2.15mm extends to Y = -4.30mm, 100% flush and fused into the half-moon base across Z in [1.00, 2.15]mm.
     """
     z_floor = BASE_THICK  # 1.00 mm
     z_rib = z_floor + BRACKET_SEATING_RIB_HEIGHT  # 2.15 mm
@@ -337,14 +337,14 @@ def build_chamfered_seating_ribs_mesh():
     
     # 2. The ONE pair below the half moon (Right pair, y_c = -4.65)
     # Extends all the way across from b3_spine (2.701) to b4_spine (9.857) to become one
-    # Chamfered on -Y flank
+    # Chamfered on -Y flank, fully fused with half moon base at Y = -4.30mm across Z in [1.00, 2.15]mm
     chamf_dy = 0.80  # 0.80mm ramp
     y_c4 = -4.65
     pts_yz = [
         (y_c4 - thick/2.0 - chamf_dy, z_floor), # -5.75, 1.00
         (y_c4 - thick/2.0, z_rib),              # -4.95, 2.15
-        (min(y_c4 + thick/2.0, -4.30), z_rib),  # -4.35, 2.15
-        (-4.30, z_floor)                        # -4.30, 1.00 (meets half moon base)
+        (-4.30, z_rib),                         # -4.30, 2.15 (100% flush & fused with half moon base)
+        (-4.30, z_floor)                        # -4.30, 1.00 (100% flush & fused with half moon base)
     ]
     poly_yz = Polygon(pts_yz)
     span_r4 = b4_spine - b3_spine
@@ -1489,9 +1489,9 @@ module bracket_seating_ribs_2d() {{
         translate([{9.857 - BRACKET_SEATING_RIB_EXT:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
             square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
     }}
-    // One Pair Below Half Moon (extends all the way across)
-    translate([{2.701:.3f}, {-4.65:.3f} - {BRACKET_SEATING_RIB_THICK}/2])
-        square([{9.857 - 2.701:.3f}, {BRACKET_SEATING_RIB_THICK}]);
+    // One Pair Below Half Moon (extends all the way across and fuses with half moon base at Y = -4.30)
+    translate([{2.701:.3f}, {-4.950:.3f}])
+        square([{9.857 - 2.701:.3f}, {0.650:.3f}]);
 }}
 
 module complete_part() {{

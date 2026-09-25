@@ -298,9 +298,9 @@ module bracket_seating_ribs_2d() {
         translate([8.057, y - 0.6/2])
             square([1.8, 0.6]);
     }
-    // One Pair Below Half Moon (extends all the way across)
-    translate([2.701, -4.650 - 0.6/2])
-        square([7.156, 0.6]);
+    // One Pair Below Half Moon (extends all the way across and fuses with half moon base at Y = -4.30)
+    translate([2.701, -4.950])
+        square([7.156, 0.650]);
 }
 
 module complete_part() {
