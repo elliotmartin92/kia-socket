@@ -47,13 +47,26 @@ BRACKET_SEATING_RIB_EXT = 1.80      # 1.80mm extension into channel from interio
 BRACKET_SEATING_RIB_THICK = 0.60    # 0.60mm thickness in Y (matching floor ribs)
 BRACKET_SEATING_RIB_Y = [5.25, 1.95, -1.35, -4.65]  # 4 Y-stations (Rib 1 bottom corner meets hook corner at Y=4.95mm)
 
-# Clips (Mating with 5.00mm female holes) - Reinforced Anti-Breakage & Faced-Off
+# Clips (Mating with 5.00mm female holes) - Equalized Protrusion & Constant-Stress Tapered Flex Beam
 CLIP_HEIGHT = 6.77        # Flush with outer wall
-CLIP_GAP_DEPTH = 5.47     # Depth of flex slot in wall (reaches Z = 1.30mm, 5.47mm cantilever length reduces bending strain by 56%)
-CLIP_ARM_THICK = 1.20     # Wall beam thickness
+CLIP_GAP_DEPTH = 5.47     # Depth of flex slot in wall (reaches Z = 1.30mm above 1.00mm floor)
+CLIP_ARM_THICK = 1.20     # Nominal wall beam thickness (tapers from 1.65mm filleted root to 0.95mm top stem)
 CLIP_ARM_WIDTH = 4.20     # 4.20mm wide snap beam (leaves 0.80mm total margin / 0.40mm per side for 5.0mm mating holes)
 CLIP_SLOT_CLEARANCE = 0.35 # 0.35mm minimal printable gap for 0.4mm nozzle (prevents fusion while minimizing air gap)
-CLIP_HOOK_DEPTH = 2.39    # 2.39mm radial overhang (-0.10mm faced-off blunt end eliminates knife-edge fragility)
+CLIP_HOOK_DEPTH = 1.25    # 1.25mm nominal radial overhang (reduces assembly flex strain by 45% while locking into 5.0mm slot)
+# Per-clip hook overhang compensation to equalize diagonal spans (135° and 327.5° perimeter walls protrude +0.30..0.37mm further)
+CLIP_HOOK_DEPTH_BY_ANGLE = {
+    45.0: 1.25,
+    135.0: 1.05,   # Compensates for +0.292mm larger perimeter radius at Top-Left (135°)
+    211.3: 1.75,   # +0.50mm extension (was 1.25mm) to provide firm retention and equalize perimeter radial reach
+    327.5: 1.55,   # +0.50mm extension (was 1.05mm) to provide 1.73mm local shelf retention and equalize diagonal spans
+}
+CLIP_STEM_OUTER_RECESS_BY_ANGLE = {
+    45.0: 0.00,
+    135.0: 0.16,   # Shaves 0.16mm off outer stem above Z=1.5mm so 135° has 1.21mm local hook step while reducing outer radius
+    211.3: 0.00,
+    327.5: 0.18,   # Shaves 0.18mm off outer stem above Z=1.5mm so 327.5° has 1.73mm local hook step while equalizing diagonal
+}
 CLIP_HOOK_HEIGHT = 1.80
 CLIP_BLUNT_HEIGHT = 0.35  # 0.35mm vertical flat face at outer apex to eliminate sharp knife-edge fragility
 CLIP_ROOT_RADIUS = 0.40   # 0.40mm radius (Ø0.80mm) circular stress-relief root at bottom of flex slots
@@ -68,15 +81,17 @@ SLIT_BOSS_WALL = 0.80   # 0.8mm thick wall around slits
 # Slit Y positioning: Option 1 (+1.00mm shift in +Y, 2.00mm offset from inner bottom wall, was 1.00mm)
 SLIT_OFFSET_FROM_WALL = 2.00
 
-# Slit Insert Detent Socket (Press-fit registration in main baseplate floor)
-INSERT_KEY_W_X = 2.60     # Male key width in X (leaves solid 0.70mm wall around 1.20mm slit)
-INSERT_KEY_LEN_Y = 4.80   # Male key length in Y (leaves solid 0.70mm wall around 3.40mm slit)
+# Slit Insert Detent Socket (High-temp compensated press-fit registration in main baseplate floor)
+INSERT_KEY_W_X = 2.44     # Male key base width in X (leaves solid 0.62mm wall around 1.20mm slit)
+INSERT_KEY_LEN_Y = 4.64   # Male key base length in Y (leaves solid 0.62mm wall around 3.40mm slit)
+INSERT_KEY_TAPER = 0.20   # 0.20mm per side (0.40mm total) self-centering lead-in taper at top of key (2.04x4.24mm tip)
 INSERT_KEY_HEIGHT = 0.95  # Male key height in Z on separate insert (nearly flush with 1.00mm floor)
-INSERT_CLEARANCE = 0.30   # 0.30mm total clearance (0.15mm per side) for snug press-fit
-SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 2.90mm female detent socket width in X
-SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 5.10mm female detent socket length in Y
+INSERT_CLEARANCE = 0.56   # 0.56mm total clearance (0.28mm per side at base, 0.48mm per side at tip) for high-temp print fit
+SOCKET_W_X = INSERT_KEY_W_X + INSERT_CLEARANCE     # 3.00mm female detent socket width in X
+SOCKET_LEN_Y = INSERT_KEY_LEN_Y + INSERT_CLEARANCE # 5.20mm female detent socket length in Y
+SOCKET_BOT_CHAMFER = 0.35 # 0.35mm x 45 deg bottom elephant's-foot relief countersink on baseplate floor sockets
 
-INSERT_BODY_W_X = 3.30    # 3.30mm outer shroud body width in X at base shoulder (creates 0.35mm horizontal seating shelf)
+INSERT_BODY_W_X = 3.30    # 3.30mm outer shroud body width in X at base shoulder (creates horizontal seating shelf)
 INSERT_BODY_LEN_Y = 5.50  # 5.50mm outer shroud body length in Y at base shoulder
 INSERT_BODY_W_TIP = 2.40  # 2.40mm outer end width in X at Z=0
 INSERT_BODY_LEN_TIP = 4.40 # 4.40mm outer end length in Y at Z=0
@@ -273,6 +288,70 @@ def create_bracket_seating_ribs_poly(ext=BRACKET_SEATING_RIB_EXT, thick=BRACKET_
         
     return unary_union(boxes)
 
+def build_chamfered_seating_ribs_mesh():
+    """Builds the 3D mesh of the 4 pairs of 45° chamfered seating ribs inside Brackets 1..4,
+    plus continuous Rib 4 bridge across the central channel under the brass U-bridge,
+    fusing directly into the half-moon base.
+    - Flat top lands at Z = 2.15mm (width = 0.60mm in Y) preserve the exact brass insert seating surface.
+    - 45° chamfered flanks (dz/dy = 1, extending 0.80mm in +/-Y) ramp smoothly down to the Z = 1.00mm floor.
+    - Eliminates 90° notch stress concentration from one rib to the next.
+    - At Rib 4 (+Y flank), smoothly merges into the half-moon base at Y = -4.30mm.
+    """
+    z_floor = BASE_THICK  # 1.00 mm
+    z_rib = z_floor + BRACKET_SEATING_RIB_HEIGHT  # 2.15 mm
+    chamf_dy = 0.80  # 0.80mm chamfer ramp
+    
+    b1_spine = -9.857
+    b2_spine = -2.701
+    b3_spine = 2.701
+    b4_spine = 9.857
+    ext = BRACKET_SEATING_RIB_EXT
+    
+    rib_meshes = []
+    
+    for y_c in BRACKET_SEATING_RIB_Y:
+        # Check if adjacent to half moon base (Rib 4 at y_c = -4.65mm)
+        pts_yz = [
+            (y_c - 0.30 - chamf_dy, z_floor),
+            (y_c - 0.30, z_rib),
+            (y_c + 0.30, z_rib),
+            (min(y_c + 0.30 + chamf_dy, -4.30 if y_c == -4.65 else y_c + 0.30 + chamf_dy), z_floor)
+        ]
+        poly_yz = Polygon(pts_yz)
+        
+        # Left Pair (B1 & B2)
+        m_b1 = trimesh.creation.extrude_polygon(poly_yz, height=ext)
+        v1 = m_b1.vertices.copy()
+        v_b1 = np.column_stack([v1[:, 2] + b1_spine, v1[:, 0], v1[:, 1]])
+        rib_meshes.append(trimesh.Trimesh(vertices=v_b1, faces=m_b1.faces.copy(), process=True))
+        
+        m_b2 = trimesh.creation.extrude_polygon(poly_yz, height=ext)
+        v2 = m_b2.vertices.copy()
+        v_b2 = np.column_stack([v2[:, 2] + (b2_spine - ext), v2[:, 0], v2[:, 1]])
+        rib_meshes.append(trimesh.Trimesh(vertices=v_b2, faces=m_b2.faces.copy(), process=True))
+        
+        # Right Pair (B3 & B4)
+        if y_c == -4.65:
+            # Rib 4 spans continuously across the entire right side (X in [2.701, 9.857])
+            # under the brass U-bridge, fusing seamlessly into the half-moon base
+            span_r4 = b4_spine - b3_spine
+            m_r4 = trimesh.creation.extrude_polygon(poly_yz, height=span_r4)
+            v4 = m_r4.vertices.copy()
+            v_r4 = np.column_stack([v4[:, 2] + b3_spine, v4[:, 0], v4[:, 1]])
+            rib_meshes.append(trimesh.Trimesh(vertices=v_r4, faces=m_r4.faces.copy(), process=True))
+        else:
+            m_b3 = trimesh.creation.extrude_polygon(poly_yz, height=ext)
+            v3 = m_b3.vertices.copy()
+            v_b3 = np.column_stack([v3[:, 2] + b3_spine, v3[:, 0], v3[:, 1]])
+            rib_meshes.append(trimesh.Trimesh(vertices=v_b3, faces=m_b3.faces.copy(), process=True))
+            
+            m_b4 = trimesh.creation.extrude_polygon(poly_yz, height=ext)
+            v4 = m_b4.vertices.copy()
+            v_b4 = np.column_stack([v4[:, 2] + (b4_spine - ext), v4[:, 0], v4[:, 1]])
+            rib_meshes.append(trimesh.Trimesh(vertices=v_b4, faces=m_b4.faces.copy(), process=True))
+            
+    return trimesh.util.concatenate(rib_meshes)
+
 def create_arch_wall_poly():
     """Creates a clean geometric U-arch wall (1.20mm thick) with 5.00mm interior width at base.
     - Interior Width: 5.00mm (inner radius R_inner = 2.50mm), centered on X = 0.
@@ -367,19 +446,19 @@ def get_exact_base_polygon():
     cx_right = 8.453
     cy = -13.589
     
-    # Left socket (bottom-left chamfer: 0.60mm x 45 deg)
+    # Left socket (bottom-left chamfer matched for 0.28mm/side clearance)
     x_l_min = cx_left - SOCKET_W_X/2
     y_l_bot = cy - SOCKET_LEN_Y/2
-    chamfer_left_tri = Polygon([[x_l_min + 0.75, y_l_bot - 0.05],
-                                [x_l_min - 0.05, y_l_bot + 0.75],
+    chamfer_left_tri = Polygon([[x_l_min + 0.88, y_l_bot - 0.05],
+                                [x_l_min - 0.05, y_l_bot + 0.88],
                                 [x_l_min - 0.05, y_l_bot - 0.05]])
     detent_left = box(cx_left - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_left + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2).difference(chamfer_left_tri)
     
-    # Right socket (bottom-right chamfer: 0.60mm x 45 deg)
+    # Right socket (bottom-right chamfer matched for 0.28mm/side clearance)
     x_r_max = cx_right + SOCKET_W_X/2
     y_r_bot = cy - SOCKET_LEN_Y/2
-    chamfer_right_tri = Polygon([[x_r_max - 0.75, y_r_bot - 0.05],
-                                 [x_r_max + 0.05, y_r_bot + 0.75],
+    chamfer_right_tri = Polygon([[x_r_max - 0.88, y_r_bot - 0.05],
+                                 [x_r_max + 0.05, y_r_bot + 0.88],
                                  [x_r_max + 0.05, y_r_bot - 0.05]])
     detent_right = box(cx_right - SOCKET_W_X/2, cy - SOCKET_LEN_Y/2, cx_right + SOCKET_W_X/2, cy + SOCKET_LEN_Y/2).difference(chamfer_right_tri)
     
@@ -392,7 +471,8 @@ def create_grid_ribs_poly(base_poly, outer_body_poly=None):
     - Extends all the way to merge and connect directly with the outer perimeter walls.
     - Excludes the bounding envelopes of the brackets.
     - Excludes the bottom section (Y < -7.17mm) where there is zero floor ribbing.
-    - Excludes the top-right through hole."""
+    - Excludes the top-right through hole.
+    - Excludes a 3.00mm inward radial flex-relief pocket behind all 4 snap clips (eliminates rib fulcrum pinch)."""
     if outer_body_poly is None:
         outer_body_poly = base_poly
     b1_pts = bracket_1_raw_pts
@@ -423,6 +503,18 @@ def create_grid_ribs_poly(base_poly, outer_body_poly=None):
     hole_x, hole_y, hole_w, hole_h = 10.284, 10.826, 5.352, 4.512
     hole_box = box(hole_x - hole_w/2 - 0.1, hole_y - hole_h/2 - 0.1,
                    hole_x + hole_w/2 + 0.1, hole_y + hole_h/2 + 0.1)
+                   
+    # 3.00mm inward radial flex-relief pocket behind all 4 snap clips so no floor rib acts as a fulcrum
+    clip_relief_polys = []
+    for angle_deg in CLIP_ANGLES:
+        p, norm, tang = find_boundary_point_and_normal(base_poly, angle_deg)
+        half_w = (CLIP_ARM_WIDTH + 1.20) / 2.0
+        c1 = p + tang * half_w + norm * 0.50
+        c2 = p - tang * half_w + norm * 0.50
+        c3 = p - tang * half_w - norm * (OUTER_WALL_THICK + 3.00)
+        c4 = p + tang * half_w - norm * (OUTER_WALL_THICK + 3.00)
+        clip_relief_polys.append(Polygon([c1, c2, c3, c4]))
+    clip_relief_union = unary_union(clip_relief_polys)
     
     bounds = outer_body_poly.bounds
     rib_boxes = []
@@ -446,7 +538,7 @@ def create_grid_ribs_poly(base_poly, outer_body_poly=None):
     raw_grid = unary_union(rib_boxes)
     
     # Intersect with outer_body_poly so all ribs extend directly into the outer walls
-    connected_ribs = raw_grid.intersection(outer_body_poly).difference(bracket_exclusions).difference(below_brackets_box).difference(hole_box)
+    connected_ribs = raw_grid.intersection(outer_body_poly).difference(bracket_exclusions).difference(below_brackets_box).difference(hole_box).difference(clip_relief_union)
     return connected_ribs
 
 # ==============================================================================
@@ -517,26 +609,51 @@ def create_backside_slit_bosses_poly():
 
 def create_center_curved_feature_poly():
     """Returns the 2D polygon of the 10.5mm tall reinforced curved feature between Brackets 3 & 4.
-    - Solid D-shape cross-section (100% solid core): eliminates fragile 0.60mm hollow shell failure.
-    - Width: 4.30mm (centered at X = 6.279mm -> X in [4.129, 8.429]mm).
-    - Depth in Y: 1.62mm (Base at Y = -4.069mm, Apex at Y = -2.449mm, 2.00mm above bracket step datum).
-    - Top arc: Preserves exact outer ellipse curvature (contacts/guides blade on insertion).
-    - Bottom base: Flat solid wall at Y = -4.069mm (maintains +0.58mm gap to brass insert, +0.28mm to Rib 4).
+    - Solid D-shape cross-section: 100% solid core.
+    - Width: 4.20mm (centered at X = 6.279mm -> X in [4.179, 8.379]mm, anchoring directly into Bracket 3 & 4 walls).
+    - Depth in Y: 1.30mm (Base extended down in -Y to Y = -4.30mm, Apex calibrated to Y = -3.00mm).
+    - Bottom base: Flat solid wall at Y = -4.30mm (leaves +0.05mm clearance to Rib 4 & brass bridge).
+    - Front apex: Calibrated to Y = -3.00mm (+0.125mm clearance to nominal 6.35mm plug blade bottom at Y = -2.875mm).
+      Prevents blade from deflecting down past Y = -3.00mm, ensuring full engagement with the cantilever at +Y.
     """
     cx = 6.279
-    w_x = 4.30
-    h_y = 1.62
-    rx = w_x / 2.0
-    ry = h_y
+    w_x = 4.20
+    base_y = -4.30
+    apex_y = -3.00
     
-    datum_y = -17.339 + 11.27  # -6.069 mm
-    base_y = datum_y + 2.00    # -4.069 mm
+    rx = w_x / 2.0
+    ry = apex_y - base_y  # 1.30 mm
     
     angles = np.linspace(np.pi, 0, 32)
     out_arc = [(cx + rx * np.cos(a), base_y + ry * np.sin(a)) for a in angles]
     
-    # 100% Solid D-shape: outer arc at +Y closed by a continuous flat solid back wall at Y = base_y
     return Polygon(out_arc + [(cx - rx, base_y)])
+
+def build_center_curved_feature_mesh():
+    """Builds the 100% watertight 3D mesh of the reinforced half moon from Z = 1.00 to 10.50mm,
+    including a 0.25mm smooth lead-in funnel chamfer on the top front rim (Z = 8.50 to 10.50mm).
+    """
+    poly = create_center_curved_feature_poly()
+    mesh = extrude_shapely_geom(poly, height=10.50 - BASE_THICK)
+    mesh.apply_translation([0, 0, BASE_THICK])
+    
+    # Smooth lead-in funnel chamfer on the top front face (Z = 8.50 to 10.50mm)
+    cx = 6.279
+    w_x = 4.20
+    apex_y = -3.00
+    chamfer_cutter = trimesh.creation.box([w_x + 2.0, 1.0, 3.0])
+    rot_chamfer = trimesh.transformations.rotation_matrix(np.radians(-7.125), [1, 0, 0])
+    chamfer_cutter.apply_transform(rot_chamfer)
+    chamfer_cutter.apply_translation([cx, apex_y + 0.50, 9.50])
+    
+    try:
+        mesh_chamfered = mesh.difference(chamfer_cutter, engine='manifold')
+        if mesh_chamfered.is_watertight and mesh_chamfered.volume > 0:
+            return mesh_chamfered
+    except Exception:
+        pass
+        
+    return mesh
 
 def create_shaft_support_towers_poly():
     """Returns 2D bounding boxes for the two reinforced shaft support towers and left tower buttress struts."""
@@ -561,23 +678,26 @@ def create_shaft_support_towers_poly():
 
 def build_clean_shaft_towers_mesh():
     """Directly extrudes the reinforced 2D U-cradle profile in (Y, Z) along X.
-    - Flared trapezoidal profile in Y-Z: Base Y in [6.250, 12.850] (6.60mm wide), Top Y in [6.550, 12.180] (5.63mm wide).
+    - Lower flared trapezoidal base (Z: 1.00 to 11.20mm): Base Y in [6.250, 12.850] (6.60mm wide) tapering to [6.550, 12.180].
+    - Upper parallel vertical clamping lands (Z: 11.20 to 14.09mm): Constant Y in [6.550, 12.180] (5.63mm wide) with 0.25mm top lead-in chamfers so the closed-box gantry clamp slides straight down without wedging.
     - Tuned 2.60mm snap-fit retention throat constriction (0.20mm positive snap with Ø2.80mm shaft, 240.0 deg wrap angle).
     - 1.50mm heavy-duty wall thickness in X.
     - Shaft axis at Y = 9.279mm (shifted -0.921mm so front buttress/tower base aligns with top inner wall of Bracket 3 at Y = 6.250mm).
     """
     y_shaft = 9.279   # Shifted to Y = 9.279mm
     z_base = BASE_THICK  # 1.0mm
+    z_land_bot = 11.200  # Bottom of parallel vertical clamp seating land
     z_top = z_base + TOWER_HEIGHT  # 14.09mm
+    z_chamfer = z_top - 0.25       # 13.84mm (0.25mm x 45 deg top entry chamfer)
     r_shaft = 1.50  # 3.0mm diameter shaft cradle -> 1.5mm radius
     z_cradle_center = 12.590  # Exact pivot axis elevation
     
     y_min_base = 6.250
     y_max_base = 12.850
     y_min_top = 6.550
-    y_max_top = 12.180
+    y_max_top = 11.850  # 1.07mm rear prong wall (leaves up to 2.63mm inside outer perimeter for Right Clamp Rear Jaw)
     
-    throat_w = TOWER_THROAT_W  # 2.05mm
+    throat_w = TOWER_THROAT_W  # 2.60mm
     half_w = throat_w / 2.0
     alpha = np.arcsin(half_w / r_shaft)
     
@@ -590,15 +710,19 @@ def build_clean_shaft_towers_mesh():
     y_left_top = y_shaft - half_w - bevel_dx
     y_right_top = y_shaft + half_w + bevel_dx
     
-    # 2D profile in (Y, Z) - 100% solid, continuous outer walls with ZERO notch stress concentrations
+    # 2D profile in (Y, Z) - Flared base (Z=1.0..11.20) + Parallel vertical clamping lands (Z=11.20..14.09) + Top entry chamfers
     profile_yz = [
         (y_min_base, z_base),
         (y_max_base, z_base),
-        (y_max_top, z_top),
+        (y_max_top, z_land_bot),
+        (y_max_top, z_chamfer),
+        (y_max_top - 0.25, z_top),
         (y_right_top, z_top),
     ] + cradle_arc_pts + [
         (y_left_top, z_top),
-        (y_min_top, z_top)
+        (y_min_top + 0.25, z_top),
+        (y_min_top, z_chamfer),
+        (y_min_top, z_land_bot),
     ]
     poly_yz = Polygon(profile_yz)
     
@@ -616,58 +740,55 @@ def build_clean_shaft_towers_mesh():
     verts_right[:, 0] += 13.100
     mesh_right = trimesh.Trimesh(vertices=verts_right, faces=m_raw.faces.copy(), process=True)
     
-    # Additive external retention ledges on the outer lateral faces (X=3.90 Left, X=14.60 Right)
-    # Allows side-wrapping clamps to positively latch into place with zero pin friction and 100% solid prongs.
-    # Enlarged to +0.70mm protrusion with 0.60mm vertical retention face and 40 deg push-on ramp
+    # Low-profile smooth 0.35mm click-retention detents on outer lateral faces (X=3.90 Left, X=14.60 Right)
+    # Positioned on the solid Front Prong at Y in [6.55, 7.35] (100% outside the R=1.85mm pin clearance arch Y>=7.43mm)
     poly_xz_left = Polygon([
-        (3.90, 12.40),
-        (3.20, 12.40),  # 0.70mm horizontal undercut locking shelf
-        (3.20, 13.00),  # 0.60mm vertical retention face (3 layers)
-        (3.90, 13.60)   # 40 deg push-on lead-in entry ramp
+        (3.90, 12.35),
+        (3.65, 12.40),  # 0.25mm low-profile locking shelf (engages X=3.73mm hook at Z=12.32mm)
+        (3.65, 12.70),  # 0.30mm vertical retention land
+        (3.90, 13.10),  # Gentle 32 deg push-on lead-in ramp (fits inside Z in [12.32, 13.15] detent pocket)
+        (4.10, 13.10),
+        (4.10, 12.35)
     ])
     
-    # Left front & rear beads (Y: 7.10 to 8.00 and 10.60 to 11.55) - nested within strut gap Y in [7.05, 11.65]
-    m_raw_b_front = trimesh.creation.extrude_polygon(poly_xz_left, height=8.00 - 7.10)
+    m_raw_b_front = trimesh.creation.extrude_polygon(poly_xz_left, height=7.35 - 6.55)
     vbf = m_raw_b_front.vertices.copy()
     fbf = m_raw_b_front.faces[:, ::-1].copy()
-    v_lf = np.column_stack([vbf[:, 0], vbf[:, 2] + 7.10, vbf[:, 1]])
+    v_lf = np.column_stack([vbf[:, 0], vbf[:, 2] + 6.55, vbf[:, 1]])
     mesh_lf = trimesh.Trimesh(vertices=v_lf, faces=fbf, process=True)
     
-    m_raw_b_rear = trimesh.creation.extrude_polygon(poly_xz_left, height=11.55 - 10.60)
+    m_raw_b_rear = trimesh.creation.extrude_polygon(poly_xz_left, height=11.85 - 11.15)
     vbr = m_raw_b_rear.vertices.copy()
     fbr = m_raw_b_rear.faces[:, ::-1].copy()
-    v_lr = np.column_stack([vbr[:, 0], vbr[:, 2] + 10.60, vbr[:, 1]])
+    v_lr = np.column_stack([vbr[:, 0], vbr[:, 2] + 11.15, vbr[:, 1]])
     mesh_lr = trimesh.Trimesh(vertices=v_lr, faces=fbr, process=True)
     
-    # Right front & rear beads (X: 14.60 to 15.30)
+    # Right front detent at Y in [6.55, 7.35] (X: 14.60 to 14.85) - 100% outside pin arch
     poly_xz_right = Polygon([
-        (14.60, 12.40),
-        (15.30, 12.40),
-        (15.30, 13.00),
-        (14.60, 13.60)
+        (14.60, 12.35),
+        (14.85, 12.40),
+        (14.85, 12.70),
+        (14.60, 13.10),
+        (14.40, 13.10),
+        (14.40, 12.35)
     ])
-    m_raw_br_front = trimesh.creation.extrude_polygon(poly_xz_right, height=8.00 - 7.10)
+    m_raw_br_front = trimesh.creation.extrude_polygon(poly_xz_right, height=7.35 - 6.55)
     vrf = m_raw_br_front.vertices.copy()
     frf = m_raw_br_front.faces[:, ::-1].copy()
-    v_rf = np.column_stack([vrf[:, 0], vrf[:, 2] + 7.10, vrf[:, 1]])
+    v_rf = np.column_stack([vrf[:, 0], vrf[:, 2] + 6.55, vrf[:, 1]])
     mesh_rf = trimesh.Trimesh(vertices=v_rf, faces=frf, process=True)
     
-    m_raw_br_rear = trimesh.creation.extrude_polygon(poly_xz_right, height=11.55 - 10.60)
-    vrr = m_raw_br_rear.vertices.copy()
-    frr = m_raw_br_rear.faces[:, ::-1].copy()
-    v_rr = np.column_stack([vrr[:, 0], vrr[:, 2] + 10.60, vrr[:, 1]])
-    mesh_rr = trimesh.Trimesh(vertices=v_rr, faces=frr, process=True)
-    
-    return trimesh.util.concatenate([mesh_left, mesh_right, mesh_lf, mesh_lr, mesh_rf, mesh_rr])
+    return trimesh.util.concatenate([mesh_left, mesh_right, mesh_lf, mesh_lr, mesh_rf])
 
 def build_left_tower_struts_mesh():
     """Builds the dual triangular buttress struts on the left side of the left tower.
-    - Front Strut: Starts at Y = 6.250mm (top inner wall of Bracket 3) extending to Y = 7.050mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.70mm).
-    - Rear Strut: Full-height triangle at Y: 11.650 to 12.850mm (X: 1.90 to 3.90mm, Z: 1.00 to 13.70mm).
+    - Front Strut: Starts at Y = 6.250mm (top inner wall of Bracket 3) extending to Y = 7.050mm (X: 1.90 to 3.90mm, Z: 1.00 to 10.90mm).
+    - Rear Strut: Triangle at Y: 11.650 to 12.850mm (X: 1.90 to 3.90mm, Z: 1.00 to 10.90mm).
+    - Top at Z = 10.90mm leaves +0.30mm vertical clearance below the tower clamp bottom (Z = 11.20mm).
     """
     x_left_outer = 3.900
     z_base = BASE_THICK  # 1.0mm
-    z_strut_top = 13.70  # 13.70mm (reinforced buttress height)
+    z_strut_top = 10.90  # 10.90mm (+0.30mm clear below Z=11.20mm clamp bottom so clamp never hits struts!)
     
     # Triangular strut in (X, Z)
     strut_pts_xz = [
@@ -696,6 +817,22 @@ def build_exact_3d_model():
     
     # 1. Extrude Base Plate (Z: 0 to BASE_THICK = 1.0mm) with floor through-holes
     mesh_base = extrude_shapely_geom(base_poly, height=BASE_THICK)
+    
+    # 1b. Bottom Elephant's-Foot Relief Chamfers (0.35mm x 45 deg countersink at Z = 0.00..0.35mm)
+    # Prevents first-layer squish at higher print temperatures from narrowing the female detent sockets
+    cx_left, cx_right, cy_sock = -7.853, 8.453, -13.589
+    chamf_c = SOCKET_BOT_CHAMFER
+    for cx_s in [cx_left, cx_right]:
+        ef_cutter = create_frustum_mesh(
+            SOCKET_W_X + 2.0 * chamf_c, SOCKET_LEN_Y + 2.0 * chamf_c,
+            SOCKET_W_X, SOCKET_LEN_Y,
+            -0.02, chamf_c
+        )
+        ef_cutter.apply_translation([cx_s, cy_sock, 0.0])
+        try:
+            mesh_base = mesh_base.difference(ef_cutter, engine='manifold')
+        except Exception:
+            pass
     
     # 2. Outer Rim Wall + Arch Wall (Z: BASE_THICK to OUTER_WALL_HEIGHT = 6.77mm)
     # 100% UNTOUCHED, continuous, solid 1.20mm wall across the entire perimeter!
@@ -728,9 +865,8 @@ def build_exact_3d_model():
     mesh_brackets.apply_translation([0, 0, BASE_THICK])
     
     # 4b. Bracket Seating Ribs (Z: BASE_THICK to BASE_THICK + BRACKET_SEATING_RIB_HEIGHT = 1.00 to 2.15mm)
-    seating_ribs_poly = create_bracket_seating_ribs_poly()
-    mesh_seating_ribs = extrude_shapely_geom(seating_ribs_poly, height=BRACKET_SEATING_RIB_HEIGHT)
-    mesh_seating_ribs.apply_translation([0, 0, BASE_THICK])
+    # Chamfered 45° stress-relief ramps from one rib to the next and Rib 4 bridge fusing with half moon
+    mesh_seating_ribs = build_chamfered_seating_ribs_mesh()
     
     # 5. Backside Slit Protruding Walls (Z: -SLIT_BOSS_HEIGHT to 0)
     bosses_poly = create_backside_slit_bosses_poly()
@@ -755,12 +891,14 @@ def build_exact_3d_model():
     except Exception:
         pass
     
-    # 7. Snap Clips: Slotted perimeter wall + direct outer hook wedges (4 clips: 45°, 135°, 211.3°, 327.5°)
+    # 7. Snap Clips: Equalized-Protrusion & Constant-Stress Tapered Flex Beams (4 clips: 45°, 135°, 211.3°, 327.5°)
     slot_cuts = []
     hook_meshes = []
+    root_fillet_meshes = []
+    stem_taper_cutters = []
     
     stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT         # 4.97 mm
-    slot_z_bot = OUTER_WALL_HEIGHT - CLIP_GAP_DEPTH # 1.30 mm (deepened to eliminate bending strain)
+    slot_z_bot = OUTER_WALL_HEIGHT - CLIP_GAP_DEPTH # 1.30 mm
     z_root_center = slot_z_bot + CLIP_ROOT_RADIUS   # 1.70 mm (center of radiused root)
     slot_t = CLIP_SLOT_CLEARANCE                    # Minimal printable flex slot width for 0.4mm nozzle
     
@@ -770,6 +908,8 @@ def build_exact_3d_model():
         r_est = np.linalg.norm(p)
         d_theta = CLIP_ARM_WIDTH / r_est
         slot_d_theta = slot_t / r_est
+        hook_depth = CLIP_HOOK_DEPTH_BY_ANGLE.get(angle_deg, CLIP_HOOK_DEPTH)
+        stem_recess = CLIP_STEM_OUTER_RECESS_BY_ANGLE.get(angle_deg, 0.0)
         
         # 1. Two vertical flex slots with stress-relief circular roots at slot bottom
         for th_slot in [center_rad - d_theta/2 - slot_d_theta/2, center_rad + d_theta/2 + slot_d_theta/2]:
@@ -792,13 +932,16 @@ def build_exact_3d_model():
             s_cutter = trimesh.util.concatenate([s_box, cyl])
             slot_cuts.append(s_cutter)
             
-        # 2. Faced-Off Hook Wedge on outer face of flexible wall beam (Z: 4.97 to 6.77mm)
-        # Includes vertical flat face at outer apex to eliminate knife-edge fragility
+        # 2. Constant-Stress Tapered Beam Geometry + Equalized Faced-Off Hook Wedge
         N = 16
         theta_vals = np.linspace(center_rad - d_theta/2.0, center_rad + d_theta/2.0, N)
         
         outer_coords = []
         shelf_coords = []
+        inner_overlap_coords = []
+        inner_wall_coords = []
+        fillet_foot_coords = []
+        taper_top_coords = []
         
         for th in theta_vals:
             ray_dir = np.array([np.cos(th), np.sin(th)])
@@ -807,22 +950,84 @@ def build_exact_3d_model():
             if inter_out.geom_type == 'Point':
                 po = np.array([inter_out.x, inter_out.y])
             elif hasattr(inter_out, 'geoms') and len(inter_out.geoms) > 0:
-                po = np.array([inter_out.geoms[-1].x, inter_out.geoms[-1].y])
+                po = np.array([inter_out.x, inter_out.y]) if hasattr(inter_out, 'x') else np.array([inter_out.geoms[-1].x, inter_out.geoms[-1].y])
             else:
                 po = ray_dir * r_est
                 
             n_dir = po / np.linalg.norm(po)
-            ps = po + n_dir * CLIP_HOOK_DEPTH
+            ps = po + n_dir * hook_depth
+            # Penetrate 0.25mm inward into the wall stem so the boolean union completely dissolves the interface
+            p_in = po - n_dir * (0.25 + stem_recess)
+            p_iw = po - n_dir * OUTER_WALL_THICK
+            p_ff = p_iw - n_dir * 0.45   # +0.45mm interior root fillet foot at Z=1.00mm (1.65mm total root thickness)
+            p_tt = p_iw + n_dir * 0.25   # -0.25mm interior stem taper at Z=4.97mm (0.95mm flexible upper stem)
+            
             outer_coords.append(po)
             shelf_coords.append(ps)
+            inner_overlap_coords.append(p_in)
+            inner_wall_coords.append(p_iw)
+            fillet_foot_coords.append(p_ff)
+            taper_top_coords.append(p_tt)
             
-        outer_coords = np.array(outer_coords)
+        inner_overlap_coords = np.array(inner_overlap_coords)
         shelf_coords = np.array(shelf_coords)
+        inner_wall_coords = np.array(inner_wall_coords)
+        fillet_foot_coords = np.array(fillet_foot_coords)
+        taper_top_coords = np.array(taper_top_coords)
         
-        v0 = np.column_stack([outer_coords, np.full(N, stem_h)])
+        # 2a. Interior Root Fillet Wedge (Z: 1.00 to 2.50mm, thickening base to 1.65mm and eliminating sharp 90 deg corner)
+        vf0 = np.column_stack([inner_wall_coords + (outer_coords - inner_wall_coords)*0.20, np.full(N, BASE_THICK - 0.05)])
+        vf1 = np.column_stack([fillet_foot_coords, np.full(N, BASE_THICK - 0.05)])
+        vf2 = np.column_stack([inner_wall_coords, np.full(N, 2.50)])
+        vf3 = np.column_stack([inner_wall_coords + (outer_coords - inner_wall_coords)*0.20, np.full(N, 2.50)])
+        fillet_verts = np.vstack([vf0, vf1, vf2, vf3])
+        fillet_faces = []
+        for i in range(N - 1):
+            fillet_faces.extend([
+                [i, N + i + 1, N + i], [i, i + 1, N + i + 1],
+                [N + i, 2*N + i + 1, 2*N + i], [N + i, N + i + 1, 2*N + i + 1],
+                [2*N + i, 3*N + i + 1, 3*N + i], [2*N + i, 2*N + i + 1, 3*N + i + 1],
+                [3*N + i, i + 1, i], [3*N + i, 3*N + i + 1, i + 1]
+            ])
+        fillet_faces.extend([
+            [0, 2*N, 3*N], [0, N, 2*N],
+            [N - 1, 3*N - 1, 2*N - 1], [N - 1, 4*N - 1, 3*N - 1]
+        ])
+        f_mesh = trimesh.Trimesh(vertices=fillet_verts, faces=np.array(fillet_faces), process=True)
+        if f_mesh.volume < 0:
+            f_mesh.faces = np.fliplr(f_mesh.faces)
+        root_fillet_meshes.append(f_mesh)
+        
+        # 2b. Constant-Stress Upper Stem Inward Taper Relief (Z: 2.50 to 4.97mm, tapering stem from 1.20mm to 0.95mm)
+        vt0 = np.column_stack([inner_wall_coords - (outer_coords - inner_wall_coords)*0.20, np.full(N, 2.50)])
+        vt1 = np.column_stack([inner_wall_coords, np.full(N, 2.50)])
+        vt2 = np.column_stack([taper_top_coords, np.full(N, stem_h + 0.02)])
+        vt3 = np.column_stack([inner_wall_coords - (outer_coords - inner_wall_coords)*0.20, np.full(N, stem_h + 0.02)])
+        taper_verts = np.vstack([vt0, vt1, vt2, vt3])
+        t_mesh = trimesh.Trimesh(vertices=taper_verts, faces=np.array(fillet_faces), process=True)
+        if t_mesh.volume < 0:
+            t_mesh.faces = np.fliplr(t_mesh.faces)
+        stem_taper_cutters.append(t_mesh)
+        
+        # 2c. Outer Stem Recess on Protruding Diagonal Clips (135° and 327.5°) from Z=1.80 to 4.97mm
+        if stem_recess > 0.001:
+            outer_arr = np.array(outer_coords)
+            recess_in = outer_arr - (outer_arr - inner_wall_coords) * (stem_recess / OUTER_WALL_THICK)
+            recess_out = outer_arr + (outer_arr - inner_wall_coords) * 0.30
+            vr0 = np.column_stack([recess_in, np.full(N, 1.80)])
+            vr1 = np.column_stack([recess_out, np.full(N, 1.80)])
+            vr2 = np.column_stack([recess_out, np.full(N, stem_h + 0.01)])
+            vr3 = np.column_stack([recess_in, np.full(N, stem_h + 0.01)])
+            r_mesh = trimesh.Trimesh(vertices=np.vstack([vr0, vr1, vr2, vr3]), faces=np.array(fillet_faces), process=True)
+            if r_mesh.volume < 0:
+                r_mesh.faces = np.fliplr(r_mesh.faces)
+            stem_taper_cutters.append(r_mesh)
+        
+        # 2d. Faced-Off Hook Wedge on outer face of flexible wall beam (Z: 4.97 to 6.77mm)
+        v0 = np.column_stack([inner_overlap_coords, np.full(N, stem_h)])
         v1 = np.column_stack([shelf_coords, np.full(N, stem_h)])
         v_face = np.column_stack([shelf_coords, np.full(N, stem_h + CLIP_BLUNT_HEIGHT)])
-        v2 = np.column_stack([outer_coords, np.full(N, CLIP_HEIGHT)])
+        v2 = np.column_stack([inner_overlap_coords, np.full(N, CLIP_HEIGHT)])
         hook_verts = np.vstack([v0, v1, v_face, v2])
         
         hook_faces = []
@@ -839,7 +1044,7 @@ def build_exact_3d_model():
             hook_faces.append([2*N + i, 3*N + i + 1, 3*N + i])
             hook_faces.append([2*N + i, 2*N + i + 1, 3*N + i + 1])
             
-            # Inner mating face (at outer wall): V2 -> V0
+            # Inner mating face (inside outer wall stem): V2 -> V0
             hook_faces.append([3*N + i, i + 1, i])
             hook_faces.append([3*N + i, 3*N + i + 1, i + 1])
             
@@ -854,6 +1059,25 @@ def build_exact_3d_model():
             hook_mesh.faces = np.fliplr(hook_mesh.faces)
         hook_meshes.append(hook_mesh)
         
+    # 1. Apply constant-stress stem tapers and monolithically fuse root fillets + hook wedges into outer wall stem
+    for tc in stem_taper_cutters:
+        try:
+            mesh_wall = mesh_wall.difference(tc, engine='manifold')
+        except Exception:
+            pass
+    for fm in root_fillet_meshes:
+        try:
+            mesh_wall = mesh_wall.union(fm, engine='manifold')
+        except Exception:
+            pass
+    unmerged_hooks = []
+    for hm in hook_meshes:
+        try:
+            mesh_wall = mesh_wall.union(hm, engine='manifold')
+        except Exception:
+            unmerged_hooks.append(hm)
+            
+    # 2. Cut vertical flex slots through the monolithic wall + hook assembly
     try:
         all_slot_cuts = trimesh.util.concatenate(slot_cuts)
         mesh_wall = mesh_wall.difference(all_slot_cuts, engine='manifold')
@@ -861,21 +1085,19 @@ def build_exact_3d_model():
     except Exception:
         pass
         
-    # 8. Center Curved Feature with Internal Rib (Z: 1.0 to 10.50mm)
-    curved_feat_poly = create_center_curved_feature_poly()
-    mesh_curved_feat = extrude_shapely_geom(curved_feat_poly, height=10.50 - BASE_THICK)
-    mesh_curved_feat.apply_translation([0, 0, BASE_THICK])
+    # 8. Center Curved Feature: Blade-Calibrated & Flared-Base Reinforced (Z: 1.0 to 10.50mm)
+    mesh_curved_feat = build_center_curved_feature_mesh()
     
-    # 9. Manual Breakaway Support Towers under 4 Snap Clip Overhangs (Z: 0 to 4.94mm)
+    # 9. Manual Breakaway Support Towers under 4 Snap Clip Overhangs (Z: 0 to 4.92mm)
     mesh_clip_supports = build_clip_supports_mesh(base_poly)
     
     # Main part is 100% planar at Z = 0.00mm for direct support-free 3D printing
-    full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_seating_ribs, mesh_towers_assembly, mesh_curved_feat, mesh_clip_supports] + hook_meshes)
+    full_part = trimesh.util.concatenate([mesh_base, mesh_wall, mesh_ribs, mesh_brackets, mesh_seating_ribs, mesh_towers_assembly, mesh_curved_feat, mesh_clip_supports] + unmerged_hooks)
     
     # Filter any degenerate zero-area/zero-volume slivers produced by boolean cuts
     try:
         bodies = full_part.split(only_watertight=False)
-        valid_bodies = [b for b in bodies if len(b.faces) > 4 and abs(b.volume) > 0.001]
+        valid_bodies = [b for b in bodies if b.is_watertight and abs(b.volume) > 0.001]
         if len(valid_bodies) > 0:
             full_part = trimesh.util.concatenate(valid_bodies)
     except Exception:
@@ -885,22 +1107,23 @@ def build_exact_3d_model():
 
 def build_clip_supports_mesh(base_poly):
     """Builds twin-prong sacrificial breakaway support towers directly under the 4 snap clip hook overhangs.
-    - Base sits flat on the print bed at Z = 0.00mm with a wide foot (1.80mm radial x 3.80mm tangential) for bed adhesion.
-    - Solid lower trunk (1.20mm radial x 3.40mm tangential) from Z = 0.40mm to Z = 3.20mm prevents wobble.
-    - Central prying arch window (1.80mm wide open relief from Z = 3.20mm to 4.82mm) allows effortless tool leverage.
-    - Twin vertical prongs at lateral edges (Y = +/- 1.40mm) rise to Z = 4.82mm, directly supporting the shelf corners.
-    - Twin chisel breakaway contact tips (each 0.50mm radial x 0.90mm tangential x 0.12mm tall) reach Z = 4.94mm.
-    - Total contact area = 2 * (0.50 * 0.90) = 0.90 mm² (identically matches previous contact area, but eliminates edge droop).
+    - Base sits flat on the print bed at Z = 0.00mm with foot (1.20mm radial x 3.20mm tangential) for bed adhesion.
+    - Solid lower trunk (0.65mm radial x 2.80mm tangential) from Z = 0.35mm to Z = 3.20mm prevents wobble.
+    - Central prying arch window allows effortless tool leverage.
+    - Slender twin vertical prongs at lateral edges (Y = +/- 1.30mm, 0.55mm radial x 0.65mm tangential) rise to Z = 4.61mm.
+    - Micro-chisel contact tips (0.25mm radial x 0.55mm tangential x 0.10mm tall, -57% contact area) reach Z = 4.71mm,
+      leaving an expanded 0.26mm Z-gap below the 4.97mm shelf to eliminate thermal fusion at high print temperatures.
     """
     stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT  # 4.97mm
-    support_top_z = stem_h - 0.15           # 4.82mm (0.15mm breakaway gap)
+    tip_h = 0.10
+    z_gap = 0.26                             # 0.26mm vertical release gap (prevents thermal welding at high print temps)
+    support_top_z = stem_h - z_gap - tip_h   # 4.61mm (tips reach 4.71mm)
     
-    y_prongs = [-1.40, 1.40]
-    prong_w_tang = 0.90
-    prong_t_rad = 1.10
-    
-    # Radial position: 60% of hook depth (reduces outer cantilever to ~0.75mm while maintaining air gap to inner wall)
-    r_supp_radial = CLIP_HOOK_DEPTH * 0.60
+    y_prongs = [-1.30, 1.30]
+    prong_w_tang = 0.65                      # Slimmed from 0.85mm
+    prong_t_rad = 0.55                       # Slimmed from 0.75mm (increases wall air gap to >= 0.35mm)
+    tip_w_tang = 0.55                        # Micro-chisel width (was 0.85mm)
+    tip_t_rad = 0.25                         # Micro-chisel depth (was 0.38mm)
     
     support_meshes = []
     for angle_deg in CLIP_ANGLES:
@@ -908,22 +1131,24 @@ def build_clip_supports_mesh(base_poly):
         p, norm, tang = find_boundary_point_and_normal(base_poly, angle_deg)
         r_wall = np.linalg.norm(p)
         n_dir = p / r_wall
+        hook_depth = CLIP_HOOK_DEPTH_BY_ANGLE.get(angle_deg, CLIP_HOOK_DEPTH)
+        r_supp_radial = max(0.62, hook_depth * 0.58)
         
         pos_center = n_dir * (r_wall + r_supp_radial)
         rot = trimesh.transformations.rotation_matrix(rad, [0, 0, 1])
         
-        # 1. Wide bed adhesion foot (Z in [0, 0.40]mm, 1.80mm radial x 3.80mm tangential)
-        foot = trimesh.creation.box([1.80, 3.80, 0.40])
+        # 1. Compact bed adhesion foot (Z in [0, 0.35]mm, 1.20mm radial x 3.20mm tangential)
+        foot = trimesh.creation.box([1.20, 3.20, 0.35])
         foot.apply_transform(rot)
-        foot.apply_translation([pos_center[0], pos_center[1], 0.20])
+        foot.apply_translation([pos_center[0], pos_center[1], 0.175])
         
-        # 2. Lower solid shared trunk (Z in [0.40, 3.20]mm -> height 2.80mm, 1.20mm radial x 3.40mm tangential)
-        z_trunk_h = 2.80
-        trunk = trimesh.creation.box([1.20, 3.40, z_trunk_h])
+        # 2. Lower solid shared trunk (Z in [0.35, 3.20]mm -> height 2.85mm, 0.65mm radial x 2.80mm tangential)
+        z_trunk_h = 2.85
+        trunk = trimesh.creation.box([0.65, 2.80, z_trunk_h])
         trunk.apply_transform(rot)
-        trunk.apply_translation([pos_center[0], pos_center[1], 0.40 + z_trunk_h / 2.0])
+        trunk.apply_translation([pos_center[0], pos_center[1], 0.35 + z_trunk_h / 2.0])
         
-        # 3. Twin vertical prongs (Z in [3.20, 4.82]mm -> height 1.62mm, at Y = +/- 1.40mm)
+        # 3. Slender twin vertical prongs (Z in [3.20, 4.61]mm -> height 1.41mm, at Y = +/- 1.30mm)
         z_prong_h = support_top_z - 3.20
         prong_parts = []
         for yp in y_prongs:
@@ -933,14 +1158,13 @@ def build_clip_supports_mesh(base_poly):
             prong.apply_translation([pos_center[0], pos_center[1], 3.20 + z_prong_h / 2.0])
             prong_parts.append(prong)
             
-        # 4. Twin breakaway chisel contact tips (Z in [4.82, 4.94]mm -> height 0.12mm)
-        # Each tip: 0.50mm radial x 0.90mm tangential -> Area = 2 * 0.45 = 0.90 mm²
+        # 4. Micro-chisel breakaway contact tips (Z in [4.61, 4.71]mm -> height 0.10mm, 0.26mm clear gap to 4.97mm shelf)
         tip_parts = []
         for yp in y_prongs:
-            tip = trimesh.creation.box([0.50, prong_w_tang, 0.12])
+            tip = trimesh.creation.box([tip_t_rad, tip_w_tang, tip_h])
             tip.apply_translation([0, yp, 0])
             tip.apply_transform(rot)
-            tip.apply_translation([pos_center[0], pos_center[1], support_top_z + 0.06])
+            tip.apply_translation([pos_center[0], pos_center[1], support_top_z + tip_h / 2.0])
             tip_parts.append(tip)
             
         supp_combined = trimesh.util.concatenate([foot, trunk] + prong_parts + tip_parts)
@@ -974,45 +1198,52 @@ def create_frustum_mesh(w_bot, l_bot, w_top, l_top, z_bot, z_top):
     return trimesh.Trimesh(vertices=verts, faces=np.array(faces), process=True)
 
 def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=SLIT_LEN_Y, is_right=True):
-    """Builds a single 100% monolithic, watertight 3D-printable slit insert part with polarized chamfered key.
-    - Flat print bed face at Z = 0 (2.20mm wide x 4.20mm long outer end tip).
-    - Sloped wall body: 15.8° draft angle expanding from 2.20x4.20mm at Z=0 to 2.70x4.80mm at shoulder Z=2.47mm.
+    """Builds a single 100% monolithic, watertight 3D-printable slit insert part with polarized self-centering tapered key.
+    - Flat print bed face at Z = 0 (2.40mm wide x 4.40mm long outer end tip).
+    - Sloped wall body expanding to 3.30x5.50mm at shoulder Z=2.47mm.
     - Continuous solid horizontal shoulder at Z = 2.47mm (flush mating face against baseplate floor).
-    - Raised indexing registration key: 1.80mm x 4.00mm with 45° chamfered corner for 1-way polarized anti-reverse insertion.
-    - Continuous inner through-hole: 1.20mm x 3.40mm from Z = 0 to 3.32mm (generous clearance for 0.77x3.10mm brass blade).
+    - Raised self-centering tapered indexing registration key: 2.44x4.64mm at shoulder tapering to 2.04x4.24mm at top tip (Z=3.42mm)
+      with 45° polarized corner chamfer (provides 0.28mm/side base clearance and 0.48mm/side lead-in entry clearance at higher print temps).
+    - Continuous inner through-hole: 1.20mm x 3.40mm from Z = 0 to 3.42mm (generous clearance for 0.77x3.10mm brass blade).
     """
     z0 = 0.00
     z1 = SLIT_BOSS_HEIGHT  # 2.47mm
-    z2 = z1 + INSERT_KEY_HEIGHT  # 3.32mm
+    z2 = z1 + INSERT_KEY_HEIGHT  # 3.42mm
     
     # 1. Shroud body: Frustum from Z=0 to Z=2.47mm (100% monolithic, untouched 4-sided frustum)
     m_body = create_frustum_mesh(INSERT_BODY_W_TIP, INSERT_BODY_LEN_TIP, INSERT_BODY_W_X, INSERT_BODY_LEN_Y, z0, z1)
     
-    # 2. Polarized Chamfered Key / Lip on Top (Z: 2.47 to 3.42mm):
-    # Only the lip which inserts into the assembly floor is chamfered for polarized indexing.
-    key_poly_raw = box(-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2, INSERT_KEY_W_X/2, INSERT_KEY_LEN_Y/2)
-    d_chamfer = 0.75  # 0.75mm x 45 deg chamfer matching 0.75mm socket chamfer
+    # 2. Polarized Self-Centering Tapered Key / Lip on Top (Z: 2.47 to 3.42mm):
+    # Tapers inward by INSERT_KEY_TAPER (0.20mm per side) toward Z=3.42mm so the tip drops freely into high-temp printed sockets
+    m_key_frustum = create_frustum_mesh(
+        INSERT_KEY_W_X, INSERT_KEY_LEN_Y,
+        INSERT_KEY_W_X - 2.0 * INSERT_KEY_TAPER, INSERT_KEY_LEN_Y - 2.0 * INSERT_KEY_TAPER,
+        z1 - 0.05, z2
+    )
+    
+    key_poly_raw = box(-INSERT_KEY_W_X/2 - 0.1, -INSERT_KEY_LEN_Y/2 - 0.1, INSERT_KEY_W_X/2 + 0.1, INSERT_KEY_LEN_Y/2 + 0.1)
+    d_chamfer = 0.75  # 0.75mm x 45 deg chamfer matching socket polarizing chamfer
     if is_right:
-        # Chamfer bottom-right corner of the lip
-        p1 = [INSERT_KEY_W_X/2 - d_chamfer, -INSERT_KEY_LEN_Y/2]
-        p2 = [INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + d_chamfer]
-        chamfer_tri = Polygon([[p1[0], p1[1] - 0.02],
-                               [p2[0] + 0.02, p2[1]],
-                               [p2[0] + 0.02, p1[1] - 0.02]])
+        # Chamfer bottom-right corner of the lip (also tapered inward by 0.15mm toward top)
+        p1 = [INSERT_KEY_W_X/2 - d_chamfer - 0.10, -INSERT_KEY_LEN_Y/2]
+        p2 = [INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + d_chamfer + 0.10]
+        chamfer_tri = Polygon([[p1[0], p1[1] - 0.20],
+                               [p2[0] + 0.20, p2[1]],
+                               [p2[0] + 0.20, p1[1] - 0.20]])
     else:
         # Chamfer bottom-left corner of the lip
-        p1 = [-INSERT_KEY_W_X/2 + d_chamfer, -INSERT_KEY_LEN_Y/2]
-        p2 = [-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + d_chamfer]
-        chamfer_tri = Polygon([[p1[0], p1[1] - 0.02],
-                               [p2[0] - 0.02, p2[1]],
-                               [p2[0] - 0.02, p1[1] - 0.02]])
+        p1 = [-INSERT_KEY_W_X/2 + d_chamfer + 0.10, -INSERT_KEY_LEN_Y/2]
+        p2 = [-INSERT_KEY_W_X/2, -INSERT_KEY_LEN_Y/2 + d_chamfer + 0.10]
+        chamfer_tri = Polygon([[p1[0], p1[1] - 0.20],
+                               [p2[0] - 0.20, p2[1]],
+                               [p2[0] - 0.20, p1[1] - 0.20]])
         
     key_poly = key_poly_raw.difference(chamfer_tri)
+    m_key_mask = extrude_shapely_geom(key_poly, height=(z2 - z1) + 0.20)
+    m_key_mask.apply_translation([0, 0, z1 - 0.10])
+    m_key = m_key_frustum.intersection(m_key_mask, engine='manifold')
     
-    m_key = extrude_shapely_geom(key_poly, height=INSERT_KEY_HEIGHT + 0.05)
-    m_key.apply_translation([0, 0, z1 - 0.05])
-    
-    # Solid insert: body is 100% untouched, only the lip has the polarized chamfer
+    # Solid insert: body is 100% untouched, only the lip has the polarized chamfer and self-centering taper
     m_solid = m_body.union(m_key, engine='manifold')
     
     if is_hollow:

@@ -21,7 +21,7 @@ clip_gap_depth      = 5.47;
 clip_arm_thick      = 1.2;
 clip_arm_width      = 4.2;
 clip_slot_clearance = 0.35;
-clip_hook_depth     = 2.39;
+clip_hook_depth     = 1.25;
 clip_hook_height    = 1.8;
 slit_boss_height    = 2.47;
 slit_boss_wall      = 0.8;
@@ -264,21 +264,21 @@ module base_plate_2d() {
         // Left Polarized Detent Socket (X = -7.853mm, bottom-left chamfer)
         translate([-7.853, -13.589])
             polygon(points = [
-                [-1.450 + 0.85, -2.550],
-                [1.450, -2.550],
-                [1.450, 2.550],
-                [-1.450, 2.550],
-                [-1.450, -2.550 + 0.85]
+                [-1.500 + 0.85, -2.600],
+                [1.500, -2.600],
+                [1.500, 2.600],
+                [-1.500, 2.600],
+                [-1.500, -2.600 + 0.85]
             ]);
             
         // Right Polarized Detent Socket (X = +8.453mm, bottom-right chamfer)
         translate([8.453, -13.589])
             polygon(points = [
-                [-1.450, -2.550],
-                [1.450 - 0.85, -2.550],
-                [1.450, -2.550 + 0.85],
-                [1.450, 2.550],
-                [-1.450, 2.550]
+                [-1.500, -2.600],
+                [1.500 - 0.85, -2.600],
+                [1.500, -2.600 + 0.85],
+                [1.500, 2.600],
+                [-1.500, 2.600]
             ]);
     }
 }
