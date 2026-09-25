@@ -284,18 +284,23 @@ module base_plate_2d() {
 }
 
 module bracket_seating_ribs_2d() {
+    // Left Pair (all 4 stations)
     for (y = [5.25, 1.95, -1.35, -4.65]) {
-        // Left Pair
         translate([-9.857, y - 0.6/2])
             square([1.8, 0.6]);
         translate([-4.501, y - 0.6/2])
             square([1.8, 0.6]);
-        // Right Pair
+    }
+    // Right Pair (top 3 stations separate)
+    for (y = [5.25, 1.95, -1.35]) {
         translate([2.701, y - 0.6/2])
             square([1.8, 0.6]);
         translate([8.057, y - 0.6/2])
             square([1.8, 0.6]);
     }
+    // One Pair Below Half Moon (extends all the way across)
+    translate([2.701, -4.650 - 0.6/2])
+        square([7.156, 0.6]);
 }
 
 module complete_part() {

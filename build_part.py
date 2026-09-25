@@ -261,14 +261,11 @@ def create_all_brackets_poly():
     return unary_union([b1, b2, b3, b4])
 
 def create_bracket_seating_ribs_poly(ext=BRACKET_SEATING_RIB_EXT, thick=BRACKET_SEATING_RIB_THICK, y_stations=BRACKET_SEATING_RIB_Y):
-    """Creates 2D polygons for the 4 sets of 1.15mm tall seating ribs in both bracket pairs.
-    - Left Pair (B1 & B2):
-      - Ribs on B1 extend from spine X = -9.857 to X = -9.857 + ext = -8.057
-      - Ribs on B2 extend from spine X = -2.701 to X = -2.701 - ext = -4.501
+    """Creates 2D polygons for the seating ribs in both bracket pairs.
+    - Left Pair (B1 & B2): all 4 stations extend 1.80mm into channel from spine walls.
     - Right Pair (B3 & B4):
-      - Ribs on B3 extend from spine X = +2.701 to X = +2.701 + ext = +4.501
-      - Ribs on B4 extend from spine X = +9.857 to X = +9.857 - ext = +8.057
-    - Rib 1 bottom edge sits flush with the bracket hook corner at Y = 4.950mm.
+      * Top 3 stations (5.25, 1.95, -1.35mm) extend 1.80mm into channel.
+      * Station 4 (-4.65mm, below half moon) extends all the way across from B3 to B4 spine to become one.
     """
     boxes = []
     b1_spine = -9.857
@@ -276,81 +273,87 @@ def create_bracket_seating_ribs_poly(ext=BRACKET_SEATING_RIB_EXT, thick=BRACKET_
     b3_spine = 2.701
     b4_spine = 9.857
     
+    # Left Pair (all 4 stations)
     for y_c in y_stations:
         y_min = y_c - thick / 2.0
         y_max = y_c + thick / 2.0
-        # Left Pair
         boxes.append(box(b1_spine, y_min, b1_spine + ext, y_max))
         boxes.append(box(b2_spine - ext, y_min, b2_spine, y_max))
-        # Right Pair
+        
+    # Right Pair (top 3 stations separate, station 4 extends all the way across)
+    for y_c in y_stations[:3]:
+        y_min = y_c - thick / 2.0
+        y_max = y_c + thick / 2.0
         boxes.append(box(b3_spine, y_min, b3_spine + ext, y_max))
         boxes.append(box(b4_spine - ext, y_min, b4_spine, y_max))
+        
+    if len(y_stations) >= 4:
+        y_c4 = y_stations[3]
+        boxes.append(box(b3_spine, y_c4 - thick / 2.0, b4_spine, y_c4 + thick / 2.0))
         
     return unary_union(boxes)
 
 def build_chamfered_seating_ribs_mesh():
-    """Builds the 3D mesh of the 4 pairs of 45° chamfered seating ribs inside Brackets 1..4,
-    plus continuous Rib 4 bridge across the central channel under the brass U-bridge,
-    fusing directly into the half-moon base.
-    - Flat top lands at Z = 2.15mm (width = 0.60mm in Y) preserve the exact brass insert seating surface.
-    - 45° chamfered flanks (dz/dy = 1, extending 0.80mm in +/-Y) ramp smoothly down to the Z = 1.00mm floor.
-    - Eliminates 90° notch stress concentration from one rib to the next.
-    - At Rib 4 (+Y flank), smoothly merges into the half-moon base at Y = -4.30mm.
+    """Builds the 3D mesh of the seating ribs:
+    - Standard Unchamfered Ribs (1.15mm tall, Z in [1.00, 2.15]mm, 0.60mm thick in Y, extending 1.80mm into channel):
+      * All 4 pairs on Left Brackets (B1 & B2): Y = 5.25, 1.95, -1.35, -4.65 mm.
+      * Top 3 pairs on Right Brackets (B3 & B4): Y = 5.25, 1.95, -1.35 mm.
+    - One Pair Below Half Moon (Right Brackets B3 & B4 at Y = -4.65 mm):
+      * Extended all the way across from B3 spine (X = 2.701 mm) to B4 spine (X = 9.857 mm) to become ONE continuous rib.
+      * Chamfered on -Y flank (ramping smoothly over 0.80mm from Z = 1.00mm to 2.15mm) to eliminate stress concentration.
+      * Flat seating land at Z = 2.15mm meets and fuses seamlessly with the half-moon base at Y = -4.30mm.
     """
     z_floor = BASE_THICK  # 1.00 mm
     z_rib = z_floor + BRACKET_SEATING_RIB_HEIGHT  # 2.15 mm
-    chamf_dy = 0.80  # 0.80mm chamfer ramp
+    h_rib = BRACKET_SEATING_RIB_HEIGHT  # 1.15 mm
     
     b1_spine = -9.857
     b2_spine = -2.701
     b3_spine = 2.701
     b4_spine = 9.857
     ext = BRACKET_SEATING_RIB_EXT
+    thick = BRACKET_SEATING_RIB_THICK
     
-    rib_meshes = []
-    
+    # 1. Standard unchamfered rectangular ribs
+    std_boxes = []
+    # Left pair (B1 & B2) - all 4 stations
     for y_c in BRACKET_SEATING_RIB_Y:
-        # Check if adjacent to half moon base (Rib 4 at y_c = -4.65mm)
-        pts_yz = [
-            (y_c - 0.30 - chamf_dy, z_floor),
-            (y_c - 0.30, z_rib),
-            (y_c + 0.30, z_rib),
-            (min(y_c + 0.30 + chamf_dy, -4.30 if y_c == -4.65 else y_c + 0.30 + chamf_dy), z_floor)
-        ]
-        poly_yz = Polygon(pts_yz)
+        y_min = y_c - thick / 2.0
+        y_max = y_c + thick / 2.0
+        std_boxes.append(box(b1_spine, y_min, b1_spine + ext, y_max))
+        std_boxes.append(box(b2_spine - ext, y_min, b2_spine, y_max))
         
-        # Left Pair (B1 & B2)
-        m_b1 = trimesh.creation.extrude_polygon(poly_yz, height=ext)
-        v1 = m_b1.vertices.copy()
-        v_b1 = np.column_stack([v1[:, 2] + b1_spine, v1[:, 0], v1[:, 1]])
-        rib_meshes.append(trimesh.Trimesh(vertices=v_b1, faces=m_b1.faces.copy(), process=True))
+    # Right pair (B3 & B4) - only top 3 stations
+    for y_c in BRACKET_SEATING_RIB_Y[:3]:
+        y_min = y_c - thick / 2.0
+        y_max = y_c + thick / 2.0
+        std_boxes.append(box(b3_spine, y_min, b3_spine + ext, y_max))
+        boxes_b4 = box(b4_spine - ext, y_min, b4_spine, y_max)
+        std_boxes.append(boxes_b4)
         
-        m_b2 = trimesh.creation.extrude_polygon(poly_yz, height=ext)
-        v2 = m_b2.vertices.copy()
-        v_b2 = np.column_stack([v2[:, 2] + (b2_spine - ext), v2[:, 0], v2[:, 1]])
-        rib_meshes.append(trimesh.Trimesh(vertices=v_b2, faces=m_b2.faces.copy(), process=True))
-        
-        # Right Pair (B3 & B4)
-        if y_c == -4.65:
-            # Rib 4 spans continuously across the entire right side (X in [2.701, 9.857])
-            # under the brass U-bridge, fusing seamlessly into the half-moon base
-            span_r4 = b4_spine - b3_spine
-            m_r4 = trimesh.creation.extrude_polygon(poly_yz, height=span_r4)
-            v4 = m_r4.vertices.copy()
-            v_r4 = np.column_stack([v4[:, 2] + b3_spine, v4[:, 0], v4[:, 1]])
-            rib_meshes.append(trimesh.Trimesh(vertices=v_r4, faces=m_r4.faces.copy(), process=True))
-        else:
-            m_b3 = trimesh.creation.extrude_polygon(poly_yz, height=ext)
-            v3 = m_b3.vertices.copy()
-            v_b3 = np.column_stack([v3[:, 2] + b3_spine, v3[:, 0], v3[:, 1]])
-            rib_meshes.append(trimesh.Trimesh(vertices=v_b3, faces=m_b3.faces.copy(), process=True))
-            
-            m_b4 = trimesh.creation.extrude_polygon(poly_yz, height=ext)
-            v4 = m_b4.vertices.copy()
-            v_b4 = np.column_stack([v4[:, 2] + (b4_spine - ext), v4[:, 0], v4[:, 1]])
-            rib_meshes.append(trimesh.Trimesh(vertices=v_b4, faces=m_b4.faces.copy(), process=True))
-            
-    return trimesh.util.concatenate(rib_meshes)
+    poly_std = unary_union(std_boxes)
+    m_std = extrude_shapely_geom(poly_std, height=h_rib)
+    m_std.apply_translation([0, 0, z_floor])
+    
+    # 2. The ONE pair below the half moon (Right pair, y_c = -4.65)
+    # Extends all the way across from b3_spine (2.701) to b4_spine (9.857) to become one
+    # Chamfered on -Y flank
+    chamf_dy = 0.80  # 0.80mm ramp
+    y_c4 = -4.65
+    pts_yz = [
+        (y_c4 - thick/2.0 - chamf_dy, z_floor), # -5.75, 1.00
+        (y_c4 - thick/2.0, z_rib),              # -4.95, 2.15
+        (min(y_c4 + thick/2.0, -4.30), z_rib),  # -4.35, 2.15
+        (-4.30, z_floor)                        # -4.30, 1.00 (meets half moon base)
+    ]
+    poly_yz = Polygon(pts_yz)
+    span_r4 = b4_spine - b3_spine
+    m_r4_poly = trimesh.creation.extrude_polygon(poly_yz, height=span_r4)
+    v4 = m_r4_poly.vertices.copy()
+    v_r4 = np.column_stack([v4[:, 2] + b3_spine, v4[:, 0], v4[:, 1]])
+    m_r4 = trimesh.Trimesh(vertices=v_r4, faces=m_r4_poly.faces.copy(), process=True)
+    
+    return trimesh.util.concatenate([m_std, m_r4])
 
 def create_arch_wall_poly():
     """Creates a clean geometric U-arch wall (1.20mm thick) with 5.00mm interior width at base.
@@ -1472,18 +1475,23 @@ module base_plate_2d() {{
 }}
 
 module bracket_seating_ribs_2d() {{
+    // Left Pair (all 4 stations)
     for (y = [{", ".join(f"{y:.2f}" for y in BRACKET_SEATING_RIB_Y)}]) {{
-        // Left Pair
         translate([{-9.857:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
             square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
         translate([{-2.701 - BRACKET_SEATING_RIB_EXT:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
             square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
-        // Right Pair
+    }}
+    // Right Pair (top 3 stations separate)
+    for (y = [{", ".join(f"{y:.2f}" for y in BRACKET_SEATING_RIB_Y[:3])}]) {{
         translate([{2.701:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
             square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
         translate([{9.857 - BRACKET_SEATING_RIB_EXT:.3f}, y - {BRACKET_SEATING_RIB_THICK}/2])
             square([{BRACKET_SEATING_RIB_EXT}, {BRACKET_SEATING_RIB_THICK}]);
     }}
+    // One Pair Below Half Moon (extends all the way across)
+    translate([{2.701:.3f}, {-4.65:.3f} - {BRACKET_SEATING_RIB_THICK}/2])
+        square([{9.857 - 2.701:.3f}, {BRACKET_SEATING_RIB_THICK}]);
 }}
 
 module complete_part() {{
