@@ -6,3 +6,15 @@ __pycache__/
 # OS generated files
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Logs & temp files
+*.log
+*.tmp
+*.bak
+
+# Temporary test outputs & diagnostic renders
+testing/*_test.stl
+testing/*_test.3mf
+testing/camera_test*.png
+testing/arrow_test*.png

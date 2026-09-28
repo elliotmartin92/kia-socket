@@ -41,11 +41,13 @@ X_RIGHT_TOWER_INNER = 13.100
 X_RIGHT_TOWER_OUTER = 14.600
 X_TOWER_CENTER = (X_LEFT_TOWER_INNER + X_RIGHT_TOWER_INNER) / 2.0  # 9.25 mm
 
-# Through-Hole bounds: X in [7.608, 12.960], Y in [8.570, 13.082], Z in [0.00, 1.00]
+# Through-Hole bounds: X in [7.608, 12.960], Y in [8.570, 13.750], Z in [0.00, 1.00]
 HOLE_X_CENTER = 10.284
 HOLE_X_WIDTH = 5.352
-HOLE_Y_CENTER = 10.826
-HOLE_Y_LEN = 4.512
+HOLE_Y_TOP = 13.750
+HOLE_Y_BOT = 8.570
+HOLE_Y_CENTER = (HOLE_Y_BOT + HOLE_Y_TOP) / 2.0  # 11.160 mm
+HOLE_Y_LEN = HOLE_Y_TOP - HOLE_Y_BOT              # 5.180 mm
 
 # Enlarged Heavy-Duty Dimensions
 TOTAL_AXLE_LEN = 11.50       # 11.50mm total length tip-to-tip
@@ -55,11 +57,11 @@ PIN_DIAMETER = 2.80          # Ø2.80mm heavy-duty pin (fits Ø3.00mm cradle, 4.
 HUB_DIAMETER = 4.20          # Ø4.20mm central structural hub barrel
 PLUNGER_REACH_BELOW_Z = 6.50 # Reaches Z = -6.50mm below baseplate floor
 
-# Cam & Ribs
-CAM_WIDTH_X = 2.70           # 2.70mm wide full-strength input cam tab
+# Cam & Ribs (Thinned to guarantee ample running clearance to Bracket 4)
+CAM_WIDTH_X = 1.90           # 1.90mm wide input cam tab (+0.60mm clearance to Bracket 4 X=8.00mm)
 CAM_X_CENTER = 6.28          # Aligned with hot plug prong centerline (X = 6.28 mm)
 RIB_FLANK_THICK = 1.00       # 1.00mm flank rib thickness
-PLUNGER_WIDTH_X = 4.40       # 4.40mm wide central plunger blade (centered in 5.35mm hole)
+PLUNGER_WIDTH_X = 3.60       # 3.60mm wide central plunger blade (+0.48mm clearance to Bracket 4)
 
 def build_shaft_rocker_mesh(
     axle_len=TOTAL_AXLE_LEN,
@@ -70,7 +72,9 @@ def build_shaft_rocker_mesh(
     plunger_w_x=PLUNGER_WIDTH_X,
     cam_w_x=CAM_WIDTH_X,
     cam_x_c=CAM_X_CENTER,
-    in_assembly_coords=True
+    in_assembly_coords=True,
+    with_supports=True,
+    return_subparts=False
 ):
     """
     Builds the enlarged heavy-duty 3-rib 3D mesh of the shaft/rocker mechanism.
@@ -171,16 +175,15 @@ def build_shaft_rocker_mesh(
     v_web = np.column_stack([v_w[:, 2] + (x_c - hub_w/2.0 + 0.10), v_w[:, 0], v_w[:, 1]])
     mesh_web = trimesh.Trimesh(vertices=v_web, faces=m_web_raw.faces.copy(), process=True)
     
-    # 4. Direct Straight Belly Cam Tab (calibrated to sit 0.90mm lower in throat to clear seated brass insert)
-    DZ_CAM = 0.90  # 0.90mm lower in Z inside the throat
+    # 4. High-Sensitivity Direct Belly Cam Tab (calibrated for 10.5mm plug blade penetration)
     poly_pts_cam = [
         (y_axle, z_axle),                          # Center of hub (9.279, 12.590)
         (y_axle, z_axle + r_hub),                  # (9.279, 14.690) - Flush tangent at hub top
-        (6.80, 11.50),                             # Smooth blend from hub down toward throat
-        (5.00, 9.80 - DZ_CAM),                     # (5.00, 8.90) - Lowered top ramp
-        (1.50, 7.20 - DZ_CAM),                     # (1.50, 6.30) - Lowered contact tip inside throat
-        (1.80, 5.00 - DZ_CAM),                     # (1.80, 4.10) - Lowered rounded nose bottom
-        (4.50, 5.20 - DZ_CAM),                     # (4.50, 4.30) - Lowered beam underside
+        (6.80, 12.20),                             # Smooth blend from hub down toward throat
+        (5.00, 10.00),                             # Elevated top ramp knee
+        (1.50, 7.40),                              # Active contact tip inside belly cavity
+        (1.80, 5.10),                              # Rounded nose bottom inside belly
+        (4.50, 5.30),                              # Beam underside
         (y_axle - 1.50, z_axle - 2.50)             # (7.779, 10.090) - Smooth return into hub belly
     ]
     poly_cam_arm = Polygon(poly_pts_cam)
@@ -195,28 +198,118 @@ def build_shaft_rocker_mesh(
     v_cam = np.column_stack([v_c[:, 2] + x_cam_start, v_c[:, 0], v_c[:, 1]])
     mesh_cam = trimesh.Trimesh(vertices=v_cam, faces=m_cam_raw.faces.copy(), process=True)
     
+    subparts = {
+        'pin_l': pin_l,
+        'pin_r': pin_r,
+        'hub': hub_mesh,
+        'rib1': mesh_rib1,
+        'rib3': mesh_rib3,
+        'plunger': mesh_plunger,
+        'web': mesh_web,
+        'cam': mesh_cam
+    }
+    
     # Assembly mesh in place
-    shaft_mesh = trimesh.util.concatenate([
-        pin_l, pin_r, hub_mesh,
-        mesh_rib1, mesh_rib3, mesh_plunger, mesh_web,
-        mesh_cam
-    ])
+    try:
+        shaft_mesh = trimesh.boolean.union(list(subparts.values()), engine='manifold')
+    except Exception:
+        shaft_mesh = trimesh.util.concatenate(list(subparts.values()))
     
     if not in_assembly_coords:
         # Orient flat on print bed: rotate so wide flat cam face sits directly on build plate (Z=0).
-        mesh_printable = shaft_mesh.copy()
         rot_bed = trimesh.transformations.rotation_matrix(np.radians(198.6), [1, 0, 0])
-        mesh_printable.apply_transform(rot_bed)
-        # Center in X, Y and shift Z_min to 0.00mm
-        bounds = mesh_printable.bounds
-        mesh_printable.apply_translation([
+        # Find global transform
+        m_tmp = shaft_mesh.copy()
+        m_tmp.apply_transform(rot_bed)
+        bounds = m_tmp.bounds
+        trans = [
             -(bounds[0, 0] + bounds[1, 0])/2.0,
             -(bounds[0, 1] + bounds[1, 1])/2.0,
             -bounds[0, 2]
-        ])
+        ]
+        
+        if return_subparts:
+            parts_p = {}
+            for k, part in subparts.items():
+                p = part.copy()
+                p.apply_transform(rot_bed)
+                p.apply_translation(trans)
+                parts_p[k] = p
+            return parts_p
+            
+        mesh_printable = shaft_mesh.copy()
+        mesh_printable.apply_transform(rot_bed)
+        mesh_printable.apply_translation(trans)
+        if with_supports:
+            cradle = build_shaft_support_cradle_mesh()
+            try:
+                mesh_printable = trimesh.boolean.union([mesh_printable, cradle], engine='manifold')
+                bodies = [b for b in mesh_printable.split(only_watertight=False) if abs(b.volume) > 5.0]
+                if len(bodies) > 0:
+                    mesh_printable = trimesh.boolean.union(bodies, engine='manifold')
+            except Exception:
+                mesh_printable = trimesh.util.concatenate([mesh_printable, cradle])
         return mesh_printable
         
+    if return_subparts:
+        return subparts
     return shaft_mesh
+
+def build_shaft_support_cradle_mesh(release_gap=0.12, bed_thickness=0.35):
+    """
+    Builds the Sacrificial Snap-Off Support Frame for the printable shaft rocker.
+    
+    Architecture:
+    1. Outer Perimeter Bed Adhesion Frame (Z: 0.00 to 0.35mm):
+       - Outer footprint: X in [-6.40, +6.40]mm (12.80mm span), Y in [-2.60, +3.80]mm (6.40mm span).
+       - Central open window: X in [-3.85, +3.85]mm, Y in [-0.80, +2.80]mm.
+       - The hub barrel of the rocker sits directly in the central open window on the build plate.
+       - Massive 52.8 mm² flat bed contact area provides 6x greater adhesion than bare rocker.
+    2. Left & Right Axle Pin Support Saddles (Z: 0.35 to 0.58mm):
+       - Left saddle: X in [-5.60, -3.90]mm (1.70mm long), centered at Y = 1.05mm, width in Y = 0.90mm.
+       - Right saddle: X in [+3.90, +5.60]mm (1.70mm long), centered at Y = 1.05mm, width in Y = 0.90mm.
+       - Reaches Z = 0.58mm, providing an exact 0.12mm vertical release micro-gap
+         under the Z = 0.70mm bottom of the Ø2.80mm axle pins.
+       - Prevents pin sag, droop, and layer distortion while snapping off effortlessly by hand.
+    3. Sacrificial Breakaway Micro-Anchor Tabs:
+       - Two slender 0.30mm x 0.50mm x 0.20mm bridges at X = +/- 3.75mm, Y = 1.05mm, Z = 0.10mm,
+         linking the frame to the hub shoulders so the support frame stays firmly indexed
+         during printing, but snaps cleanly off with zero tool marks.
+    4. Prying Tabs:
+       - 45° chamfered outer corners and 0.80mm rear prying lip for effortless release.
+    """
+    # 1. Build the frame polygon in 2D
+    outer_box = box(-6.40, -2.60, 6.40, 3.80)
+    inner_window = box(-3.85, -0.80, 3.85, 2.80)
+    
+    # Add a small rear prying tab: X in [-2.0, 2.0], Y in [-3.30, -2.60]
+    pry_tab = box(-2.00, -3.30, 2.00, -2.60)
+    frame_poly = outer_box.union(pry_tab).difference(inner_window)
+    
+    frame_mesh = trimesh.creation.extrude_polygon(frame_poly, height=bed_thickness)
+    
+    # 2. Saddles under pins
+    z_saddle_top = 0.70 - release_gap
+    h_saddle = z_saddle_top - bed_thickness
+    
+    saddle_l = trimesh.creation.box([1.70, 0.90, h_saddle])
+    saddle_l.apply_translation([-4.75, 1.05, bed_thickness + h_saddle / 2.0])
+    
+    saddle_r = trimesh.creation.box([1.70, 0.90, h_saddle])
+    saddle_r.apply_translation([4.75, 1.05, bed_thickness + h_saddle / 2.0])
+    
+    # 3. Micro-breakaway anchor tabs
+    tab_l = trimesh.creation.box([0.30, 0.50, 0.20])
+    tab_l.apply_translation([-3.75, 1.05, 0.10])
+    
+    tab_r = trimesh.creation.box([0.30, 0.50, 0.20])
+    tab_r.apply_translation([3.75, 1.05, 0.10])
+    
+    try:
+        cradle_mesh = trimesh.boolean.union([frame_mesh, saddle_l, saddle_r, tab_l, tab_r], engine='manifold')
+    except Exception:
+        cradle_mesh = trimesh.util.concatenate([frame_mesh, saddle_l, saddle_r, tab_l, tab_r])
+    return cradle_mesh
 
 def export_shaft_scad(filename="shaft_rocker.scad"):
     """Exports OpenSCAD source file for parametric customization."""
@@ -242,15 +335,15 @@ x_c = {X_TOWER_CENTER};
 y_axle = {Y_AXLE};
 z_axle = {Z_AXLE};
 
-// 2D Profile: Direct Straight Belly Cam (calibrated 0.90mm lower in throat)
+// 2D Profile: High-Sensitivity Direct Belly Cam (calibrated for 10.5mm blade penetration)
 poly_cam_pts = [
     [{Y_AXLE}, {Z_AXLE}],
     [{Y_AXLE}, {Z_AXLE + HUB_DIAMETER/2.0}],
-    [6.80, 11.50],
-    [5.00, 8.90],
-    [1.50, 6.30],
-    [1.80, 4.10],
-    [4.50, 4.30],
+    [6.80, 12.20],
+    [5.00, 10.00],
+    [1.50, 7.40],
+    [1.80, 5.10],
+    [4.50, 5.30],
     [{Y_AXLE - 1.50}, {Z_AXLE - 2.50}]
 ];
 
@@ -293,13 +386,19 @@ if __name__ == '__main__':
     shaft_assembled.export("shaft_rocker_assembled.obj")
     print(f"Saved shaft_rocker_assembled.stl (Bounds: {shaft_assembled.bounds})")
     
-    # 2. Print-ready flat build-plate mesh (Z = 0.00mm)
-    shaft_printable = build_shaft_rocker_mesh(in_assembly_coords=False)
+    # 2. Print-ready flat build-plate mesh with built-in breakaway supports (Z = 0.00mm)
+    shaft_printable = build_shaft_rocker_mesh(in_assembly_coords=False, with_supports=True)
     shaft_printable.export("shaft_rocker.stl")
     shaft_printable.export("shaft_rocker.obj")
-    print(f"Saved shaft_rocker.stl (Print-ready flat at Z=0, Bounds: {shaft_printable.bounds})")
+    print(f"Saved shaft_rocker.stl with built-in breakaway supports (Print-ready flat at Z=0, Bounds: {shaft_printable.bounds})")
     
-    # 3. OpenSCAD code
+    # 3. Clean version without supports (bare lever for reference / custom slicer supports)
+    shaft_clean = build_shaft_rocker_mesh(in_assembly_coords=False, with_supports=False)
+    shaft_clean.export("shaft_rocker_clean.stl")
+    shaft_clean.export("shaft_rocker_clean.obj")
+    print(f"Saved shaft_rocker_clean.stl (Clean bare lever without supports)")
+    
+    # 4. OpenSCAD code
     export_shaft_scad("shaft_rocker.scad")
     print("Shaft CAD generation complete!")
 

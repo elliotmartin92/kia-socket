@@ -17,11 +17,11 @@ bracket_h           = 4.6;
 bracket_seating_rib_h = 1.15;
 bracket_seating_rib_ext = 1.8;
 clip_height         = 6.77;
-clip_gap_depth      = 5.47;
+clip_gap_depth      = 3.7;
 clip_arm_thick      = 1.2;
 clip_arm_width      = 4.2;
-clip_slot_clearance = 0.35;
-clip_hook_depth     = 1.25;
+clip_slot_clearance = 0.6;
+clip_hook_depth     = 1.85;
 clip_hook_height    = 1.8;
 slit_boss_height    = 2.47;
 slit_boss_wall      = 0.8;
@@ -261,25 +261,13 @@ module base_plate_2d() {
         translate([10.28 - 5.35/2, 10.83 - 4.51/2])
             square([5.35, 4.51]);
             
-        // Left Polarized Detent Socket (X = -7.853mm, bottom-left chamfer)
-        translate([-7.853, -13.589])
-            polygon(points = [
-                [-1.500 + 0.85, -2.600],
-                [1.500, -2.600],
-                [1.500, 2.600],
-                [-1.500, 2.600],
-                [-1.500, -2.600 + 0.85]
-            ]);
+        // Left Slit Hole (X = -7.853mm, 1.20 x 3.40mm)
+        translate([-8.453, -15.289])
+            square([1.200, 3.400]);
             
-        // Right Polarized Detent Socket (X = +8.453mm, bottom-right chamfer)
-        translate([8.453, -13.589])
-            polygon(points = [
-                [-1.500, -2.600],
-                [1.500 - 0.85, -2.600],
-                [1.500, -2.600 + 0.85],
-                [1.500, 2.600],
-                [-1.500, 2.600]
-            ]);
+        // Right Slit Hole (X = +8.453mm, 1.20 x 3.40mm)
+        translate([7.853, -15.289])
+            square([1.200, 3.400]);
     }
 }
 

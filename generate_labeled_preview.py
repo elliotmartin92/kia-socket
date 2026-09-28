@@ -134,22 +134,22 @@ ax1.annotate('Top Tab (Centered)\n8.20mm W (fits 8.33mm gap)', xy=(0, 20.2), xyt
              fontsize=8.5, fontweight='bold', color='#1565c0', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1565c0'))
 
 # Snap Clip 45°
-ax1.annotate('Snap Clip (45.0°)\n4.20mm Beam, 2.39mm Hook', xy=(clip_pts[45.0][0], clip_pts[45.0][1]), xytext=(19.0, 16.5),
+ax1.annotate('Snap Clip (45.0°)\nSturdy Beam (L=3.70mm)\n1.85mm Crown Hook', xy=(clip_pts[45.0][0], clip_pts[45.0][1]), xytext=(19.0, 16.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 135°
-ax1.annotate('Snap Clip (135.0°)\n4.20mm Beam, 2.39mm Hook', xy=(clip_pts[135.0][0], clip_pts[135.0][1]), xytext=(-30.5, 16.5),
+ax1.annotate('Snap Clip (135.0°)\nSturdy Beam (L=3.70mm)\n1.85mm Crown Hook', xy=(clip_pts[135.0][0], clip_pts[135.0][1]), xytext=(-30.5, 16.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 211.3°
-ax1.annotate('Snap Clip (211.3°)\n4.42mm to Ear, 8.47mm to Tab', xy=(clip_pts[211.3][0], clip_pts[211.3][1]), xytext=(-31.0, -10.5),
+ax1.annotate('Snap Clip (211.3°)\nSturdy Beam (L=3.70mm)\n1.85mm Crown Hook', xy=(clip_pts[211.3][0], clip_pts[211.3][1]), xytext=(-31.0, -10.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 327.5°
-ax1.annotate('Snap Clip (327.5°)\n4.42mm to Ear, 8.47mm to Tab', xy=(clip_pts[327.5][0], clip_pts[327.5][1]), xytext=(17.5, -10.5),
+ax1.annotate('Snap Clip (327.5°)\nSturdy Beam (L=3.70mm)\n1.85mm Crown Hook', xy=(clip_pts[327.5][0], clip_pts[327.5][1]), xytext=(17.5, -10.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
@@ -174,7 +174,7 @@ ax1.annotate('Right Tower & Reinforcing\nBridge Rib (to outer wall)', xy=(14.6, 
              fontsize=8, fontweight='bold', color='#ad1457', bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
 # Top-Right Through-Hole
-ax1.annotate('Through-Hole (5.35x4.51mm)\nPlunger Reach ≥6.5mm', xy=(10.28, 11.5), xytext=(4.0, 22.8),
+ax1.annotate('Through-Hole (5.35x5.18mm)\nExtended Rearward +0.67mm\nPlunger Reach ≥6.5mm', xy=(10.28, 11.5), xytext=(4.0, 22.8),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#d32f2f'),
              fontsize=8, fontweight='bold', color='#d32f2f', bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#d32f2f'))
 
@@ -194,7 +194,7 @@ ax1.annotate('Bracket Pair 3 & 4\n(Height: 4.60mm)', xy=(7.25, -0.5), xytext=(17
              fontsize=8, fontweight='bold', color='#2e7d32', bbox=dict(boxstyle='round,pad=0.2', fc='#e8f5e9', ec='#2e7d32'))
 
 # Center Curved Feature & Dividing Rib
-ax1.annotate('Center Curved Feature (10.50mm H)\nSolid D-Core & Flat Base', xy=(6.28, -3.0), xytext=(-9.0, -5.5),
+ax1.annotate('Center Curved Feature (8.13mm H)\nSolid D-Core & Flat Base', xy=(6.28, -3.6), xytext=(-9.0, -5.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#6a1b9a'),
              fontsize=8, fontweight='bold', color='#6a1b9a', bbox=dict(boxstyle='round,pad=0.2', fc='#f3e5f5', ec='#8e24aa'))
 
@@ -273,13 +273,13 @@ add_3d_callout(ax2, [4.65, 10.20, 14.09], [-22.0, 22.0, 26.0], "Left Tower & Cra
 add_3d_callout(ax2, [13.85, 10.20, 14.09], [22.0, 22.0, 26.0], "Right Tower & Bridge Rib\n(Z=14.09mm)", color='#ad1457', bgcolor='#fce4ec')
 add_3d_callout(ax2, [2.5, 7.67, 4.0], [-29.0, 14.0, 14.0], "Left Buttress Struts\n(0.8mm & 1.2mm)", color='#c2185b', bgcolor='#fce4ec')
 add_3d_callout(ax2, [7.05, 6.5, 8.0], [-3.0, 4.0, 20.0], "Enlarged Shaft Rocker\n(Ø2.8mm Pin, 4.4mm Plunger)", color='#e65100', bgcolor='#fff3e0')
-add_3d_callout(ax2, [clip_pts[135.0][0], clip_pts[135.0][1], 6.77], [-30.0, 16.0, 6.0], "Snap Clip 135°\n(2.39mm Hook)", color='#00838f', bgcolor='#e0f7fa')
-add_3d_callout(ax2, [clip_pts[45.0][0], clip_pts[45.0][1], 6.77], [30.0, 16.0, 6.0], "Snap Clip 45°\n(2.39mm Hook)", color='#00838f', bgcolor='#e0f7fa')
+add_3d_callout(ax2, [clip_pts[135.0][0], clip_pts[135.0][1], 6.77], [-30.0, 16.0, 6.0], "Snap Clip 135°\n(1.85mm Crown Hook, L=3.70mm)", color='#00838f', bgcolor='#e0f7fa')
+add_3d_callout(ax2, [clip_pts[45.0][0], clip_pts[45.0][1], 6.77], [30.0, 16.0, 6.0], "Snap Clip 45°\n(1.85mm Crown Hook, L=3.70mm)", color='#00838f', bgcolor='#e0f7fa')
 add_3d_callout(ax2, [-7.25, 0.0, 4.60], [-28.0, -12.0, 14.0], "Guide Brackets 1 & 2\n(4.60mm H)", color='#2e7d32', bgcolor='#e8f5e9')
 add_3d_callout(ax2, [7.25, 0.0, 4.60], [28.0, -12.0, 14.0], "Guide Brackets 3 & 4\n(4.60mm H)", color='#2e7d32', bgcolor='#e8f5e9')
 add_3d_callout(ax2, [-21.075, 0.0, 3.5], [-30.0, -2.0, -2.0], "Left Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
 add_3d_callout(ax2, [20.200, 0.0, 3.5], [30.0, -2.0, -2.0], "Right Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
-add_3d_callout(ax2, [6.28, -3.2, 10.50], [16.0, 0.0, 20.0], "Center Curved Feature\n(10.50mm H Solid D-Core)", color='#6a1b9a', bgcolor='#f3e5f5')
+add_3d_callout(ax2, [6.28, -3.6, 8.13], [16.0, 0.0, 20.0], "Center Curved Feature\n(8.13mm H Solid D-Core)", color='#6a1b9a', bgcolor='#f3e5f5')
 add_3d_callout(ax2, [0, -8.7, 6.77], [0.0, -34.0, -6.0], "Bottom Central U-Arch\n(7.95mm H, 5mm Inner W)", color='#0d47a1', bgcolor='white')
 add_3d_callout(ax2, [-8.38, -13.66, 0.0], [-17.0, -28.0, -6.0], "Left Slit Detent Socket\n(Press-Fit Insert)", color='#7b1fa2', bgcolor='#f3e5f5')
 add_3d_callout(ax2, [8.38, -13.66, 0.0], [17.0, -28.0, -6.0], "Right Slit Detent Socket\n(Press-Fit Insert)", color='#7b1fa2', bgcolor='#f3e5f5')
@@ -307,56 +307,80 @@ ax3.fill([y_tower_min, y_tower_max, y_tower_max, y_tower_min],
 
 # Baseplate floor (Z: 0 to 1.0mm)
 ax3.fill([0, 18, 18, 0], [0, 0, 1.0, 1.0], color='#78909c', alpha=0.7, label='Base Floor (1.00mm thick, Z=0 datum)')
-# Through-hole cutout in floor
-ax3.fill([8.570, 13.082, 13.082, 8.570], [-0.1, -0.1, 1.1, 1.1], color='white')
+# Through-hole cutout in floor (Y in [8.570, 13.750])
+ax3.fill([8.570, 13.750, 13.750, 8.570], [-0.1, -0.1, 1.1, 1.1], color='white')
 ax3.plot([8.570, 8.570], [-0.1, 1.1], 'r--', linewidth=1.5)
-ax3.plot([13.082, 13.082], [-0.1, 1.1], 'r--', linewidth=1.5)
+ax3.plot([13.750, 13.750], [-0.1, 1.1], 'r--', linewidth=1.5)
 
 # Shaft Pivot Center
 y_axle, z_axle = 9.279, 12.590
+r_hub = 2.10
 ax3.plot(y_axle, z_axle, 'r+', markersize=14, markeredgewidth=2.5, label='Shaft Axis (Y=9.28, Z=12.59)')
 
 # Plunger Arm Profile (Rest Position - Z = -6.50mm, Y = 10.48mm)
 y_rest, z_rest = 10.479, -6.50
 ax3.plot([y_axle, y_rest, y_rest], [z_axle, 4.0, z_rest], color='#e65100', linewidth=4.5, label='Output Plunger (Rest: Y=10.48mm)')
 
-# Plunger Arm Profile (Actuated Position - rotated 7 deg CW)
-theta_act = np.radians(7)
+# CCW Rotation by 7.5 deg caused by downward plug blade push
+theta_act = np.radians(7.5)
 c_a, s_a = np.cos(theta_act), np.sin(theta_act)
-rot_mat = np.array([[c_a, s_a], [-s_a, c_a]])
-p_arm_home = np.array([y_rest - y_axle, z_rest - z_axle])
-p_arm_act = rot_mat @ p_arm_home
-y_act = y_axle + p_arm_act[0]
-z_act = z_axle + p_arm_act[1]
-ax3.plot([y_axle, y_act], [z_axle, z_act], color='#d32f2f', linestyle='--', linewidth=3.0, label=f'Actuated Plunger (Swings -Y to {y_act:.2f}mm)')
 
-# Input Cam Profile (105° Bellcrank Angle, convex crowned rolling contact)
-y_input, z_input = 2.83, 10.42
-ax3.plot([y_axle, y_input], [z_axle, z_input], color='#ffb300', linewidth=4.5, label='Direct 105° Convex Crowned Cam')
+def rot_2d(y, z):
+    dy = y - y_axle
+    dz = z - z_axle
+    yr = y_axle + c_a * dy - s_a * dz
+    zr = z_axle + s_a * dy + c_a * dz
+    return yr, zr
 
-# Y-Axis Oriented Switch (Right-angle switch facing +Y at Z = -6.5mm)
-ax3.fill([5.5, 8.5, 8.5, 5.5], [-7.5, -7.5, -5.5, -5.5], color='#4caf50', alpha=0.85, label='Y-Axis Switch Body')
-ax3.fill([8.5, 9.2, 9.2, 8.5], [-6.8, -6.8, -6.2, -6.2], color='#2e7d32', alpha=0.9, label='Switch Actuator Stem (Faces +Y)')
-ax3.plot([2.0, 10.0], [-7.8, -7.8], color='#1b5e20', linewidth=3, label='PCB Surface (Z = -7.8mm)')
+y_act, z_act = rot_2d(y_rest, z_rest)
+ax3.plot([y_axle, y_act, y_act], [z_axle, 4.0 + (z_act - z_rest), z_act], color='#d32f2f', linestyle='--', linewidth=3.0,
+         label=f'Actuated Plunger (Swings +Y to {y_act:.2f}mm)')
+
+# High-Sensitivity Cam Polygon at Rest and Actuated
+poly_pts_cam = [
+    (y_axle, z_axle),
+    (y_axle, z_axle + r_hub),
+    (6.80, 12.20),
+    (5.00, 10.00),
+    (1.50, 7.40),
+    (1.80, 5.10),
+    (4.50, 5.30),
+    (y_axle - 1.50, z_axle - 2.50)
+]
+cam_ys = [p[0] for p in poly_pts_cam]
+cam_zs = [p[1] for p in poly_pts_cam]
+ax3.fill(cam_ys, cam_zs, color='#ffb300', alpha=0.85, label='High-Sensitivity Cam Profile')
+
+cam_rot = [rot_2d(p[0], p[1]) for p in poly_pts_cam]
+ax3.fill([p[0] for p in cam_rot], [p[1] for p in cam_rot], color='#ffb300', alpha=0.35, linestyle=':', edgecolor='#e65100')
+
+# Plug Blade (Reaching Z = 7.10mm at Y in [0.5, 4.5] mm)
+ax3.fill([0.5, 4.5, 4.5, 0.5], [7.10, 7.10, 18.0, 18.0], color='#90caf9', alpha=0.7, edgecolor='#1976d2', linewidth=1.5,
+         label='Plug Blade (10.5mm Reach, Z_tip=7.1mm)')
+
+# Y-Axis Oriented Tactile Switch (Stem at Y = 12.40mm facing -Y at Z = -6.5mm)
+ax3.fill([12.6, 16.0, 16.0, 12.6], [-7.5, -7.5, -5.5, -5.5], color='#4caf50', alpha=0.85, label='Y-Axis Switch Body')
+ax3.fill([12.0, 12.6, 12.6, 12.0], [-6.8, -6.8, -6.2, -6.2], color='#2e7d32', alpha=0.9, label='Switch Actuator Stem (Faces -Y)')
+ax3.plot([11.0, 17.5], [-7.8, -7.8], color='#1b5e20', linewidth=3, label='PCB Surface (Z = -7.8mm)')
 
 # Annotations
-ax3.annotate('Plug Prong Insertion Push\n(Right Blade Moves +Y)', xy=(y_input, z_input), xytext=(y_input - 3.5, z_input + 2.5),
-             arrowprops=dict(facecolor='#d32f2f', edgecolor='#b71c1c', width=2.2, headwidth=7),
-             fontweight='bold', color='#b71c1c', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#b71c1c'))
+ax3.annotate('Plug Blade Insertion Push\n(10.5mm reach pushes cam ramp)', xy=(3.0, 7.10), xytext=(-1.5, 12.0),
+             arrowprops=dict(facecolor='#1976d2', edgecolor='#0d47a1', width=2.0, headwidth=7),
+             fontweight='bold', color='#0d47a1', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#e3f2fd', ec='#1976d2'))
 
 ax3.annotate('Optimized Snap-Fit Cradle (2.60mm Throat)\nØ3.00mm Socket / Ø2.80mm Axle Snap (0.20mm Lock)', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
              arrowprops=dict(arrowstyle='->', color='#ad1457', lw=1.5),
              fontweight='bold', color='#ad1457', fontsize=8, bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
-ax3.annotate('Through-Hole Cutout\n(Y in [8.57, 13.08] mm)', xy=(10.826, 0.5), xytext=(13.2, 2.5),
+ax3.annotate('Through-Hole Cutout\n(Y in [8.57, 13.75] mm, +0.67mm relief)', xy=(11.16, 0.5), xytext=(7.5, 3.2),
              arrowprops=dict(arrowstyle='->', color='#d32f2f', lw=1.5),
              fontweight='bold', color='#d32f2f', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#d32f2f'))
 
-ax3.annotate(f'Kinematic Stroke: {y_rest - y_act:.2f}mm in -Y\n(Presses Y-axis switch stem)', xy=(y_act, z_act), xytext=(10.5, -9.8),
+ax3.annotate(f'Kinematic Stroke: +{y_act - y_rest:.2f}mm into +Y\n(Depresses switch stem past 12.40mm)', xy=(y_act, z_act), xytext=(2.0, -9.8),
              arrowprops=dict(facecolor='#d32f2f', edgecolor='#b71c1c', width=1.8, headwidth=6),
              fontweight='bold', color='#d32f2f', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#ffebee', ec='#d32f2f'))
 
-ax3.annotate('Tactile Switch Stem\nActuation Point (Z=-6.5mm)', xy=(8.85, -6.5), xytext=(0.5, -9.8),
+ax3.annotate('Tactile Switch Stem\nActuation Threshold (Y=12.40mm)', xy=(12.0, -6.5), xytext=(12.0, -9.8),
              arrowprops=dict(arrowstyle='->', color='#2e7d32', lw=1.5),
              fontweight='bold', color='#2e7d32', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#e8f5e9', ec='#2e7d32'))
 
@@ -367,7 +391,7 @@ ax3.grid(True, linestyle=':', alpha=0.6)
 ax3.set_title("3. Y-Axis Kinematic Stroke: Plunger Swings Horizontally into Switch", fontsize=13, fontweight='bold', pad=12)
 ax3.set_xlabel("Y (mm)")
 ax3.set_ylabel("Z (mm)")
-ax3.legend(loc='upper right', fontsize=7.5)
+ax3.legend(loc='upper right', fontsize=7.0)
 
 plt.tight_layout()
 plt.savefig('labeled_part_preview.png', dpi=200)

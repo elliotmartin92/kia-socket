@@ -20,6 +20,6 @@ print(f"Shaft Rocker:        Z_max = {shaft_printable.bounds[1,2]:.3f} mm (Heigh
 # Target cooling tower height should match or slightly exceed the tallest component
 # e.g., 20.50mm or 20.00mm to cover shaft rocker (19.86mm) with a 0.5-1.0mm safety margin
 recommended_height = 20.50
-print(f"\nRecommended Cooling Tower Height: {recommended_height:.2f} mm (Diameter: Ø8.00 mm)")
+print(f"\nRecommended Cooling Tower Height: {recommended_height:.2f} mm (Diameter: Ø4.00 mm)")
 print(f"Margin above Shaft Rocker tip: {recommended_height - shaft_printable.bounds[1,2]:.2f} mm")
 print(f"Margin above Main Baseplate tower tips: {recommended_height - part_mesh.bounds[1,2]:.2f} mm")

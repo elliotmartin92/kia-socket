@@ -11,24 +11,24 @@ pin_len = 2.00;
 hub_d = 4.2;
 
 plunger_reach_below_z = 6.5;
-plunger_w = 4.4;
+plunger_w = 3.6;
 hole_x_c = 10.284;
 
-cam_w = 2.7;
+cam_w = 1.9;
 cam_x_c = 6.28;
 x_c = 9.25;
 y_axle = 9.279;
 z_axle = 12.59;
 
-// 2D Profile: Direct Straight Belly Cam (calibrated 0.90mm lower in throat)
+// 2D Profile: High-Sensitivity Direct Belly Cam (calibrated for 10.5mm blade penetration)
 poly_cam_pts = [
     [9.279, 12.59],
     [9.279, 14.69],
-    [6.80, 11.50],
-    [5.00, 8.90],
-    [1.50, 6.30],
-    [1.80, 4.10],
-    [4.50, 4.30],
+    [6.80, 12.20],
+    [5.00, 10.00],
+    [1.50, 7.40],
+    [1.80, 5.10],
+    [4.50, 5.30],
     [7.779, 10.09]
 ];
 
