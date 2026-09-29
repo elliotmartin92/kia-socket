@@ -40,13 +40,24 @@ def run_verification():
     print(f"[1] Towers Z_top: {z_top_actual:.2f} mm (Target: {BASE_THICK + TOWER_HEIGHT:.2f} mm)")
     assert abs(z_top_actual - (BASE_THICK + TOWER_HEIGHT)) < 0.05, "Tower height mismatch!"
     
-    # Check that the crown is solid across Y around Y_AXLE at top of tower
-    # There should be vertices at Z_top spanning Y from ~6.55 to ~12.18
-    top_mask = towers.vertices[:, 2] >= z_top_actual - 0.10
+    # Check that the crown is solid and continuous over the axle (rounded arch crown)
+    # Apex sits directly over axle center (Y_AXLE ~ 9.28mm), proving 360° closed socket with no open snap throat
+    top_mask = towers.vertices[:, 2] >= z_top_actual - 0.20
     top_y = towers.vertices[top_mask, 1]
-    print(f"    Top crown continuous Y span: [{np.min(top_y):.2f}, {np.max(top_y):.2f}] mm")
-    assert np.min(top_y) <= 7.0 and np.max(top_y) >= 12.0, "Crown should be continuous across top!"
-    print("    -> PASS: Enclosed 360° sockets confirmed (Zero open snap throat)")
+    print(f"    Top arch crown peak Y span: [{np.min(top_y):.2f}, {np.max(top_y):.2f}] mm (centered over axle {Y_AXLE:.2f} mm)")
+    assert np.min(top_y) <= Y_AXLE <= np.max(top_y), "Crown apex must be centered over axle!"
+    
+    # Check that at springline (Z >= 12.59mm), tower spans full front-to-back width
+    shoulder_mask = towers.vertices[:, 2] >= Z_AXLE
+    shoulder_y = towers.vertices[shoulder_mask, 1]
+    print(f"    Arch shoulder Y span (Z >= {Z_AXLE:.2f} mm): [{np.min(shoulder_y):.2f}, {np.max(shoulder_y):.2f}] mm")
+    assert np.min(shoulder_y) <= 6.50 and np.max(shoulder_y) >= 12.10, "Arch shoulder must span full tower width!"
+    
+    # Check roof thickness over the bore (target >= 1.20mm solid plastic)
+    roof_thickness = z_top_actual - (Z_AXLE + TOWER_BORE_RADIUS)
+    print(f"    Solid roof thickness over bore: {roof_thickness:.2f} mm (Target >= 1.20 mm)")
+    assert roof_thickness >= 1.20, f"Roof thickness too thin: {roof_thickness:.2f} mm"
+    print("    -> PASS: Enclosed 360° sockets with thick rounded crown confirmed (Zero open snap throat)")
     
     # 2. Monolithic Rear Cross-Tie Bridge
     # Check material in bridge zone: X in [6.0, 12.5], Y in [11.6, 12.8], Z in [12.6, 14.5]

@@ -16,7 +16,7 @@
    $$\text{SCALE} = 0.349787\text{ mm/pixel}, \quad X_0 = 128.65\text{ px}, \quad Y_0 = 128.65\text{ px}$$
  - **Axle Datum**: $Y_{\text{axle}} = 9.279\text{ mm}, \quad Z_{\text{axle}} = 12.590\text{ mm}$
  - **Shaft Sockets**: Fully enclosed $360^\circ$ teardrop journal ($\varnothing 3.30\text{ mm}$), $0.25\text{ mm}$ radial clearance around $\varnothing 2.80\text{ mm}$ shaft pin for Print-in-Place pivot.
- - **Towers & Rear Bridge**: Left: $X \in [3.90, 5.40]\text{ mm}$, Right: $X \in [13.10, 14.60]\text{ mm}$ ($7.70\text{ mm}$ clear gap). Towers are united across the rear by a monolithic cross-tie bridge ($X \in [5.40, 13.10]\text{ mm}$, $Y \in [11.60, 12.85]\text{ mm}$, $Z \in [12.60, 14.50]\text{ mm}$) permanently preventing tower spreading.
+ - **Towers & Rear Bridge**: Left: $X \in [3.90, 5.40]\text{ mm}$, Right: $X \in [13.10, 14.60]\text{ mm}$ ($7.70\text{ mm}$ clear gap). Features a thick rounded arch crown ($R_y = 2.85\text{ mm}, R_z = 3.00\text{ mm}$, apex at $Z = 15.59\text{ mm}$, providing $1.35\text{ mm}$ solid plastic roof over the teardrop bore). Towers are united across the rear by a monolithic cross-tie bridge ($X \in [5.40, 13.10]\text{ mm}$, $Y \in [11.60, 12.85]\text{ mm}$, $Z \in [12.60, 15.00]\text{ mm}$, $2.40\text{ mm}$ tall) permanently preventing tower spreading.
  - **Z-Elevation Datum (Main Baseplate)**:
    - $Z = 0.00\text{ mm}$: Flat build datum.
    - $Z \in [0.00, 1.00]\text{ mm}$: Floor plate ($1.00\text{ mm}$).
@@ -25,7 +25,7 @@
    - $Z \in [1.00, 5.60]\text{ mm}$: Guide brackets ($4.60\text{ mm}$ tall).
    - $Z \in [1.00, 6.77]\text{ mm}$: Outer perimeter wall & snap clips ($6.77\text{ mm}$ tall).
    - $Z \in [1.00, 8.125]\text{ mm}$: Center curved D-wall ($7.125\text{ mm}$ tall above floor, base extended to $Y = -5.05\text{ mm}$ as brass insert backstop).
-   - $Z \in [1.00, 14.50]\text{ mm}$: Support towers & monolithic cross-tie bridge ($14.50\text{ mm}$ tall, solid closed crown).
+   - $Z \in [1.00, 15.59]\text{ mm}$: Support towers & monolithic cross-tie bridge ($14.59\text{ mm}$ tall above floor, apex at $Z = 15.59\text{ mm}$, solid rounded arch crown).
  - **Perimeter Clips (4x)**: $45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$. Hook shelf at $Z = 4.97\text{ mm}$, $1.85\text{ mm}$ center depth with $0.20\text{ mm}$ crown ease, $0.53\text{ mm}$ blunt land, $2.07\text{ mm}$ solid hoop ring. Bottom clips ($211.3^\circ, 327.5^\circ$) equipped with hardcoded 45° breakaway support struts from stem.
  - **Integrated Slit Shrouds / Inserts**: In-place backside chimneys ($Z \in [-2.47, 0.00]\text{ mm}$) at $X = -7.853\text{ mm}$ and $+8.453\text{ mm}$, channels $1.10 \times 3.00\text{ mm}$. Supported in 45° print orientation by twin 0.60mm vertical breakaway struts under the 32.5° overhanging back wall with a 1.20mm open center window clearing the slit holes.
 

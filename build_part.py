@@ -98,14 +98,15 @@ INSERT_BODY_W_TIP = 2.40  # 2.40mm outer end width in X at Z=0
 INSERT_BODY_LEN_TIP = 4.40 # 4.40mm outer end length in Y at Z=0
 
 # Shaft Support Towers (Top-Right Above Hole) - Heavy-Duty Reinforced Enclosed PIP
-TOWER_HEIGHT = 13.50         # 13.50mm protrusion above face (Total Z_top = 14.50mm, cradle center Z = 12.59mm)
+TOWER_ARCH_RY = 2.85         # 2.85mm arch radius in Y
+TOWER_ARCH_RZ = 3.00         # 3.00mm arch radius in Z (Apex at Z = 12.59 + 3.00 = 15.59mm, solid 1.35mm roof over bore)
+TOWER_HEIGHT = 14.59         # 14.59mm protrusion above face (Total Z_apex = 15.59mm, cradle center Z = 12.59mm)
 TOWER_Y_BASE_LEN = 6.60      # 6.60mm flared base in Y (Y in [6.250, 12.850]mm, exactly aligned with Bracket 3 top inner wall)
-TOWER_Y_TOP_LEN = 5.63       # 5.63mm flared top in Y (Y in [6.550, 12.180]mm, solid material around cradle)
 TOWER_INTERNAL_GAP = 7.70    # 7.70mm internal gap between reinforced tower inner faces (X: 5.40 to 13.10mm)
 TOWER_WALL_THICK = 1.50      # 1.50mm heavy-duty wall thickness in X (+50% column strength)
 TOWER_BORE_RADIUS = 1.65     # Ø3.30mm teardrop bore for Ø2.80mm shaft pin (0.25mm radial clearance for smooth PIP)
 TOWER_BRIDGE_THICK_Y = 1.25  # 1.25mm thick monolithic rear cross-tie bridge (Y in [11.60, 12.85]mm)
-TOWER_BRIDGE_HEIGHT_Z = 1.90 # 1.90mm tall monolithic rear cross-tie bridge (Z in [12.60, 14.50]mm)
+TOWER_BRIDGE_HEIGHT_Z = 2.40 # 2.40mm tall monolithic rear cross-tie bridge (Z in [12.60, 15.00]mm)
 
 # Side Ears (Mating with 8.30mm enclosure guide slot/gap)
 EAR_GAP = 8.30             # 8.30mm enclosure guide slot/gap
@@ -684,32 +685,35 @@ def build_clean_shaft_towers_mesh():
     """Builds the heavy-duty shaft support towers and rear cross-tie bridge for Print-in-Place (PIP):
     - Left Tower: X in [3.90, 5.40] (1.50mm thick).
     - Right Tower: X in [13.10, 14.60] (1.50mm thick).
-    - Fully enclosed 360° journal sockets with teardrop ceiling apex (45° angle) to prevent bridging sag at 45° print tilt.
-    - Bore diameter: Ø3.30mm (1.65mm radius), providing 0.25mm radial clearance around Ø2.80mm pin for smooth PIP pivot.
-    - Tower height: Z = 14.50mm (solid closed crown, no open throat).
-    - Rear Monolithic Cross-Tie Bridge: Spans X in [5.40, 13.10] at Y in [11.60, 12.85], Z in [12.60, 14.50],
+    - Fully enclosed 360° journal sockets with a smooth rounded arch crown (Apex Z = 15.59mm, R_z = 3.00mm)
+      providing a thick 1.35mm solid roof over the bearing bore.
+    - Bore: Ø3.30mm (1.65mm radius) teardrop profile with 45° apex in machine build direction for smooth PIP pivot.
+    - Rear Monolithic Cross-Tie Bridge: Spans X in [5.40, 13.10] at Y in [11.60, 12.85], Z in [12.60, 15.00],
       rigidly boxing Left and Right towers together so they CANNOT spread under plug insertion force.
     """
     y_shaft = 9.279
+    z_shaft = 12.590
     z_base = BASE_THICK  # 1.0mm
     z_land_bot = 11.200
-    z_tower_top = z_base + TOWER_HEIGHT  # 14.50mm
-    z_cradle_center = 12.590
     r_bore = TOWER_BORE_RADIUS  # 1.65mm (Ø3.30mm bore for Ø2.80mm pin -> 0.25mm radial clearance)
+    arch_rx = TOWER_ARCH_RY     # 2.85mm in Y
+    arch_rz = TOWER_ARCH_RZ     # 3.00mm in Z (Apex Z = 15.59mm)
     
     y_min_base = 6.250
     y_max_base = 12.850
-    y_min_top = 6.550
-    y_max_top = 12.180
+    y_rear_tangent = y_shaft + arch_rx
+    y_front_tangent = y_shaft - arch_rx
     
-    # 1. Exterior boundary of the tower in (Y, Z)
+    # 1. Exterior boundary of the tower in (Y, Z) with smooth rounded arch over axle
+    theta_arch = np.linspace(0, np.pi, 48)
+    arch_pts = [(y_shaft + arch_rx * np.cos(t), z_shaft + arch_rz * np.sin(t)) for t in theta_arch]
+    
     exterior_pts = [
         (y_min_base, z_base),
         (y_max_base, z_base),
-        (y_max_top, z_land_bot),
-        (y_max_top, z_tower_top),
-        (y_min_top, z_tower_top),
-        (y_min_top, z_land_bot),
+        (y_rear_tangent, z_land_bot),
+    ] + arch_pts + [
+        (y_front_tangent, z_land_bot),
     ]
     
     # 2. Teardrop bore profile in (Y, Z)
@@ -718,11 +722,11 @@ def build_clean_shaft_towers_mesh():
     
     # Circular arc for the bottom and sides (270 degrees)
     phi_arc = np.linspace(phi_up + np.pi/4, phi_up + 7*np.pi/4, 48)
-    arc_pts = [(y_shaft + r_bore * np.cos(p), z_cradle_center + r_bore * np.sin(p)) for p in phi_arc]
+    arc_pts = [(y_shaft + r_bore * np.cos(p), z_shaft + r_bore * np.sin(p)) for p in phi_arc]
     
     # Teardrop peak extending upward along phi_up:
     peak_pt = (y_shaft + r_bore * np.sqrt(2.0) * np.cos(phi_up),
-               z_cradle_center + r_bore * np.sqrt(2.0) * np.sin(phi_up))
+               z_shaft + r_bore * np.sqrt(2.0) * np.sin(phi_up))
     
     bore_pts = arc_pts + [peak_pt]
     poly_yz = Polygon(exterior_pts, [bore_pts])
@@ -746,14 +750,21 @@ def build_clean_shaft_towers_mesh():
     # 3. Rear Monolithic Cross-Tie Bridge
     # Spans X in [5.40, 13.10] (width 7.70mm)
     # Y in [11.60, 12.85] (thickness 1.25mm, leaves >0.22mm air gap behind hub)
-    # Z in [12.60, 14.50] (height 1.90mm)
+    # Z in [12.60, 15.00] (height 2.40mm, solidly bracing both towers)
     bridge_box = trimesh.creation.box([TOWER_INTERNAL_GAP, TOWER_BRIDGE_THICK_Y, TOWER_BRIDGE_HEIGHT_Z])
     bridge_box.apply_translation([
         (5.40 + 13.10) / 2.0,       # X center = 9.25 mm
         (11.60 + 12.85) / 2.0,      # Y center = 12.225 mm
-        (12.60 + 14.50) / 2.0       # Z center = 13.55 mm
+        (12.60 + 15.00) / 2.0       # Z center = 13.80 mm
     ])
     
+    try:
+        combined = trimesh.boolean.union([mesh_left, mesh_right, bridge_box], engine='manifold')
+        if combined.is_watertight:
+            return combined
+    except Exception:
+        pass
+        
     return trimesh.util.concatenate([mesh_left, mesh_right, bridge_box])
 
 def build_left_tower_struts_mesh():

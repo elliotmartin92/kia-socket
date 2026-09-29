@@ -74,8 +74,8 @@ py -3 testing/verify_shaft_supports_production.py
   - $Z \in [1.00, 1.50]\text{ mm}$: Internal floor stiffener grid ribs ($0.50\text{ mm}$ tall).
   - $Z \in [1.00, 4.60]\text{ mm}$: Guide brackets ($4.60\text{ mm}$ total height).
   - $Z \in [1.00, 6.77]\text{ mm}$: Outer perimeter wall, snap clip stems, bottom arch wall, and bridge rib ($6.77\text{ mm}$ height).
-  - $Z \in [1.00, 10.50]\text{ mm}$: Center curved feature with reinforced solid core and flat base ($10.50\text{ mm}$ total height).
-  - $Z \in [1.00, 14.09]\text{ mm}$: Shaft support towers ($13.09\text{ mm}$ height above floor, total $14.09\text{ mm}$).
+  - $Z \in [1.00, 8.125]\text{ mm}$: Center curved D-wall ($7.125\text{ mm}$ tall above floor, base extended to $Y = -5.05\text{ mm}$ as brass insert backstop).
+  - $Z \in [1.00, 15.59]\text{ mm}$: Shaft support towers with thick rounded arch crown ($14.59\text{ mm}$ height above floor, apex at $Z = 15.59\text{ mm}$, monolithic cross-tie bridge).
 - **Separate Slit Insert Dimensions**:
   - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.80\text{ mm} \times 5.60\text{ mm}$ outer, $1.20\text{ mm} \times 3.50\text{ mm}$ inner clearance channel for $0.77\text{ mm} \times 3.10\text{ mm}$ part).
   - $Z \in [2.47, 3.32]\text{ mm}$: Indexing registration key ($2.00\text{ mm} \times 4.30\text{ mm} \times 0.85\text{ mm}$) with continuous $1.20\text{ mm} \times 3.50\text{ mm}$ core.
@@ -119,19 +119,21 @@ py -3 testing/verify_shaft_supports_production.py
   - Notch outer sidewalls: placed at **$X = \pm 2.500\text{ mm}$**, aligning with the **interior sidewalls of the arch**.
   - Floor: Solid continuous $1.00\text{ mm}$ floor within the inset wall.
 
-### 3.2. Shaft Support Towers with Heavy-Duty Reinforced Retention Cradles
-- **Shaft Axis**: **$Y = 9.279\text{ mm}$, $Z = 12.59\text{ mm}$** ($\varnothing 3.00\text{ mm}$ shaft cradle socket, centered directly over the through-hole).
+### 3.2. Shaft Support Towers with Enclosed 360° Teardrop Sockets & Thick Rounded Crown (Print-in-Place)
+- **Shaft Axis**: **$Y = 9.279\text{ mm}$, $Z = 12.59\text{ mm}$** ($\varnothing 3.30\text{ mm}$ teardrop journal bore, centered directly over the through-hole).
 - **Left Tower**: $X \in [3.900, 5.400]\text{ mm}$ ($1.50\text{ mm}$ wall thickness).
 - **Right Tower**: $X \in [13.100, 14.600]\text{ mm}$ ($1.50\text{ mm}$ thickness, $0.14\text{ mm}$ clearance right of through-hole).
-- **Internal Clearance Between Towers**: **$7.70\text{ mm}$**.
-- **Flared Trapezoidal Tower Profile (in Y-Z)**:
-  - Base Length in $Y$: **$6.60\text{ mm}$** ($Y \in [6.250, 12.850]\text{ mm}$, shifted $-0.921\text{ mm}$ to align buttress base with top inner wall of Bracket 3 at $Y = 6.250\text{ mm}$).
-  - Top Length in $Y$: **$5.63\text{ mm}$** ($Y \in [6.550, 12.180]\text{ mm}$).
-- **Positive Heavy-Duty Snap-Fit Retention Cradle**:
-  - Socket Diameter: **$\varnothing 3.00\text{ mm}$** (provides $0.20\text{ mm}$ running clearance with $\varnothing 2.80\text{ mm}$ shaft pin).
-  - Retention throat constriction gap: **$2.60\text{ mm}$** ($0.20\text{ mm}$ firm positive mechanical interference with $\varnothing 2.80\text{ mm}$ shaft, $0.10\text{ mm}$ deflection per side to prevent snapping during insertion).
-  - Wrap angle: **$240.0^\circ$** ($>60^\circ$ wrap beyond the equator), securely capturing and locking the axle against vertical ejection.
-  - Wide $45^\circ$ lead-in bevel funnel expanding up to $3.73\text{ mm}$ opening at $Z = 14.09\text{ mm}$ for smooth self-centering downward press-fit insertion.
+- **Internal Clearance Between Towers**: **$7.70\text{ mm}$** (accommodates $7.20\text{ mm}$ hub barrel with $0.25\text{ mm}$ lateral clearance per side).
+- **Enclosed 360° Journal Sockets**:
+  - Bore: Teardrop profile ($\varnothing 3.30\text{ mm}$ circular bottom, $45^\circ$ self-supporting angled apex oriented at $135^\circ$ in Y-Z so that under $45^\circ$ print tilt, the apex points vertically upward, eliminating bridging sag).
+  - Clearance: $0.25\text{ mm}$ radial running clearance around $\varnothing 2.80\text{ mm}$ axle pins, completely eliminating thermal fusing during FDM printing.
+- **Thick Rounded Arch Crown**:
+  - Profile: Smooth continuous elliptical/rounded arch in the Y-Z plane ($R_y = 2.85\text{ mm}, R_z = 3.00\text{ mm}$, tangent to vertical lands at $Y = 6.43\text{ mm}$ and $Y = 12.13\text{ mm}$).
+  - Tower Total Height: **$14.59\text{ mm}$ above floor (apex at $Z = 15.59\text{ mm}$)**.
+  - Solid Roof Thickness: **$1.35\text{ mm}$ of 100% solid plastic** over the top of the bore ($Z \in [14.24, 15.59]\text{ mm}$), providing immense hoop strength and resistance to upward plug prying forces.
+- **Monolithic Rear Cross-Tie Bridge**:
+  - Spans the entire $7.70\text{ mm}$ inter-tower gap across $X \in [5.40, 13.10]\text{ mm}$ at $Y \in [11.60, 12.85]\text{ mm}$ ($1.25\text{ mm}$ thick in Y) and $Z \in [12.60, 15.00]\text{ mm}$ ($2.40\text{ mm}$ tall in Z).
+  - Permanently and rigidly locks the two towers together, 100% eliminating tower spreading under plug insertion forces without requiring secondary external clips.
 - **Left Tower Dual Lateral Buttress Struts**:
   - **Front Strut**: Base meets the top inner wall of Bracket 3 at **$Y = 6.250\text{ mm}$** ($X \in [1.90, 3.90\text{ mm}]$, $Y \in [6.250, 7.050\text{ mm}]$), sloping directly into the Left Tower at $Z = 13.70\text{ mm}$ with **zero encroachment into Bracket 3's sliding channel**.
   - **Rear Strut**: Full-height triangular rib ($1.20\text{ mm}$ thick in $Y$ at $Y \in [11.650, 12.850\text{ mm}]$, $X \in [1.90, 3.90\text{ mm}]$, $Z \in [1.00, 13.70\text{ mm}]$).
