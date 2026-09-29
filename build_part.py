@@ -606,8 +606,8 @@ def create_center_curved_feature_poly():
     """Returns the 2D polygon of the calibrated reinforced curved feature between Brackets 3 & 4.
     - Solid D-shape cross-section: 100% solid core.
     - Width: 4.20mm (centered at X = 6.279mm -> X in [4.179, 8.379]mm).
-    - Depth in Y: 0.70mm (Base at Y = -4.30mm, Apex receded in -Y to Y = -3.60mm).
-    - Bottom base: Flat solid wall at Y = -4.30mm (100% flush & fused with continuous Rib 4 bridge).
+    - Depth in Y: 1.45mm (Base extended 0.75mm in -Y to Y = -5.05mm, Apex receded in -Y to Y = -3.60mm).
+    - Bottom base: Flat solid wall at Y = -5.05mm (extended 0.75mm to backstop flush against brass insert).
     - Front apex: Calibrated to Y = -3.60mm (+0.725mm clearance to nominal 6.35mm plug blade bottom at Y = -2.875mm).
       Eliminates blade collision on insertion while acting as a reliable deflection backstop.
     """
@@ -615,14 +615,19 @@ def create_center_curved_feature_poly():
     w_x = 4.20
     base_y = -4.30
     apex_y = -3.60
+    extension_y = 0.75  # 0.75mm extension in -Y direction to backstop against brass insert
     
     rx = w_x / 2.0
     ry = apex_y - base_y  # 0.70 mm
     
-    angles = np.linspace(np.pi, 0, 32)
+    angles = np.linspace(np.pi, 0, 33)
     out_arc = [(cx + rx * np.cos(a), base_y + ry * np.sin(a)) for a in angles]
     
-    return Polygon(out_arc + [(cx - rx, base_y)])
+    pts = out_arc + [
+        (cx + rx, base_y - extension_y),
+        (cx - rx, base_y - extension_y)
+    ]
+    return Polygon(pts)
 
 def build_center_curved_feature_mesh():
     """Builds the 100% watertight 3D mesh of the calibrated half moon with 25% height reduction
@@ -979,8 +984,11 @@ def build_exact_3d_model():
     # 8. Center Curved Feature: Blade-Calibrated & Flared-Base Reinforced (Z: 1.0 to 8.125mm)
     mesh_curved_feat = build_center_curved_feature_mesh()
     
-    # Main part with in-place printed slit shrouds
-    full_part = trimesh.util.concatenate([mesh_base, mesh_shrouds, mesh_wall, mesh_ribs, mesh_brackets, mesh_seating_ribs, mesh_towers_assembly, mesh_curved_feat] + unmerged_hooks)
+    # 8b. Thin Removable 45° Breakaway Supports for Bottom Clips (211.3° and 327.5°)
+    mesh_clip_supports = build_bottom_clip_45deg_supports_mesh(base_poly)
+    
+    # Main part with in-place printed slit shrouds and clip supports
+    full_part = trimesh.util.concatenate([mesh_base, mesh_shrouds, mesh_wall, mesh_ribs, mesh_brackets, mesh_seating_ribs, mesh_towers_assembly, mesh_curved_feat, mesh_clip_supports] + unmerged_hooks)
     
     # Filter and monolithically fuse into a single solid watertight body
     try:
@@ -1065,6 +1073,64 @@ def build_clip_supports_mesh(base_poly):
             
         supp_combined = trimesh.util.concatenate([foot, trunk] + prong_parts + tip_parts)
         support_meshes.append(supp_combined)
+        
+    return trimesh.util.concatenate(support_meshes)
+
+def build_bottom_clip_45deg_supports_mesh(base_poly):
+    """Builds thin, easily removable 45° breakaway support struts under the bottom clips (211.3° and 327.5°):
+    - Sprouts directly from the solid clip stem at a 45° angle to support the hook shelf and eliminate sagging.
+    - Twin slender struts (0.80mm wide x 0.55mm beam thickness) leaving a wide 1.60mm open center space.
+    - Root penetrates 0.25mm into the stem wall with a neck notch (0.40mm tall in Z at the stem surface)
+      ensuring rock-solid print adhesion and a clean, flush snap-off when twisted with needle-nose pliers.
+    - Top chisel tip (0.35mm radial contact) catches the underside of the shelf perimeter right at Z = 4.97mm.
+    - Preserves 100% of the flat horizontal retention shelf once snapped off.
+    """
+    stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT  # 4.97 mm
+    hook_depth = CLIP_HOOK_DEPTH            # 1.85 mm
+    half_w = CLIP_ARM_WIDTH / 2.0           # 2.10 mm
+    z_stem = stem_h - hook_depth            # 3.12 mm
+    
+    prong_w = 0.80
+    prong_offsets = [-1.20, 1.20]
+    bottom_clip_angles = [211.3, 327.5]
+    
+    support_meshes = []
+    
+    for angle_deg in bottom_clip_angles:
+        rad = math.radians(angle_deg)
+        u_r = np.array([math.cos(rad), math.sin(rad)])
+        u_t = np.array([-math.sin(rad), math.cos(rad)])
+        p, _, _ = find_boundary_point_and_normal(base_poly, angle_deg)
+        
+        prongs = []
+        for yo in prong_offsets:
+            eff_depth = hook_depth - CLIP_CROWN_EASE * ((abs(yo) / half_w) ** 2.0)
+            pts_rz = [
+                (-0.25, z_stem - 0.25),       # root inside stem wall
+                (-0.25, z_stem + 0.15),       # root inside stem wall
+                (0.00,  z_stem + 0.15),       # stem outer face (top of neck)
+                (eff_depth - 0.35, stem_h),   # shelf contact start
+                (eff_depth, stem_h),          # shelf contact end (outer perimeter edge)
+                (eff_depth, stem_h - 0.20),   # outer chamfer
+                (0.00,  z_stem - 0.25),       # stem outer face (bottom of neck)
+            ]
+            poly_rz = Polygon(pts_rz)
+            m2d = trimesh.creation.extrude_polygon(poly_rz, height=prong_w)
+            v = m2d.vertices.copy()
+            v_local = np.column_stack([v[:, 0], v[:, 2] - prong_w/2.0 + yo, v[:, 1]])
+            m_p = trimesh.Trimesh(vertices=v_local, faces=m2d.faces.copy(), process=True)
+            if m_p.volume < 0:
+                m_p.faces = np.fliplr(m_p.faces)
+            prongs.append(m_p)
+            
+        m_pair = trimesh.util.concatenate(prongs)
+        M = np.eye(4)
+        M[:3, 0] = [u_r[0], u_r[1], 0]
+        M[:3, 1] = [u_t[0], u_t[1], 0]
+        M[:3, 2] = [0, 0, 1]
+        M[:3, 3] = [p[0], p[1], 0]
+        m_pair.apply_transform(M)
+        support_meshes.append(m_pair)
         
     return trimesh.util.concatenate(support_meshes)
 
@@ -1173,17 +1239,59 @@ def build_indexed_assembly_mesh(main_mesh, insert_mesh=None, shaft_mesh=None, in
         meshes.append(cool_tower)
     return trimesh.util.concatenate(meshes)
 
-def build_45deg_supported_part_mesh(base_mesh):
+def build_insert_backside_breakaway_supports_mesh():
+    """Builds thin, sacrificial breakaway support struts under the back side of the integrated slit inserts.
+    - Sits on the build plate (Z = 0.00mm) inside the relief cutout area.
+    - Supports the steep 32.5° overhang of the insert back wall from Z = 0.20mm (tip ridge) up to Z = 1.56mm (floor).
+    - Twin slender struts (0.60mm wide in X) spaced at X = cx ± 0.90mm for each insert (cx = -7.853mm, cx = +8.453mm).
+    - Leaves an open 1.20mm center window directly under the 1.10mm slit through-hole so no support material enters or clogs the hole.
+    - Thin 0.60mm wall snaps cleanly off the insert face with needle-nose pliers or peels off with the bed pad.
+    """
+    cx_left, cx_right = -7.853, 8.453
+    y_tip = -9.418
+    z_tip = 0.198
+    y_floor = -11.553
+    z_floor = 1.556
+    
+    pts_yz = [
+        (-11.80, 0.00),         # bed anchor back
+        (-9.20,  0.00),         # bed anchor front
+        (-9.20,  z_tip),        # tip support front
+        (y_tip,  z_tip),        # tip ridge contact
+        (y_floor, z_floor),     # floor junction contact
+        (-11.80, z_floor),      # back vertical
+    ]
+    poly_yz = Polygon(pts_yz)
+    
+    strut_w = 0.60
+    offsets = [-0.90, 0.90]
+    
+    prongs = []
+    for cx in [cx_left, cx_right]:
+        for xo in offsets:
+            m2d = trimesh.creation.extrude_polygon(poly_yz, height=strut_w)
+            v = m2d.vertices.copy()
+            v_3d = np.column_stack([v[:, 2] - strut_w/2.0 + cx + xo, v[:, 0], v[:, 1]])
+            m_p = trimesh.Trimesh(vertices=v_3d, faces=m2d.faces.copy(), process=True)
+            if m_p.volume < 0:
+                m_p.faces = np.fliplr(m_p.faces)
+            prongs.append(m_p)
+            
+    return trimesh.util.concatenate(prongs)
+
+def build_45deg_supported_part_mesh(base_mesh, base_poly=None):
     """Generates the 45-degree tilted main part with in-place slit shrouds and baked-in breakaway Support Fins,
     adhering to the Slant3D / Support Fins specification (https://github.com/gittrahan/support-fins):
     - Tilted 45 deg about X: Re-orients layer planes so inter-layer cleavage failure on the half moon is eliminated.
+    - Hardcoded 45° angled breakaway supports for bottom clips (211.3° & 327.5°) coming out of the stem.
     - Solid 0.60mm bed adhesion pad with relief openings under the in-place shroud tips.
+    - Thin breakaway twin support struts under the back side of each integrated insert (1.2mm center gap clears slit holes).
     - 5 vertical fin walls under the 45 deg inclined backplate:
       * Inner pair at X = +/-8.0mm (Y: -5.80 to +14.00mm) — primary support under brackets and shaft towers.
       * Outer pair at X = +/-14.0mm (Y: -3.00 to +10.00mm) — catches outer baseplate floor overhangs.
       * Center fin at X = 0.0mm (Y: -3.00 to +10.00mm) — catches mid-plane wall/floor overhangs.
-    - 0.20mm release gap (standoff) with periodic horizontal breakaway tines (0.24mm H x 0.60mm W)
-      every ~3.1mm fusing into the part underside (per FIN-SPEC.md).
+    - 0.24mm release gap (tweaked from 0.20mm) with periodic horizontal breakaway tines (0.55mm W x 0.45mm L)
+      every 4.5mm (tweaked from 3.1mm) for effortless, clean breakaway.
     - Lateral sway braces at X = -22.20mm and X = +21.32mm stabilizing the tall tilted part.
     """
     R = trimesh.transformations.rotation_matrix(np.radians(45.0), [1, 0, 0])
@@ -1209,13 +1317,18 @@ def build_45deg_supported_part_mesh(base_mesh):
         pass
     fin_components.append(pad_mesh)
     
+    # 1b. Thin Breakaway Supports under Back Side of Integrated Slit Inserts (prevents 32.5° overhang sagging)
+    insert_supps = build_insert_backside_breakaway_supports_mesh()
+    fin_components.append(insert_supps)
+    
     # 2. Main Support Fins under the 45° inclined backplate
-    #    Inner pair at X = ±8.0mm (extended Y range to +14.0mm)
-    #    Outer pair at X = ±14.0mm (catches baseplate floor beyond inner fins)
-    #    Center fin at X = 0.0mm (catches mid-plane wall overhangs)
+    #    Calibrated tines: 0.55mm width x 0.45mm length, 0.24mm standoff, 4.5mm pitch for clean release
     fin_thick_x = 0.80  # 2 nozzle perimeters
-    standoff = 0.20     # 0.20mm release gap as per Slant3D / FIN-SPEC
+    standoff = 0.24     # 0.24mm release gap (tweaked for easy peeling)
     z_bed = 0.60
+    tine_w_x = 0.55     # Slimmed from 0.80 to 0.55mm (-31% contact width)
+    tine_l_y = 0.45     # Shortened from 0.60 to 0.45mm (-25% contact length)
+    tine_pitch = 4.50   # Expanded pitch from 3.10 to 4.50mm (~30% fewer contact points)
     
     # --- Inner Fin Pair (X = ±8.0mm): extended Y from -5.80 to +14.00mm ---
     y_start_inner = -5.80
@@ -1239,11 +1352,11 @@ def build_45deg_supported_part_mesh(base_mesh):
             fin_components.append(m_fin)
             
             # Horizontal breakaway tines along this fin
-            y_tine_stations = np.arange(y_start_inner + 1.5, y_end_inner - 0.8, 3.1)
+            y_tine_stations = np.arange(y_start_inner + 2.0, y_end_inner - 1.0, tine_pitch)
             for yt in y_tine_stations:
                 zt_underside = yt - z_min
-                tine = trimesh.creation.box([fin_thick_x, 0.60, standoff + 0.35])
-                tine.apply_translation([x_pos, yt, zt_underside - standoff/2.0 + 0.10])
+                tine = trimesh.creation.box([tine_w_x, tine_l_y, standoff + 0.20])
+                tine.apply_translation([x_pos, yt, zt_underside - standoff/2.0 + 0.05])
                 fin_components.append(tine)
                 
     # --- Outer Fin Pair (X = ±14.0mm): catches outer baseplate floor overhangs ---
@@ -1268,11 +1381,11 @@ def build_45deg_supported_part_mesh(base_mesh):
             fin_components.append(m_fin)
             
             # Horizontal breakaway tines
-            y_tine_stations = np.arange(y_start_outer + 1.5, y_end_outer - 0.8, 3.1)
+            y_tine_stations = np.arange(y_start_outer + 2.0, y_end_outer - 1.0, tine_pitch)
             for yt in y_tine_stations:
                 zt_underside = yt - z_min
-                tine = trimesh.creation.box([fin_thick_x, 0.60, standoff + 0.35])
-                tine.apply_translation([x_pos, yt, zt_underside - standoff/2.0 + 0.10])
+                tine = trimesh.creation.box([tine_w_x, tine_l_y, standoff + 0.20])
+                tine.apply_translation([x_pos, yt, zt_underside - standoff/2.0 + 0.05])
                 fin_components.append(tine)
     
     # --- Center Fin (X = 0.0mm): catches mid-plane wall/floor overhangs ---
@@ -1296,11 +1409,11 @@ def build_45deg_supported_part_mesh(base_mesh):
         fin_components.append(m_fin)
         
         # Horizontal breakaway tines for center fin
-        y_tine_stations = np.arange(y_start_center + 1.5, y_end_center - 0.8, 3.1)
+        y_tine_stations = np.arange(y_start_center + 2.0, y_end_center - 1.0, tine_pitch)
         for yt in y_tine_stations:
             zt_underside = yt - z_min
-            tine = trimesh.creation.box([fin_thick_x, 0.60, standoff + 0.35])
-            tine.apply_translation([0.0, yt, zt_underside - standoff/2.0 + 0.10])
+            tine = trimesh.creation.box([tine_w_x, tine_l_y, standoff + 0.20])
+            tine.apply_translation([0.0, yt, zt_underside - standoff/2.0 + 0.05])
             fin_components.append(tine)
                 
     # 3. Sway Braces for Lateral Stability (at X = -22.20mm and X = +21.32mm)
@@ -1309,7 +1422,7 @@ def build_45deg_supported_part_mesh(base_mesh):
     sway_l.apply_translation([-22.20, -1.0, 9.30])
     fin_components.append(sway_l)
     for z_t in [10.0, 14.0, 17.5]:
-        tine_l = trimesh.creation.box([2.00, 1.00, 0.40])
+        tine_l = trimesh.creation.box([2.00, 0.60, 0.28])
         tine_l.apply_translation([-21.70, -1.0, z_t])
         fin_components.append(tine_l)
         
@@ -1318,7 +1431,7 @@ def build_45deg_supported_part_mesh(base_mesh):
     sway_r.apply_translation([21.32, -1.0, 9.30])
     fin_components.append(sway_r)
     for z_t in [10.0, 14.0, 17.5]:
-        tine_r = trimesh.creation.box([2.00, 1.00, 0.40])
+        tine_r = trimesh.creation.box([2.00, 0.60, 0.28])
         tine_r.apply_translation([20.82, -1.0, z_t])
         fin_components.append(tine_r)
 
@@ -1335,7 +1448,7 @@ def build_45deg_supported_part_mesh(base_mesh):
         combined = trimesh.boolean.union([m_tilted, fins_solid], engine='manifold')
         # Filter any micro-slivers from boolean intersection
         bodies = combined.split(only_watertight=False)
-        main_bodies = [b for b in bodies if abs(b.volume) > 5.0]
+        main_bodies = [b for b in bodies if abs(b.volume) > 0.01]
         if len(main_bodies) == 1:
             combined = main_bodies[0]
         elif len(main_bodies) > 1:
@@ -1563,7 +1676,7 @@ if __name__ == '__main__':
     part_mesh_flat, base_poly = build_exact_3d_model()
     
     print("Building 45° Tilted Main Part with Baked-In Support Fins (Slant3D / Support Fins spec)...")
-    part_mesh_45, _, _ = build_45deg_supported_part_mesh(part_mesh_flat)
+    part_mesh_45, _, _ = build_45deg_supported_part_mesh(part_mesh_flat, base_poly)
     
     # Primary production deliverables: 45° Tilted Main Part with Baked-In Support Fins
     part_mesh_45.export('part.stl')

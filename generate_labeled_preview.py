@@ -144,12 +144,12 @@ ax1.annotate('Snap Clip (135.0°)\nSturdy Beam (L=3.70mm)\n1.85mm Crown Hook', x
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 211.3°
-ax1.annotate('Snap Clip (211.3°)\nSturdy Beam (L=3.70mm)\n1.85mm Crown Hook', xy=(clip_pts[211.3][0], clip_pts[211.3][1]), xytext=(-31.0, -10.5),
+ax1.annotate('Snap Clip (211.3°)\nSturdy Beam (L=3.70mm)\n1.75mm Hook + 45° Stem Support', xy=(clip_pts[211.3][0], clip_pts[211.3][1]), xytext=(-31.0, -10.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 327.5°
-ax1.annotate('Snap Clip (327.5°)\nSturdy Beam (L=3.70mm)\n1.85mm Crown Hook', xy=(clip_pts[327.5][0], clip_pts[327.5][1]), xytext=(17.5, -10.5),
+ax1.annotate('Snap Clip (327.5°)\nSturdy Beam (L=3.70mm)\n1.55mm Hook + 45° Stem Support', xy=(clip_pts[327.5][0], clip_pts[327.5][1]), xytext=(17.5, -10.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
@@ -280,6 +280,8 @@ add_3d_callout(ax2, [7.25, 0.0, 4.60], [28.0, -12.0, 14.0], "Guide Brackets 3 & 
 add_3d_callout(ax2, [-21.075, 0.0, 3.5], [-30.0, -2.0, -2.0], "Left Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
 add_3d_callout(ax2, [20.200, 0.0, 3.5], [30.0, -2.0, -2.0], "Right Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
 add_3d_callout(ax2, [6.28, -3.6, 8.13], [16.0, 0.0, 20.0], "Center Curved Feature\n(8.13mm H Solid D-Core)", color='#6a1b9a', bgcolor='#f3e5f5')
+add_3d_callout(ax2, [clip_pts[211.3][0], clip_pts[211.3][1], 5.0], [-33.0, -18.0, 4.0], "Snap Clip 211.3°\n(45° Stem Support)", color='#00838f', bgcolor='#e0f7fa')
+add_3d_callout(ax2, [clip_pts[327.5][0], clip_pts[327.5][1], 5.0], [33.0, -18.0, 4.0], "Snap Clip 327.5°\n(45° Stem Support)", color='#00838f', bgcolor='#e0f7fa')
 add_3d_callout(ax2, [0, -8.7, 6.77], [0.0, -34.0, -6.0], "Bottom Central U-Arch\n(7.95mm H, 5mm Inner W)", color='#0d47a1', bgcolor='white')
 add_3d_callout(ax2, [-8.38, -13.66, 0.0], [-17.0, -28.0, -6.0], "Left Slit Detent Socket\n(Press-Fit Insert)", color='#7b1fa2', bgcolor='#f3e5f5')
 add_3d_callout(ax2, [8.38, -13.66, 0.0], [17.0, -28.0, -6.0], "Right Slit Detent Socket\n(Press-Fit Insert)", color='#7b1fa2', bgcolor='#f3e5f5')

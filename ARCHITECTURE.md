@@ -7,27 +7,27 @@
 ## 1. System Function & Kinematic Summary
 - **Intermediate Sub-Housing Baseplate**: Retains OEM stamped brass conductive contacts and mounts the safety interlock rocker.
 - **Interlock Mechanism**: Right plug blade engages the angled belly cam ($105^\circ$ bellcrank) rotating the shaft axle ($Y = 9.279\text{ mm}, Z = 12.590\text{ mm}$) to drive the extended plunger downwards ($Z \le -6.50\text{ mm}$) through the baseplate floor through-hole ($Y \in [8.57, 13.75]\text{ mm}$), actuating a PCB momentary tactile switch at $Y = 12.40\text{ mm}$.
-- **Print Optimization**: Main part is tilted 45° with baked-in support fins; shaft rocker has built-in sacrificial breakaway frame ($Z \in [0.00, 0.58]\text{ mm}$, release gap $0.12\text{ mm}$) for 1-click support-free printing.
-
----
-
-## 2. Global Coordinates & Critical Datums
-- **Scale Factor**: Calibrated from SVG pixel coordinates:
-  $$\text{SCALE} = 0.349787\text{ mm/pixel}, \quad X_0 = 128.65\text{ px}, \quad Y_0 = 128.65\text{ px}$$
-- **Axle Datum**: $Y_{\text{axle}} = 9.279\text{ mm}, \quad Z_{\text{axle}} = 12.590\text{ mm}$
-- **Shaft Sockets**: $\varnothing 3.00\text{ mm}$ cradle, $2.60\text{ mm}$ throat ($240^\circ$ wrap), fits $\varnothing 2.80\text{ mm}$ shaft pin.
-- **Towers**: Left: $X \in [3.90, 5.40]\text{ mm}$, Right: $X \in [13.10, 14.60]\text{ mm}$ ($7.70\text{ mm}$ clear gap).
-- **Z-Elevation Datum (Main Baseplate)**:
-  - $Z = 0.00\text{ mm}$: Flat build datum.
-  - $Z \in [0.00, 1.00]\text{ mm}$: Floor plate ($1.00\text{ mm}$).
-  - $Z \in [1.00, 1.50]\text{ mm}$: Stiffener grid ribs ($0.50\text{ mm}$).
-  - $Z \in [1.00, 2.15]\text{ mm}$: Brass seating ribs ($1.15\text{ mm}$ elevation).
-  - $Z \in [1.00, 5.60]\text{ mm}$: Guide brackets ($4.60\text{ mm}$ tall).
-  - $Z \in [1.00, 6.77]\text{ mm}$: Outer perimeter wall & snap clips ($6.77\text{ mm}$ tall).
-  - $Z \in [1.00, 10.50]\text{ mm}$: Center curved D-wall ($10.50\text{ mm}$ tall).
-  - $Z \in [1.00, 14.09]\text{ mm}$: Support towers ($14.09\text{ mm}$ tall).
-- **Perimeter Clips (4x)**: $45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$. Hook shelf at $Z = 4.97\text{ mm}$, $1.85\text{ mm}$ center depth with $0.20\text{ mm}$ crown ease, $0.53\text{ mm}$ blunt land, $2.07\text{ mm}$ solid hoop ring.
-- **Slit Inserts**: Channels $1.20 \times 3.40\text{ mm}$, indexing key $1.80 \times 4.00\text{ mm}$ with $45^\circ$ chamfer.
+- **Print Optimization**: Main part is tilted 45° with baked-in breakaway support fins (0.24mm release gap, 4.5mm pitch for clean release), hardcoded 45° stem-anchored breakaway twin struts supporting the bottom clips, and twin breakaway support struts under the back side of each integrated slit insert (with 1.2mm center gap clearing slit through-holes); shaft rocker has built-in sacrificial breakaway frame ($Z \in [0.00, 0.58]\text{ mm}$, release gap $0.12\text{ mm}$) for 1-click support-free printing.
+ 
+ ---
+ 
+ ## 2. Global Coordinates & Critical Datums
+ - **Scale Factor**: Calibrated from SVG pixel coordinates:
+   $$\text{SCALE} = 0.349787\text{ mm/pixel}, \quad X_0 = 128.65\text{ px}, \quad Y_0 = 128.65\text{ px}$$
+ - **Axle Datum**: $Y_{\text{axle}} = 9.279\text{ mm}, \quad Z_{\text{axle}} = 12.590\text{ mm}$
+ - **Shaft Sockets**: $\varnothing 3.00\text{ mm}$ cradle, $2.60\text{ mm}$ throat ($240^\circ$ wrap), fits $\varnothing 2.80\text{ mm}$ shaft pin.
+ - **Towers**: Left: $X \in [3.90, 5.40]\text{ mm}$, Right: $X \in [13.10, 14.60]\text{ mm}$ ($7.70\text{ mm}$ clear gap).
+ - **Z-Elevation Datum (Main Baseplate)**:
+   - $Z = 0.00\text{ mm}$: Flat build datum.
+   - $Z \in [0.00, 1.00]\text{ mm}$: Floor plate ($1.00\text{ mm}$).
+   - $Z \in [1.00, 1.50]\text{ mm}$: Stiffener grid ribs ($0.50\text{ mm}$).
+   - $Z \in [1.00, 2.15]\text{ mm}$: Brass seating ribs ($1.15\text{ mm}$ elevation).
+   - $Z \in [1.00, 5.60]\text{ mm}$: Guide brackets ($4.60\text{ mm}$ tall).
+   - $Z \in [1.00, 6.77]\text{ mm}$: Outer perimeter wall & snap clips ($6.77\text{ mm}$ tall).
+   - $Z \in [1.00, 8.125]\text{ mm}$: Center curved D-wall ($7.125\text{ mm}$ tall above floor, base extended to $Y = -5.05\text{ mm}$ as brass insert backstop).
+   - $Z \in [1.00, 14.09]\text{ mm}$: Support towers ($14.09\text{ mm}$ tall).
+ - **Perimeter Clips (4x)**: $45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$. Hook shelf at $Z = 4.97\text{ mm}$, $1.85\text{ mm}$ center depth with $0.20\text{ mm}$ crown ease, $0.53\text{ mm}$ blunt land, $2.07\text{ mm}$ solid hoop ring. Bottom clips ($211.3^\circ, 327.5^\circ$) equipped with hardcoded 45° breakaway support struts from stem.
+ - **Integrated Slit Shrouds / Inserts**: In-place backside chimneys ($Z \in [-2.47, 0.00]\text{ mm}$) at $X = -7.853\text{ mm}$ and $+8.453\text{ mm}$, channels $1.10 \times 3.00\text{ mm}$. Supported in 45° print orientation by twin 0.60mm vertical breakaway struts under the 32.5° overhanging back wall with a 1.20mm open center window clearing the slit holes.
 
 ---
 
