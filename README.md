@@ -449,6 +449,21 @@ py -3 testing/verify_shaft_supports_production.py
   - `part_flat.stl`: Flat unrotated model preserved for reference.
   - `complete_assembly.stl`: Full print-bed layout with 45° supported main part, paired slit inserts, shaft rocker, and cooling tower.
 
+### Version 10 (v10) - Print-in-Place (PIP) Captive Lever & Enclosed Bridged Towers
+- **Anti-Spreading Architecture (Fully Enclosed 360° Sockets & Monolithic Rear Bridge)**:
+  - **Closed 360° Teardrop Journal Sockets**: Permanently eliminates the top open snap-fit throat. Towers are solid across the top up to $Z = 14.50\text{ mm}$ with a $\varnothing 3.30\text{ mm}$ teardrop bearing bore ($r_{\text{bore}} = 1.65\text{ mm}$), providing a calibrated **$0.25\text{ mm}$ radial clearance** around the $\varnothing 2.80\text{ mm}$ axle pins. The $45^\circ$ teardrop apex aligns with the printer's vertical axis at $45^\circ$ print tilt, completely eliminating bridging sag and thermal weld fusion.
+  - **Monolithic Rear Cross-Tie Bridge**: Spans between the Left Tower ($X = 5.40\text{ mm}$) and Right Tower ($X = 13.10\text{ mm}$) across the full $7.70\text{ mm}$ gap at $Y \in [11.60, 12.85]\text{ mm}$ ($1.25\text{ mm}$ thick) and $Z \in [12.60, 14.50]\text{ mm}$ ($1.90\text{ mm}$ tall). Rigidly boxes the two towers into an unbroken U-frame truss, making lateral tower spreading physically impossible under plug insertion loads.
+  - **$0.25\text{ mm}$ Lateral Hub Clearances**: Adjusted `HUB_WIDTH` from $7.50\text{ mm} \to 7.20\text{ mm}$, providing a guaranteed $0.25\text{ mm}$ lateral air gap between the rotating hub ends and the static tower inner faces.
+- **Dedicated Plunger Breakaway Support Strut**:
+  - Tilted at $45^\circ$, the lever's lowest point is the plunger nose at $Z' = 15.63\text{ mm}$ ($>15.0\text{ mm}$ above the print bed, completely clearing the bed pad).
+  - A vertical support strut ($1.40 \times 1.80\text{ mm}$ trunk) anchored to the bed pad rises directly under the plunger blade center ($X = 10.284\text{ mm}, Y' = 11.30\text{ mm}$) with a chisel breakaway tip ($0.70 \times 1.00\text{ mm}$) at $Z' = 15.43\text{ mm}$, leaving an exact **$0.20\text{ mm}$ release micro-gap**.
+  - Held rigidly during printing to maintain dead-center pin concentricity; peels away cleanly in one piece with the sacrificial bed pad.
+- **Production Deliverables Updated**:
+  - `part.stl`: 45° tilted Print-in-Place model featuring enclosed bridged towers, captive safety lever, and baked-in support fins + plunger support.
+  - `part_flat.stl`: Flat unrotated baseplate with enclosed bridged towers for CAD reference.
+  - `shaft_rocker.stl` / `shaft_rocker_clean.stl`: Standalone lever deliverables preserved with $0.25\text{ mm}$ PIP clearances for spare printing or inspection.
+  - `complete_assembly.stl`: Arranges the 45° PIP part and paired slit inserts on $Z = 0.00\text{ mm}$.
+
 ---
 
 ## 7. Future Optimization & Tweak Candidates

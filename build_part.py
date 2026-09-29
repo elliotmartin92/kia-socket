@@ -97,13 +97,15 @@ INSERT_BODY_LEN_Y = 5.50  # 5.50mm outer shroud body length in Y at base shoulde
 INSERT_BODY_W_TIP = 2.40  # 2.40mm outer end width in X at Z=0
 INSERT_BODY_LEN_TIP = 4.40 # 4.40mm outer end length in Y at Z=0
 
-# Shaft Support Towers (Top-Right Above Hole) - Heavy-Duty Reinforced
-TOWER_HEIGHT = 13.09         # 13.09mm protrusion above face (Total Z_top = 14.09mm, cradle center Z = 12.59mm)
+# Shaft Support Towers (Top-Right Above Hole) - Heavy-Duty Reinforced Enclosed PIP
+TOWER_HEIGHT = 13.50         # 13.50mm protrusion above face (Total Z_top = 14.50mm, cradle center Z = 12.59mm)
 TOWER_Y_BASE_LEN = 6.60      # 6.60mm flared base in Y (Y in [6.250, 12.850]mm, exactly aligned with Bracket 3 top inner wall)
-TOWER_Y_TOP_LEN = 5.63       # 5.63mm flared top in Y (Y in [7.471, 13.101]mm, +45% solid material around cradle)
+TOWER_Y_TOP_LEN = 5.63       # 5.63mm flared top in Y (Y in [6.550, 12.180]mm, solid material around cradle)
 TOWER_INTERNAL_GAP = 7.70    # 7.70mm internal gap between reinforced tower inner faces (X: 5.40 to 13.10mm)
 TOWER_WALL_THICK = 1.50      # 1.50mm heavy-duty wall thickness in X (+50% column strength)
-TOWER_THROAT_W = 2.60        # 2.60mm optimized snap throat (0.20mm positive snap interference with Ø2.80mm shaft, 240.0 deg wrap angle)
+TOWER_BORE_RADIUS = 1.65     # Ø3.30mm teardrop bore for Ø2.80mm shaft pin (0.25mm radial clearance for smooth PIP)
+TOWER_BRIDGE_THICK_Y = 1.25  # 1.25mm thick monolithic rear cross-tie bridge (Y in [11.60, 12.85]mm)
+TOWER_BRIDGE_HEIGHT_Z = 1.90 # 1.90mm tall monolithic rear cross-tie bridge (Z in [12.60, 14.50]mm)
 
 # Side Ears (Mating with 8.30mm enclosure guide slot/gap)
 EAR_GAP = 8.30             # 8.30mm enclosure guide slot/gap
@@ -679,70 +681,80 @@ def create_shaft_support_towers_poly():
     return unary_union([left_box, right_box, strut_front, strut_rear])
 
 def build_clean_shaft_towers_mesh():
-    """Directly extrudes the reinforced 2D U-cradle profile in (Y, Z) along X.
-    - Lower flared trapezoidal base (Z: 1.00 to 11.20mm): Base Y in [6.250, 12.850] (6.60mm wide) tapering to [6.550, 12.180].
-    - Upper parallel vertical clamping lands (Z: 11.20 to 14.09mm): Constant Y in [6.550, 12.180] (5.63mm wide) with 0.25mm top lead-in chamfers so the closed-box gantry clamp slides straight down without wedging.
-    - Tuned 2.60mm snap-fit retention throat constriction (0.20mm positive snap with Ø2.80mm shaft, 240.0 deg wrap angle).
-    - 1.50mm heavy-duty wall thickness in X.
-    - Shaft axis at Y = 9.279mm (shifted -0.921mm so front buttress/tower base aligns with top inner wall of Bracket 3 at Y = 6.250mm).
+    """Builds the heavy-duty shaft support towers and rear cross-tie bridge for Print-in-Place (PIP):
+    - Left Tower: X in [3.90, 5.40] (1.50mm thick).
+    - Right Tower: X in [13.10, 14.60] (1.50mm thick).
+    - Fully enclosed 360° journal sockets with teardrop ceiling apex (45° angle) to prevent bridging sag at 45° print tilt.
+    - Bore diameter: Ø3.30mm (1.65mm radius), providing 0.25mm radial clearance around Ø2.80mm pin for smooth PIP pivot.
+    - Tower height: Z = 14.50mm (solid closed crown, no open throat).
+    - Rear Monolithic Cross-Tie Bridge: Spans X in [5.40, 13.10] at Y in [11.60, 12.85], Z in [12.60, 14.50],
+      rigidly boxing Left and Right towers together so they CANNOT spread under plug insertion force.
     """
-    y_shaft = 9.279   # Shifted to Y = 9.279mm
+    y_shaft = 9.279
     z_base = BASE_THICK  # 1.0mm
-    z_land_bot = 11.200  # Bottom of parallel vertical clamp seating land
-    z_top = z_base + TOWER_HEIGHT  # 14.09mm
-    z_chamfer = z_top - 0.25       # 13.84mm (0.25mm x 45 deg top entry chamfer)
-    r_shaft = 1.50  # 3.0mm diameter shaft cradle -> 1.5mm radius
-    z_cradle_center = 12.590  # Exact pivot axis elevation
+    z_land_bot = 11.200
+    z_tower_top = z_base + TOWER_HEIGHT  # 14.50mm
+    z_cradle_center = 12.590
+    r_bore = TOWER_BORE_RADIUS  # 1.65mm (Ø3.30mm bore for Ø2.80mm pin -> 0.25mm radial clearance)
     
     y_min_base = 6.250
     y_max_base = 12.850
     y_min_top = 6.550
-    y_max_top = 11.850  # 1.07mm rear prong wall (leaves up to 2.63mm inside outer perimeter for Right Clamp Rear Jaw)
+    y_max_top = 12.180
     
-    throat_w = TOWER_THROAT_W  # 2.60mm
-    half_w = throat_w / 2.0
-    alpha = np.arcsin(half_w / r_shaft)
-    
-    # Circular arc around shaft cavity from right retention tip to left retention tip
-    phi = np.linspace(np.pi/2 - alpha, -np.pi - (np.pi/2 - alpha), 64)
-    cradle_arc_pts = [(y_shaft + r_shaft * np.cos(p), z_cradle_center + r_shaft * np.sin(p)) for p in phi]
-    
-    # 45-degree lead-in bevel from retention tips up to top edge (Z = z_top)
-    bevel_dx = (z_top - (z_cradle_center + r_shaft * np.cos(alpha))) * 0.75
-    y_left_top = y_shaft - half_w - bevel_dx
-    y_right_top = y_shaft + half_w + bevel_dx
-    
-    # 2D profile in (Y, Z) - Flared base (Z=1.0..11.20) + Parallel vertical clamping lands (Z=11.20..14.09) + Top entry chamfers
-    profile_yz = [
+    # 1. Exterior boundary of the tower in (Y, Z)
+    exterior_pts = [
         (y_min_base, z_base),
         (y_max_base, z_base),
         (y_max_top, z_land_bot),
-        (y_max_top, z_chamfer),
-        (y_max_top - 0.25, z_top),
-        (y_right_top, z_top),
-    ] + cradle_arc_pts + [
-        (y_left_top, z_top),
-        (y_min_top + 0.25, z_top),
-        (y_min_top, z_chamfer),
+        (y_max_top, z_tower_top),
+        (y_min_top, z_tower_top),
         (y_min_top, z_land_bot),
     ]
-    poly_yz = Polygon(profile_yz)
+    
+    # 2. Teardrop bore profile in (Y, Z)
+    # Direction of machine vertical in unrotated Y-Z plane when tilted 45° around X:
+    phi_up = 3 * np.pi / 4.0  # 135 degrees (dY = -1/sqrt(2), dZ = +1/sqrt(2))
+    
+    # Circular arc for the bottom and sides (270 degrees)
+    phi_arc = np.linspace(phi_up + np.pi/4, phi_up + 7*np.pi/4, 48)
+    arc_pts = [(y_shaft + r_bore * np.cos(p), z_cradle_center + r_bore * np.sin(p)) for p in phi_arc]
+    
+    # Teardrop peak extending upward along phi_up:
+    peak_pt = (y_shaft + r_bore * np.sqrt(2.0) * np.cos(phi_up),
+               z_cradle_center + r_bore * np.sqrt(2.0) * np.sin(phi_up))
+    
+    bore_pts = arc_pts + [peak_pt]
+    poly_yz = Polygon(exterior_pts, [bore_pts])
     
     # Extrude along X (thickness = 1.50mm)
     m_raw = trimesh.creation.extrude_polygon(poly_yz, height=TOWER_WALL_THICK)
     verts = m_raw.vertices.copy()
     
-    # Left tower mesh: X in [3.90, 5.40] (1.50mm thick)
-    verts_left = np.column_stack([verts[:, 2], verts[:, 0], verts[:, 1]])
-    verts_left[:, 0] += 3.900
+    # Left tower mesh: X in [3.90, 5.40]
+    verts_left = np.column_stack([verts[:, 2] + 3.900, verts[:, 0], verts[:, 1]])
     mesh_left = trimesh.Trimesh(vertices=verts_left, faces=m_raw.faces.copy(), process=True)
-    
-    # Right tower mesh: X in [13.10, 14.60] (1.50mm thick)
-    verts_right = np.column_stack([verts[:, 2], verts[:, 0], verts[:, 1]])
-    verts_right[:, 0] += 13.100
+    if mesh_left.volume < 0:
+        mesh_left.faces = np.fliplr(mesh_left.faces)
+        
+    # Right tower mesh: X in [13.10, 14.60]
+    verts_right = np.column_stack([verts[:, 2] + 13.100, verts[:, 0], verts[:, 1]])
     mesh_right = trimesh.Trimesh(vertices=verts_right, faces=m_raw.faces.copy(), process=True)
+    if mesh_right.volume < 0:
+        mesh_right.faces = np.fliplr(mesh_right.faces)
+        
+    # 3. Rear Monolithic Cross-Tie Bridge
+    # Spans X in [5.40, 13.10] (width 7.70mm)
+    # Y in [11.60, 12.85] (thickness 1.25mm, leaves >0.22mm air gap behind hub)
+    # Z in [12.60, 14.50] (height 1.90mm)
+    bridge_box = trimesh.creation.box([TOWER_INTERNAL_GAP, TOWER_BRIDGE_THICK_Y, TOWER_BRIDGE_HEIGHT_Z])
+    bridge_box.apply_translation([
+        (5.40 + 13.10) / 2.0,       # X center = 9.25 mm
+        (11.60 + 12.85) / 2.0,      # Y center = 12.225 mm
+        (12.60 + 14.50) / 2.0       # Z center = 13.55 mm
+    ])
     
-    return trimesh.util.concatenate([mesh_left, mesh_right])
+    return trimesh.util.concatenate([mesh_left, mesh_right, bridge_box])
 
 def build_left_tower_struts_mesh():
     """Builds the dual triangular buttress struts on the left side of the left tower.
@@ -1279,10 +1291,12 @@ def build_insert_backside_breakaway_supports_mesh():
             
     return trimesh.util.concatenate(prongs)
 
-def build_45deg_supported_part_mesh(base_mesh, base_poly=None):
-    """Generates the 45-degree tilted main part with in-place slit shrouds and baked-in breakaway Support Fins,
-    adhering to the Slant3D / Support Fins specification (https://github.com/gittrahan/support-fins):
+def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft=True):
+    """Generates the 45-degree tilted main part with in-place slit shrouds, baked-in breakaway Support Fins,
+    and Print-in-Place (PIP) captive safety lever with dedicated breakaway plunger support strut:
     - Tilted 45 deg about X: Re-orients layer planes so inter-layer cleavage failure on the half moon is eliminated.
+    - Captive PIP Shaft Rocker: Printed in place inside the enclosed 360° bridged towers with 0.25mm radial/lateral clearances.
+    - Dedicated Breakaway Plunger Strut: Vertical column rising from the bed pad up to 0.20mm below the plunger belly.
     - Hardcoded 45° angled breakaway supports for bottom clips (211.3° & 327.5°) coming out of the stem.
     - Solid 0.60mm bed adhesion pad with relief openings under the in-place shroud tips.
     - Thin breakaway twin support struts under the back side of each integrated insert (1.2mm center gap clears slit holes).
@@ -1320,6 +1334,22 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None):
     # 1b. Thin Breakaway Supports under Back Side of Integrated Slit Inserts (prevents 32.5° overhang sagging)
     insert_supps = build_insert_backside_breakaway_supports_mesh()
     fin_components.append(insert_supps)
+    
+    # 1c. Dedicated Breakaway Support Strut under Print-in-Place Plunger Belly
+    # Rises from bed pad at X = 10.284mm (center of through-hole & plunger blade), Y' = 11.30mm
+    # Standoff release micro-gap = 0.20mm below the Z' = 15.63mm plunger tip
+    z_plunger_lowest = 2.52 - z_min  # ~15.63mm
+    z_strut_top = z_plunger_lowest - 0.20  # 0.20mm release micro-gap
+    strut_h = z_strut_top - 0.60
+    if strut_h > 1.0:
+        trunk_h = strut_h - 1.20
+        trunk = trimesh.creation.box([1.40, 1.80, trunk_h])
+        trunk.apply_translation([10.284, 11.30, 0.60 + trunk_h / 2.0])
+        fin_components.append(trunk)
+        
+        tip = trimesh.creation.box([0.70, 1.00, 1.20])
+        tip.apply_translation([10.284, 11.30, z_strut_top - 0.60])
+        fin_components.append(tip)
     
     # 2. Main Support Fins under the 45° inclined backplate
     #    Calibrated tines: 0.55mm width x 0.45mm length, 0.24mm standoff, 4.5mm pitch for clean release
@@ -1455,6 +1485,17 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None):
             combined = trimesh.boolean.union(main_bodies, engine='manifold')
     except Exception:
         combined = trimesh.util.concatenate([m_tilted, all_fins])
+        
+    if include_pip_shaft:
+        try:
+            from build_shaft import build_shaft_rocker_mesh
+            shaft_mesh = build_shaft_rocker_mesh(hub_w=7.20, in_assembly_coords=True, with_supports=False)
+            shaft_tilted = shaft_mesh.copy().apply_transform(R)
+            shaft_tilted.apply_translation([0, 0, -z_min])
+            combined = trimesh.util.concatenate([combined, shaft_tilted])
+        except Exception as e:
+            print(f"Warning: could not add PIP shaft to 45° model: {e}")
+            
     return combined, m_tilted, all_fins
 
 # ==============================================================================
@@ -1714,11 +1755,13 @@ if __name__ == '__main__':
         print(f"Warning: could not generate shaft rocker: {e}")
         shaft_printable = None
     
-    # Export complete assembled model with 45° tilted supported main part
-    assembly_mesh = build_indexed_assembly_mesh(part_mesh_45, insert_mesh, shaft_printable, include_cooling_tower=False)
+    part_mesh_flat.export('part_flat.stl')
+    
+    # Export complete assembled model with 45° tilted supported main part (includes captive PIP lever)
+    assembly_mesh = build_indexed_assembly_mesh(part_mesh_45, insert_mesh, shaft_mesh=None, include_cooling_tower=False)
     assembly_mesh.export('complete_assembly.stl')
     assembly_mesh.export('complete_assembly.obj')
-    print("Exported complete_assembly.stl successfully! (45° Supported Main Part + Slit Inserts + Shaft Rocker on Z=0.00mm)")
+    print("Exported complete_assembly.stl successfully! (45° Supported PIP Main Part + Slit Inserts on Z=0.00mm)")
     
     render_plots(part_mesh_flat, base_poly)
     export_openscad_exact(base_poly)

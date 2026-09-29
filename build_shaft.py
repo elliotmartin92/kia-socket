@@ -51,9 +51,9 @@ HOLE_Y_LEN = HOLE_Y_TOP - HOLE_Y_BOT              # 5.180 mm
 
 # Enlarged Heavy-Duty Dimensions
 TOTAL_AXLE_LEN = 11.50       # 11.50mm total length tip-to-tip
-HUB_WIDTH = 7.50             # 7.50mm structural hub (0.10mm clearance per side in 7.70mm tower gap)
-PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.00 mm per side
-PIN_DIAMETER = 2.80          # Ø2.80mm heavy-duty pin (fits Ø3.00mm cradle, 4.72x higher torsional rigidity)
+HUB_WIDTH = 7.20             # 7.20mm structural hub (0.25mm clearance per side in 7.70mm tower gap for PIP)
+PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.15 mm per side
+PIN_DIAMETER = 2.80          # Ø2.80mm heavy-duty pin (fits Ø3.30mm teardrop cradle, 4.72x higher torsional rigidity)
 HUB_DIAMETER = 4.20          # Ø4.20mm central structural hub barrel
 PLUNGER_REACH_BELOW_Z = 6.50 # Reaches Z = -6.50mm below baseplate floor
 

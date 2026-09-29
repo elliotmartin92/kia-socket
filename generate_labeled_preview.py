@@ -164,12 +164,12 @@ ax1.annotate('Right Side Ear\n(8.20mm W, fits 8.3mm gap)', xy=(20.200, 0.0), xyt
              fontsize=8, fontweight='bold', color='#01579b', bbox=dict(boxstyle='round,pad=0.2', fc='#e1f5fe', ec='#0288d1'))
 
 # Left Tower & Dual Struts
-ax1.annotate('Left Tower (14.09mm H)\n+ Dual Buttress Struts', xy=(3.9, 10.20), xytext=(-20.5, 10.5),
+ax1.annotate('Left Tower (14.50mm H)\n+ Enclosed 360° Socket', xy=(3.9, 10.20), xytext=(-20.5, 10.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#ad1457'),
              fontsize=8, fontweight='bold', color='#ad1457', bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
 # Right Tower & Bridge Rib
-ax1.annotate('Right Tower & Reinforcing\nBridge Rib (to outer wall)', xy=(14.6, 10.20), xytext=(18.5, 11.5),
+ax1.annotate('Right Tower & Rear Bridge\nMonolithic Zero-Spread Box', xy=(14.6, 10.20), xytext=(18.5, 11.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#ad1457'),
              fontsize=8, fontweight='bold', color='#ad1457', bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
@@ -269,8 +269,8 @@ def add_3d_callout(ax, pt_model, pt_text, text, color='#000000', bgcolor='white'
 
 # 3D Subpart Callouts with carefully placed leader lines around perimeter
 add_3d_callout(ax2, [0, 20.0, 6.77], [0.0, 33.0, 24.0], "Top Tab (Centered)\n(8.20mm W, fits 8.33mm gap)", color='#1565c0', bgcolor='white')
-add_3d_callout(ax2, [4.65, 10.20, 14.09], [-22.0, 22.0, 26.0], "Left Tower & Cradle\n(Z=14.09mm)", color='#ad1457', bgcolor='#fce4ec')
-add_3d_callout(ax2, [13.85, 10.20, 14.09], [22.0, 22.0, 26.0], "Right Tower & Bridge Rib\n(Z=14.09mm)", color='#ad1457', bgcolor='#fce4ec')
+add_3d_callout(ax2, [4.65, 10.20, 14.50], [-22.0, 22.0, 26.0], "Left Tower & Socket\n(Z=14.50mm Enclosed)", color='#ad1457', bgcolor='#fce4ec')
+add_3d_callout(ax2, [13.85, 10.20, 14.50], [22.0, 22.0, 26.0], "Right Tower & Rear Bridge\n(Z=14.50mm, Zero Spread)", color='#ad1457', bgcolor='#fce4ec')
 add_3d_callout(ax2, [2.5, 7.67, 4.0], [-29.0, 14.0, 14.0], "Left Buttress Struts\n(0.8mm & 1.2mm)", color='#c2185b', bgcolor='#fce4ec')
 add_3d_callout(ax2, [7.05, 6.5, 8.0], [-3.0, 4.0, 20.0], "Enlarged Shaft Rocker\n(Ø2.8mm Pin, 4.4mm Plunger)", color='#e65100', bgcolor='#fff3e0')
 add_3d_callout(ax2, [clip_pts[135.0][0], clip_pts[135.0][1], 6.77], [-30.0, 16.0, 6.0], "Snap Clip 135°\n(1.85mm Crown Hook, L=3.70mm)", color='#00838f', bgcolor='#e0f7fa')
@@ -370,7 +370,7 @@ ax3.annotate('Plug Blade Insertion Push\n(10.5mm reach pushes cam ramp)', xy=(3.
              arrowprops=dict(facecolor='#1976d2', edgecolor='#0d47a1', width=2.0, headwidth=7),
              fontweight='bold', color='#0d47a1', fontsize=8.5, bbox=dict(boxstyle='round,pad=0.2', fc='#e3f2fd', ec='#1976d2'))
 
-ax3.annotate('Optimized Snap-Fit Cradle (2.60mm Throat)\nØ3.00mm Socket / Ø2.80mm Axle Snap (0.20mm Lock)', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
+ax3.annotate('Enclosed 360° Teardrop Socket (Ø3.30mm)\nCaptive Ø2.80mm Axle Pin + Rear Monolithic Bridge', xy=(y_axle, z_axle + 0.6), xytext=(y_axle - 4.5, z_axle + 2.2),
              arrowprops=dict(arrowstyle='->', color='#ad1457', lw=1.5),
              fontweight='bold', color='#ad1457', fontsize=8, bbox=dict(boxstyle='round,pad=0.2', fc='#fce4ec', ec='#ad1457'))
 
