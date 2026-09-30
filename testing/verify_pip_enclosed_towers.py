@@ -71,13 +71,13 @@ def run_verification():
     print("    -> PASS: Monolithic cross-tie bridge confirmed (Zero tower spreading)")
     
     # 3. PIP Tolerances: Radial and Lateral Clearances
-    shaft = build_shaft_rocker_mesh(hub_w=7.20, in_assembly_coords=True, with_supports=False)
+    shaft = build_shaft_rocker_mesh(hub_w=6.90, in_assembly_coords=True, with_supports=False)
     tree_towers = cKDTree(towers.vertices)
     dists, _ = tree_towers.query(shaft.vertices)
     min_gap = np.min(dists)
-    print(f"[3] Shaft-to-Towers Minimum Clearance: {min_gap:.3f} mm (Target: >= 0.22 mm)")
-    assert min_gap >= 0.22, f"Clearance too tight: {min_gap:.3f} mm < 0.22 mm"
-    print("    -> PASS: 0.25mm PIP clearance verified (Prevents FDM thermal fusion)")
+    print(f"[3] Shaft-to-Towers Minimum Clearance: {min_gap:.3f} mm (Target: >= 0.30 mm)")
+    assert min_gap >= 0.30, f"Clearance too tight: {min_gap:.3f} mm < 0.30 mm"
+    print("    -> PASS: 0.35mm PIP clearance verified (Prevents FDM thermal fusion & ensures smooth rotation)")
     
     # 4. Full Kinematic Rotation Stroke
     print("[4] Kinematic Rotation Stroke Collision Check (theta = 0° to 12°):")

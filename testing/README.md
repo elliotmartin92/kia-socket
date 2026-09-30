@@ -10,6 +10,7 @@ Run these canonical tests to validate deliverables before release or after modif
 | Verification Script | Description |
 | :--- | :--- |
 | `py -3 testing/verify_exported_deliverables.py` | Validates all exported STL deliverables (`part.stl`, `shaft_rocker.stl`, `cooling_tower.stl`, `complete_assembly.stl`) for manifold integrity, body counts, and Z-bounds. |
+| `py -3 testing/verify_shaft_support_stick.py` | Verifies dedicated breakaway stick support with Y-fork head under floating lever shaft cylinder (X in [7.90, 11.10], 0.28mm release gap). |
 | `py -3 testing/verify_shaft_supports_production.py` | Verifies shaft rocker print support frame: bed contact ($Z = 0.00\text{ mm}$), pin release micro-gap ($0.12\text{ mm}$), and stick geometry. |
 | `py -3 testing/verify_slit_alignment.py` | Verifies slit detent key alignment ($X = -7.853, +8.453\text{ mm}$) and fit clearances. |
 | `py -3 testing/verify_185mm_clips.py` | Validates the 4 snap clips for $1.85\text{ mm}$ hook depth, $0.20\text{ mm}$ top-down crown arc ease, and $0.53\text{ mm}$ blunt land. |

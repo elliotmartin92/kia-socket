@@ -51,9 +51,9 @@ HOLE_Y_LEN = HOLE_Y_TOP - HOLE_Y_BOT              # 5.180 mm
 
 # Enlarged Heavy-Duty Dimensions
 TOTAL_AXLE_LEN = 11.50       # 11.50mm total length tip-to-tip
-HUB_WIDTH = 7.20             # 7.20mm structural hub (0.25mm clearance per side in 7.70mm tower gap for PIP)
-PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.15 mm per side
-PIN_DIAMETER = 2.80          # Ø2.80mm heavy-duty pin (fits Ø3.30mm teardrop cradle, 4.72x higher torsional rigidity)
+HUB_WIDTH = 6.90             # 6.90mm structural hub (0.40mm clearance per side in 7.70mm tower gap for smooth operation)
+PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.30 mm per side
+PIN_DIAMETER = 2.80          # Ø2.80mm heavy-duty pin (fits Ø3.50mm teardrop cradle, smooth 0.35mm radial clearance)
 HUB_DIAMETER = 4.20          # Ø4.20mm central structural hub barrel
 PLUNGER_REACH_BELOW_Z = 6.50 # Reaches Z = -6.50mm below baseplate floor
 
@@ -165,7 +165,7 @@ def build_shaft_rocker_mesh(
     
     # 3. Structural Web tying the 3 ribs together (X in [5.60, 12.90])
     web_y_min = y_axle - 1.50
-    web_y_max = y_axle + 2.50
+    web_y_max = y_axle + 1.80  # Trimmed from +2.50 to +1.80 to ensure +0.67mm clearance to rear cross-tie bridge (Y=11.75mm)
     web_z_min = z_axle - 3.20
     web_z_max = z_axle + 1.00
     web_poly = box(web_y_min, web_z_min, web_y_max, web_z_max)
@@ -298,12 +298,12 @@ def build_shaft_support_cradle_mesh(release_gap=0.12, bed_thickness=0.35):
     saddle_r = trimesh.creation.box([1.70, 0.90, h_saddle])
     saddle_r.apply_translation([4.75, 1.05, bed_thickness + h_saddle / 2.0])
     
-    # 3. Micro-breakaway anchor tabs
-    tab_l = trimesh.creation.box([0.30, 0.50, 0.20])
-    tab_l.apply_translation([-3.75, 1.05, 0.10])
+    # 3. Micro-breakaway anchor tabs (spanning 0.40mm gap between hub shoulder at ±3.45mm and frame window at ±3.85mm)
+    tab_l = trimesh.creation.box([0.50, 0.50, 0.20])
+    tab_l.apply_translation([-3.65, 1.05, 0.10])
     
-    tab_r = trimesh.creation.box([0.30, 0.50, 0.20])
-    tab_r.apply_translation([3.75, 1.05, 0.10])
+    tab_r = trimesh.creation.box([0.50, 0.50, 0.20])
+    tab_r.apply_translation([3.65, 1.05, 0.10])
     
     try:
         cradle_mesh = trimesh.boolean.union([frame_mesh, saddle_l, saddle_r, tab_l, tab_r], engine='manifold')

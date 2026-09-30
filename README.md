@@ -44,7 +44,7 @@ py -3 testing/verify_shaft_supports_production.py
 ### Generated Output Files
 | File | Description |
 | :--- | :--- |
-| **`part.stl`** / **`part.obj`** | Main baseplate with **100% planar flat bottom ($Z = 0.00\text{ mm}$)** for support-free 3D printing. Tower lateral faces are 100% clean and flat. Baseplate perimeter features top-down crowned snap clips ($L = 3.70\text{ mm}$, $1.85\text{ mm}$ center hook depth with $0.20\text{ mm}$ top-down continuous crown arc ease, $0.53\text{ mm}$ prominent squared-off vertical blunt face, $0.60\text{ mm}$ slot width, $2.07\text{ mm}$ continuous solid hoop ring above floor) and an extended through-hole ($Y \in [8.57, 13.75]\text{ mm}$) for free plunger travel. |
+| **`part.stl`** / **`part.obj`** | Main baseplate with **100% planar flat bottom ($Z = 0.00\text{ mm}$)** for support-free 3D printing. Tower lateral faces are 100% clean and flat. Baseplate perimeter features top-down crowned snap clips ($L = 3.70\text{ mm}$, $1.75\text{ mm}$ center hook depth with $0.20\text{ mm}$ top-down continuous crown arc ease, shelf at $Z = 4.72\text{ mm}$, $0.53\text{ mm}$ prominent squared-off vertical blunt face, $0.60\text{ mm}$ slot width, $2.07\text{ mm}$ continuous solid hoop ring above floor) and an extended through-hole ($Y \in [8.57, 13.75]\text{ mm}$) for free plunger travel. |
 | **`shaft_rocker.stl`** / **`shaft_rocker.obj`** | Separate 3D-printable enlarged heavy-duty shaft/rocker mechanism with **built-in sacrificial snap-off support frame** ($Z \in [0.00, 0.58]\text{ mm}$, $52.8\text{ mm}^2$ bed footprint, $0.12\text{ mm}$ pin release gap). Ready for 1-click printing with **slicer supports completely DISABLED**. Pre-oriented flat on build bed ($Z = 0.00\text{ mm}$). |
 | **`shaft_rocker_clean.stl`** / **`shaft_rocker_clean.obj`** | Bare shaft/rocker mechanism without built-in supports (for reference or manual slicer tree supports). |
 | **`shaft_rocker_assembled.stl`** | Shaft/rocker mechanism positioned in exact assembly coordinates seated in the towers. |
@@ -74,7 +74,7 @@ py -3 testing/verify_shaft_supports_production.py
   - $Z \in [1.00, 1.50]\text{ mm}$: Internal floor stiffener grid ribs ($0.50\text{ mm}$ tall).
   - $Z \in [1.00, 4.60]\text{ mm}$: Guide brackets ($4.60\text{ mm}$ total height).
   - $Z \in [1.00, 6.77]\text{ mm}$: Outer perimeter wall, snap clip stems, bottom arch wall, and bridge rib ($6.77\text{ mm}$ height).
-  - $Z \in [1.00, 8.125]\text{ mm}$: Center curved D-wall ($7.125\text{ mm}$ tall above floor, base extended to $Y = -5.05\text{ mm}$ as brass insert backstop).
+  - $Z \in [1.00, 10.50]\text{ mm}$: Center curved D-wall ($9.50\text{ mm}$ tall above floor, base extended to $Y = -5.05\text{ mm}$ as brass insert backstop).
   - $Z \in [1.00, 15.59]\text{ mm}$: Shaft support towers with thick rounded arch crown ($14.59\text{ mm}$ height above floor, apex at $Z = 15.59\text{ mm}$, monolithic cross-tie bridge).
 - **Separate Slit Insert Dimensions**:
   - $Z \in [0.00, 2.47]\text{ mm}$: Wall body ($3.80\text{ mm} \times 5.60\text{ mm}$ outer, $1.20\text{ mm} \times 3.50\text{ mm}$ inner clearance channel for $0.77\text{ mm} \times 3.10\text{ mm}$ part).
@@ -148,11 +148,11 @@ py -3 testing/verify_shaft_supports_production.py
   - **Cantilever Beam Length**: **$L = 3.70\text{ mm}$** ($Z \in [3.07, 6.77]\text{ mm}$), restoring the proven robust flex architecture of earlier stable iterations.
   - **Continuous Solid Perimeter Hoop Ring**: Preserves a **$2.07\text{ mm}$ unbroken ring** ($Z \in [1.00, 3.07]\text{ mm}$) above the base floor. This anchors the perimeter wall in continuous hoop tension, completely eliminating stress concentration at the thin floor boundary and preventing layer delamination/snapping under bending moments.
   - **Widened Flex Slots**: Increased slot width to **$0.60\text{ mm}$** (`CLIP_SLOT_CLEARANCE = 0.60`). Completely eliminates inter-wall micro-fusion and filament bridging during FDM printing that previously caused tearing along layer lines.
-- **Top-Down Crowned Retention Hook Overhang ($1.85\text{ mm}$ Depth, $0.20\text{ mm}$ Crown Ease)**:
-  - Undercut retention shelf at $Z = 4.97\text{ mm}$ projecting **$+1.85\text{ mm}$ radially outward at center** (`CLIP_HOOK_DEPTH = 1.85`), calibrated **$0.25\text{ mm}$ less prominent** than earlier $2.10\text{ mm}$ designs to reduce insertion force and cantilever flex strain while maintaining robust positive latch retention in the mating enclosure windows.
-  - **Top-Down Subtle Continuous Crown Arc (`CLIP_CROWN_EASE = 0.20`)**: Looking top-down in the XY plane, the hook edge follows a smooth parabolic/cosine crown arc tapering from $1.85\text{ mm}$ at the center to $1.65\text{ mm}$ at lateral edges. This eliminates sharp $90^\circ$ biting corners that previously gouged the circular receptacle bore during insertion.
-  - **Prominent Vertical Squared-Off Blunt Land ($0.53\text{ mm}$ Height)**: Features an enlarged **$0.53\text{ mm}$ vertical solid blunt face** at the outer apex ($Z \in [4.97, 5.50]\text{ mm}$, `CLIP_BLUNT_HEIGHT = 0.53`, $+51\%$ increase over original $0.35\text{ mm}$), permanently eliminating knife-edge fragility and layer splitting under insertion forces.
-  - Sloped lead-in ramp tapering from the blunt land ($Z = 5.50\text{ mm}$) up to the top outer wall apex at $Z = 6.77\text{ mm}$.
+- **Top-Down Crowned Retention Hook Overhang ($1.75\text{ mm}$ Depth, $0.20\text{ mm}$ Crown Ease)**:
+  - Undercut retention shelf at $Z = 4.72\text{ mm}$ ($+0.25\text{ mm}$ material under shelf for positive switch engagement) projecting **$+1.75\text{ mm}$ radially outward at center** (`CLIP_HOOK_DEPTH = 1.75`), trimmed **$0.10\text{ mm}$ off the face** to lower insertion force and cantilever flex strain while maintaining robust positive latch retention in the mating enclosure windows.
+  - **Top-Down Subtle Continuous Crown Arc (`CLIP_CROWN_EASE = 0.20`)**: Looking top-down in the XY plane, the hook edge follows a smooth parabolic/cosine crown arc tapering from $1.75\text{ mm}$ at the center to $1.55\text{ mm}$ at lateral edges. This eliminates sharp $90^\circ$ biting corners that previously gouged the circular receptacle bore during insertion.
+  - **Prominent Vertical Squared-Off Blunt Land ($0.53\text{ mm}$ Height)**: Features an enlarged **$0.53\text{ mm}$ vertical solid blunt face** at the outer apex ($Z \in [4.72, 5.25]\text{ mm}$, `CLIP_BLUNT_HEIGHT = 0.53`), permanently eliminating knife-edge fragility and layer splitting under insertion forces.
+  - Sloped lead-in ramp tapering from the blunt land ($Z = 5.25\text{ mm}$) up to the top outer wall apex at $Z = 6.77\text{ mm}$ ($1.52\text{ mm}$ vertical span, flattens lead-in angle to $49.0^\circ$ for smooth entry).
 - **Built-In Sacrificial Support Towers (Twin-Prong Breakaway Fork Supports)**:
   - Sturdy base sitting flat on print bed ($Z = 0.00\text{ mm}$) with a wide adhesion foot ($1.80\text{ mm} \times 3.80\text{ mm}$) and solid lower trunk ($1.20\text{ mm} \times 3.40\text{ mm}$) up to $Z = 3.20\text{ mm}$.
   - **Twin Lateral Prongs & Prying Arch**: Splits into two vertical prongs centered at $Y = \pm 1.40\text{ mm}$ spanning across a $1.80\text{ mm}$ wide central prying arch window ($Z \in [3.20, 4.82]\text{ mm}$), directly supporting the outer lateral shelf corners ($0.25\text{ mm}$ margin to edges).
@@ -419,16 +419,17 @@ py -3 testing/verify_shaft_supports_production.py
 ### Version 9.8 (v9.8) - Top-Down Subtle Crown Snap Clips & Prominent Squared-Off Blunt Face
 - **Top-Down Continuous Crown Arc (`CLIP_CROWN_EASE = 0.20`)**:
   - Replaced the sharp $90^\circ$ biting corners in top-down view with a continuous subtle circular crown arc.
-  - Tapers smoothly from $1.85\text{ mm}$ radial overhang at the center to $1.65\text{ mm}$ at the lateral corners ($0.20\text{ mm}$ corner relief).
+  - Tapers smoothly from $1.75\text{ mm}$ radial overhang at the center to $1.55\text{ mm}$ at the lateral corners ($0.20\text{ mm}$ corner relief).
   - Eliminates corner scraping, gouging, and stress concentration against the circular receptacle bore during insertion.
-- **$0.25\text{ mm}$ Calibrated Prominence Reduction (`CLIP_HOOK_DEPTH = 1.85`)**:
-  - Calibrated radial hook depth from $2.10\text{ mm} \to 1.85\text{ mm}$ across all 4 snap clips.
-  - Lowers peak insertion force and beam deflection strain during installation while preserving deep positive horizontal shelf locking ($Z = 4.97\text{ mm}$) in the mating enclosure windows.
+- **Calibrated Shelf Elevation & Prominence (`CLIP_HOOK_HEIGHT = 2.05`, `CLIP_HOOK_DEPTH = 1.75`)**:
+  - Added $+0.25\text{ mm}$ of material under each clip shelf, lowering the horizontal retention shelf from $Z = 4.97\text{ mm} \to 4.72\text{ mm}$ to take up the switch actuation gap and hold the assembly securely in positive engagement.
+  - Trimmed $0.10\text{ mm}$ off the outer face ($1.85\text{ mm} \to 1.75\text{ mm}$) to ease insertion force and reduce beam bending strain.
+  - Flattened lead-in entry ramp angle from $55.5^\circ \to 49.0^\circ$ relative to vertical axis ($1.52\text{ mm}$ ramp height).
 - **Prominent Squared-Off Vertical Blunt Land (`CLIP_BLUNT_HEIGHT = 0.53`)**:
-  - Enlarged vertical blunt face height from $0.35\text{ mm} \to 0.53\text{ mm}$ ($Z \in [4.97, 5.50]\text{ mm}$, $+51\%$ increase).
+  - Vertical blunt face height of $0.53\text{ mm}$ ($Z \in [4.72, 5.25]\text{ mm}$).
   - Truncates the lead-in ramp to eliminate knife-edge fragility, dramatically reinforcing the apex cross-section against layer splitting under insertion forces.
 - **Breakaway Support Alignment & Watertight Validation**:
-  - Sacrificial breakaway twin prongs ($Y = \pm 1.30\text{ mm}$, radial span $\approx 0.80 - 1.35\text{ mm}$) remain centered underneath the $1.65 - 1.85\text{ mm}$ retention shelf with full support coverage.
+  - Sacrificial breakaway twin prongs automatically lower contact tips to $Z = 4.44\text{ mm}$, maintaining calibrated $0.28\text{ mm}$ release gap under the shelf.
   - All 4 hook wedge meshes and the slotted outer wall remain 100% watertight.
 ### Version 9.9 (v9.9) - 45° Tilted Print Orientation with Baked-In Support Fins & Calibrated Half Moon
 - **45° Tilted Print Orientation for Anti-Delamination Reinforcement**:
@@ -441,11 +442,11 @@ py -3 testing/verify_shaft_supports_production.py
   - **Horizontal Breakaway Tines ($0.24\text{ mm} \times 0.60\text{ mm}$)**: Spaced every $3.5\text{ mm}$ along $Y$, bridging the $0.20\text{ mm}$ gap and fusing $0.35\text{ mm}$ into the part underside. Prints as single continuous layer-line beads without retractions, and snaps cleanly off when bent.
   - **Twin Lateral Sway Braces ($X = \pm 19.00\text{ mm}$)**: Vertical stabilizing walls with horizontal tines holding the outer perimeter tabs from swaying as the print grows to $Z = 32.04\text{ mm}$.
   - Slices and prints with **slicer supports completely DISABLED**.
-- **Calibrated Half Moon (25% Height Reduction & Receded Placement)**:
-  - **$25\%$ Height Drop**: Lowered from $Z = 10.50\text{ mm} \to \mathbf{Z = 8.125\text{ mm}}$ ($7.125\text{ mm}$ above baseplate floor). Shortens the cantilever moment arm $M = F \cdot H$ by $25\%$, standing only $2.52\text{ mm}$ above the guide brackets ($Z = 5.60\text{ mm}$).
+- **Calibrated Half Moon (Restored Full Height & Receded Placement)**:
+  - **Restored Full Height**: Maintained at original $Z = 10.50\text{ mm}$ ($9.50\text{ mm}$ above baseplate floor) to ensure positive, full-depth guidance of entering plug blades without insertion angle dependency.
   - **Receded Apex ($Y = -3.60\text{ mm}$)**: Moved back from $Y = -3.00\text{ mm}$, opening a generous **$+0.725\text{ mm}$ clear air gap** to the nominal plug blade bottom ($Y = -2.875\text{ mm}$).
-  - **Continuous Rib 4 Fusion Preserved**: Flat base at $Y = -4.30\text{ mm}$ remains 100% flush and fused into the continuous Rib 4 bridge across $Z \in [1.00, 2.15]\text{ mm}$.
-  - **$15^\circ$ Lead-In Entry Funnel**: Smooth $15^\circ$ bevel across $Z \in [6.50, 8.125]\text{ mm}$ prevents blunt catching on entry.
+  - **Continuous Rib 4 Fusion Preserved**: Flat base at $Y = -4.30\text{ mm}$ remains 100% flush and fused into the continuous Rib 4 bridge across $Z \in [1.00, 2.15]\text{ mm}$ (extended to $Y = -5.05\text{ mm}$ as brass insert backstop).
+  - **$15^\circ$ Lead-In Entry Funnel**: Smooth $15^\circ$ bevel across $Z \in [8.50, 10.50]\text{ mm}$ prevents blunt catching on entry.
 - **Production Deliverables Updated**:
   - `part.stl`: 45° tilted main part with baked-in Support Fins, ready for 1-click support-free printing.
   - `part_flat.stl`: Flat unrotated model preserved for reference.
