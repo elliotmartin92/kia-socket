@@ -96,15 +96,15 @@ def build_shaft_rocker_mesh(
     
     rot_x = trimesh.transformations.rotation_matrix(np.pi/2, [0, 1, 0])
     
-    # Left pin: [3.50, 5.50]
-    pin_l = trimesh.creation.cylinder(radius=r_pin, height=pin_len + 0.10, sections=32)
+    # Left pin: [x_c - hub_w/2.0 - pin_len, x_c - hub_w/2.0]
+    pin_l = trimesh.creation.cylinder(radius=r_pin, height=pin_len + 0.20, sections=36)
     pin_l.apply_transform(rot_x)
-    pin_l.apply_translation([x_c - hub_w/2.0 - pin_len/2.0, y_axle, z_axle])
+    pin_l.apply_translation([x_c - hub_w/2.0 - pin_len/2.0 + 0.10, y_axle, z_axle])
     
-    # Right pin: [13.00, 15.00]
-    pin_r = trimesh.creation.cylinder(radius=r_pin, height=pin_len + 0.10, sections=32)
+    # Right pin: [x_c + hub_w/2.0, x_c + hub_w/2.0 + pin_len]
+    pin_r = trimesh.creation.cylinder(radius=r_pin, height=pin_len + 0.20, sections=36)
     pin_r.apply_transform(rot_x)
-    pin_r.apply_translation([x_c + hub_w/2.0 + pin_len/2.0, y_axle, z_axle])
+    pin_r.apply_translation([x_c + hub_w/2.0 + pin_len/2.0 - 0.10, y_axle, z_axle])
     
     # Central Hub Barrel: [5.50, 13.00]
     hub_mesh = trimesh.creation.cylinder(radius=r_hub, height=hub_w, sections=32)
@@ -112,7 +112,7 @@ def build_shaft_rocker_mesh(
     hub_mesh.apply_translation([x_c, y_axle, z_axle])
     
     # 2. OEM 3-Rib Flanks & Plunger Array
-    flank_collar = Point(y_axle, z_axle).buffer(r_hub)
+    flank_collar = Point(y_axle, z_axle).buffer(r_hub - 0.05)
     flank_pts = [
         (y_axle - 1.50, z_axle + 0.60),
         (y_axle + 3.20, z_axle - 1.50),
@@ -168,7 +168,15 @@ def build_shaft_rocker_mesh(
     web_y_max = y_axle + 1.80  # Trimmed from +2.50 to +1.80 to ensure +0.67mm clearance to rear cross-tie bridge (Y=11.75mm)
     web_z_min = z_axle - 3.20
     web_z_max = z_axle + 1.00
-    web_poly = box(web_y_min, web_z_min, web_y_max, web_z_max)
+    web_chamfer = 1.00  # 45° lead-in chamfer eliminating sagging overhang ceiling in 45° print orientation
+    pts_web = [
+        (web_y_min, web_z_max),
+        (web_y_max, web_z_max),
+        (web_y_max, web_z_min),
+        (web_y_min + web_chamfer, web_z_min),
+        (web_y_min, web_z_min + web_chamfer)
+    ]
+    web_poly = Polygon(pts_web)
     web_span_x = (x_c + hub_w/2.0 - 0.10) - (x_c - hub_w/2.0 + 0.10)
     m_web_raw = trimesh.creation.extrude_polygon(web_poly, height=web_span_x)
     v_w = m_web_raw.vertices.copy()

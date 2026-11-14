@@ -194,7 +194,7 @@ ax1.annotate('Bracket Pair 3 & 4\n(Height: 4.60mm)', xy=(7.25, -0.5), xytext=(17
              fontsize=8, fontweight='bold', color='#2e7d32', bbox=dict(boxstyle='round,pad=0.2', fc='#e8f5e9', ec='#2e7d32'))
 
 # Center Curved Feature & Dividing Rib
-ax1.annotate('Center Curved Feature (10.50mm H)\nSolid D-Core & Flat Base', xy=(6.28, -3.6), xytext=(-9.0, -5.5),
+ax1.annotate('Center Curved Feature (10.50mm H)\nSolid D-Core & Flared Foot', xy=(6.28, -3.25), xytext=(-9.0, -5.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#6a1b9a'),
              fontsize=8, fontweight='bold', color='#6a1b9a', bbox=dict(boxstyle='round,pad=0.2', fc='#f3e5f5', ec='#8e24aa'))
 
@@ -279,7 +279,7 @@ add_3d_callout(ax2, [-7.25, 0.0, 4.60], [-28.0, -12.0, 14.0], "Guide Brackets 1 
 add_3d_callout(ax2, [7.25, 0.0, 4.60], [28.0, -12.0, 14.0], "Guide Brackets 3 & 4\n(4.60mm H)", color='#2e7d32', bgcolor='#e8f5e9')
 add_3d_callout(ax2, [-21.075, 0.0, 3.5], [-30.0, -2.0, -2.0], "Left Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
 add_3d_callout(ax2, [20.200, 0.0, 3.5], [30.0, -2.0, -2.0], "Right Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
-add_3d_callout(ax2, [6.28, -3.6, 10.50], [16.0, 0.0, 20.0], "Center Curved Feature\n(10.50mm H Solid D-Core)", color='#6a1b9a', bgcolor='#f3e5f5')
+add_3d_callout(ax2, [6.28, -3.25, 10.50], [16.0, 0.0, 20.0], "Center Curved Feature\n(10.50mm H Flared Foot)", color='#6a1b9a', bgcolor='#f3e5f5')
 add_3d_callout(ax2, [clip_pts[211.3][0], clip_pts[211.3][1], 5.0], [-33.0, -18.0, 4.0], "Snap Clip 211.3°\n(1.75mm Hook, 45° Support)", color='#00838f', bgcolor='#e0f7fa')
 add_3d_callout(ax2, [clip_pts[327.5][0], clip_pts[327.5][1], 5.0], [33.0, -18.0, 4.0], "Snap Clip 327.5°\n(1.75mm Hook, 45° Support)", color='#00838f', bgcolor='#e0f7fa')
 add_3d_callout(ax2, [0, -8.7, 6.77], [0.0, -34.0, -6.0], "Bottom Central U-Arch\n(7.95mm H, 5mm Inner W)", color='#0d47a1', bgcolor='white')
@@ -303,9 +303,9 @@ ax3 = fig.add_subplot(1, 3, 3)
 
 # Tower profile in Y-Z
 y_tower_min, y_tower_max = 7.171, 13.771
-z_tower_top = 14.09
+z_tower_top = 14.19
 ax3.fill([y_tower_min, y_tower_max, y_tower_max, y_tower_min],
-         [1.0, 1.0, z_tower_top, z_tower_top], color='#cfd8dc', alpha=0.6, label='Tower Support Profile (14.09mm)')
+         [1.0, 1.0, z_tower_top, z_tower_top], color='#cfd8dc', alpha=0.6, label='Tower Support Profile (14.19mm)')
 
 # Baseplate floor (Z: 0 to 1.0mm)
 ax3.fill([0, 18, 18, 0], [0, 0, 1.0, 1.0], color='#78909c', alpha=0.7, label='Base Floor (1.00mm thick, Z=0 datum)')
@@ -315,9 +315,9 @@ ax3.plot([8.570, 8.570], [-0.1, 1.1], 'r--', linewidth=1.5)
 ax3.plot([13.750, 13.750], [-0.1, 1.1], 'r--', linewidth=1.5)
 
 # Shaft Pivot Center
-y_axle, z_axle = 9.279, 12.590
+y_axle, z_axle = 9.279, 11.190
 r_hub = 2.10
-ax3.plot(y_axle, z_axle, 'r+', markersize=14, markeredgewidth=2.5, label='Shaft Axis (Y=9.28, Z=12.59)')
+ax3.plot(y_axle, z_axle, 'r+', markersize=14, markeredgewidth=2.5, label='Shaft Axis (Y=9.28, Z=11.19)')
 
 # Plunger Arm Profile (Rest Position - Z = -6.50mm, Y = 10.48mm)
 y_rest, z_rest = 10.479, -6.50

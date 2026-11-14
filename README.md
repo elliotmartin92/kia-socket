@@ -44,14 +44,14 @@ py -3 testing/verify_shaft_supports_production.py
 ### Generated Output Files
 | File | Description |
 | :--- | :--- |
-| **`part.stl`** / **`part.obj`** | Main baseplate with **100% planar flat bottom ($Z = 0.00\text{ mm}$)** for support-free 3D printing. Tower lateral faces are 100% clean and flat. Baseplate perimeter features top-down crowned snap clips ($L = 3.70\text{ mm}$, $1.75\text{ mm}$ center hook depth with $0.20\text{ mm}$ top-down continuous crown arc ease, shelf at $Z = 4.72\text{ mm}$, $0.53\text{ mm}$ prominent squared-off vertical blunt face, $0.60\text{ mm}$ slot width, $2.07\text{ mm}$ continuous solid hoop ring above floor) and an extended through-hole ($Y \in [8.57, 13.75]\text{ mm}$) for free plunger travel. |
+| **`part.stl`** / **`part.obj`** | Main baseplate with **100% planar flat bottom ($Z = 0.00\text{ mm}$)** for support-free 3D printing. Tower lateral faces are 100% clean and flat. Baseplate perimeter features top-down crowned snap clips ($L = 3.70\text{ mm}$, $1.80\text{ mm}$ center hook depth with $0.20\text{ mm}$ top-down continuous crown arc ease, shelf at $Z = 4.72\text{ mm}$, $0.53\text{ mm}$ prominent squared-off vertical blunt face, $0.60\text{ mm}$ slot width, $2.07\text{ mm}$ continuous solid hoop ring above floor) and an extended through-hole ($Y \in [8.57, 13.75]\text{ mm}$) for free plunger travel. |
 | **`shaft_rocker.stl`** / **`shaft_rocker.obj`** | Separate 3D-printable enlarged heavy-duty shaft/rocker mechanism with **built-in sacrificial snap-off support frame** ($Z \in [0.00, 0.58]\text{ mm}$, $52.8\text{ mm}^2$ bed footprint, $0.12\text{ mm}$ pin release gap). Ready for 1-click printing with **slicer supports completely DISABLED**. Pre-oriented flat on build bed ($Z = 0.00\text{ mm}$). |
 | **`shaft_rocker_clean.stl`** / **`shaft_rocker_clean.obj`** | Bare shaft/rocker mechanism without built-in supports (for reference or manual slicer tree supports). |
 | **`shaft_rocker_assembled.stl`** | Shaft/rocker mechanism positioned in exact assembly coordinates seated in the towers. |
 | **`shaft_rocker.scad`** | OpenSCAD parametric source file for the shaft/rocker mechanism. |
 | **`slit_insert.stl`** / **`slit_insert.obj`** | Separate 3D-printable backside slit wall insert with enlarged, sliceable registration key (**$2.60 \times 4.80\text{ mm}$** with solid **$0.70\text{ mm}$ walls**, impossible to drop in slicing) and $0.60\text{ mm} \times 45^\circ$ non-breaching polarization corner bevel. |
 | **`slit_inserts_pair.stl`** | Two inserts pre-arranged side-by-side on a single build plate for 1-click 3D printing. |
-| **`cooling_tower.stl`** / **`cooling_tower.obj`** | Sacrificial cooling column ($\varnothing 4.00\text{ mm} \times 20.50\text{ mm}$ tall) to guarantee dedicated cooling time per layer on delicate baseplate tower tips ($Z = 14.09\text{ mm}$) and shaft rocker tips ($Z = 19.86\text{ mm}$). |
+| **`cooling_tower.stl`** / **`cooling_tower.obj`** | Sacrificial cooling column ($\varnothing 4.00\text{ mm} \times 20.50\text{ mm}$ tall) to guarantee dedicated cooling time per layer on delicate baseplate tower tips ($Z = 15.59\text{ mm}$) and shaft rocker tips ($Z = 19.86\text{ mm}$). |
 | **`complete_assembly.stl`** / **`complete_assembly.obj`** | Complete 1-click 3D print plate with the main baseplate, both separate slit inserts, shaft rocker, and sacrificial cooling tower pre-arranged side-by-side on the **same flat print plane ($Z = 0.00\text{ mm}$)** with wide thermal isolation spacing ($>16\text{ mm}$ clearance). |
 | **`accessories/tower_clamp/`** | Standalone optional anti-spreading tower prong clamps (`tower_clamp_bridge.stl`, `tower_clamp_left.stl`, `tower_clamp_right.stl`, `tower_clamps_pair.stl`). Preserved separately as an auxiliary accessory. |
 | **`slicer/`** | Pre-configured Bambu Studio / OrcaSlicer project files (`complete_assembly_printed.3mf`). |
@@ -120,19 +120,19 @@ py -3 testing/verify_shaft_supports_production.py
   - Floor: Solid continuous $1.00\text{ mm}$ floor within the inset wall.
 
 ### 3.2. Shaft Support Towers with Enclosed 360° Teardrop Sockets & Thick Rounded Crown (Print-in-Place)
-- **Shaft Axis**: **$Y = 9.279\text{ mm}$, $Z = 12.59\text{ mm}$** ($\varnothing 3.30\text{ mm}$ teardrop journal bore, centered directly over the through-hole).
+- **Shaft Axis**: **$Y = 9.279\text{ mm}$, $Z = 12.590\text{ mm}$** ($\varnothing 3.50\text{ mm}$ teardrop journal bore, centered directly over the through-hole).
 - **Left Tower**: $X \in [3.900, 5.400]\text{ mm}$ ($1.50\text{ mm}$ wall thickness).
 - **Right Tower**: $X \in [13.100, 14.600]\text{ mm}$ ($1.50\text{ mm}$ thickness, $0.14\text{ mm}$ clearance right of through-hole).
-- **Internal Clearance Between Towers**: **$7.70\text{ mm}$** (accommodates $7.20\text{ mm}$ hub barrel with $0.25\text{ mm}$ lateral clearance per side).
+- **Internal Clearance Between Towers**: **$7.70\text{ mm}$** (accommodates $6.90\text{ mm}$ hub barrel with $0.40\text{ mm}$ lateral clearance per side).
 - **Enclosed 360° Journal Sockets**:
-  - Bore: Teardrop profile ($\varnothing 3.30\text{ mm}$ circular bottom, $45^\circ$ self-supporting angled apex oriented at $135^\circ$ in Y-Z so that under $45^\circ$ print tilt, the apex points vertically upward, eliminating bridging sag).
-  - Clearance: $0.25\text{ mm}$ radial running clearance around $\varnothing 2.80\text{ mm}$ axle pins, completely eliminating thermal fusing during FDM printing.
+  - Bore: Teardrop profile ($\varnothing 3.50\text{ mm}$ circular bottom, $45^\circ$ self-supporting angled apex oriented at $135^\circ$ in Y-Z so that under $45^\circ$ print tilt, the apex points vertically upward, eliminating bridging sag).
+  - Clearance: $0.35\text{ mm}$ radial running clearance around $\varnothing 2.80\text{ mm}$ axle pins, completely eliminating thermal fusing during FDM printing.
 - **Thick Rounded Arch Crown**:
   - Profile: Smooth continuous elliptical/rounded arch in the Y-Z plane ($R_y = 2.85\text{ mm}, R_z = 3.00\text{ mm}$, tangent to vertical lands at $Y = 6.43\text{ mm}$ and $Y = 12.13\text{ mm}$).
   - Tower Total Height: **$14.59\text{ mm}$ above floor (apex at $Z = 15.59\text{ mm}$)**.
-  - Solid Roof Thickness: **$1.35\text{ mm}$ of 100% solid plastic** over the top of the bore ($Z \in [14.24, 15.59]\text{ mm}$), providing immense hoop strength and resistance to upward plug prying forces.
+  - Solid Roof Thickness: **$1.25\text{ mm}$ of 100% solid plastic** over the top of the bore ($Z \in [14.34, 15.59]\text{ mm}$), providing immense hoop strength and resistance to upward plug prying forces.
 - **Monolithic Rear Cross-Tie Bridge**:
-  - Spans the entire $7.70\text{ mm}$ inter-tower gap across $X \in [5.40, 13.10]\text{ mm}$ at $Y \in [11.60, 12.85]\text{ mm}$ ($1.25\text{ mm}$ thick in Y) and $Z \in [12.60, 15.00]\text{ mm}$ ($2.40\text{ mm}$ tall in Z).
+  - Spans the entire $7.70\text{ mm}$ inter-tower gap across $X \in [5.40, 13.10]\text{ mm}$ at $Y \in [11.75, 12.85]\text{ mm}$ ($1.10\text{ mm}$ thick in Y) and $Z \in [12.60, 15.00]\text{ mm}$ ($2.40\text{ mm}$ tall in Z).
   - Permanently and rigidly locks the two towers together, 100% eliminating tower spreading under plug insertion forces without requiring secondary external clips.
 - **Left Tower Dual Lateral Buttress Struts**:
   - **Front Strut**: Base meets the top inner wall of Bracket 3 at **$Y = 6.250\text{ mm}$** ($X \in [1.90, 3.90\text{ mm}]$, $Y \in [6.250, 7.050\text{ mm}]$), sloping directly into the Left Tower at $Z = 13.70\text{ mm}$ with **zero encroachment into Bracket 3's sliding channel**.
@@ -148,9 +148,9 @@ py -3 testing/verify_shaft_supports_production.py
   - **Cantilever Beam Length**: **$L = 3.70\text{ mm}$** ($Z \in [3.07, 6.77]\text{ mm}$), restoring the proven robust flex architecture of earlier stable iterations.
   - **Continuous Solid Perimeter Hoop Ring**: Preserves a **$2.07\text{ mm}$ unbroken ring** ($Z \in [1.00, 3.07]\text{ mm}$) above the base floor. This anchors the perimeter wall in continuous hoop tension, completely eliminating stress concentration at the thin floor boundary and preventing layer delamination/snapping under bending moments.
   - **Widened Flex Slots**: Increased slot width to **$0.60\text{ mm}$** (`CLIP_SLOT_CLEARANCE = 0.60`). Completely eliminates inter-wall micro-fusion and filament bridging during FDM printing that previously caused tearing along layer lines.
-- **Top-Down Crowned Retention Hook Overhang ($1.75\text{ mm}$ Depth, $0.20\text{ mm}$ Crown Ease)**:
-  - Undercut retention shelf at $Z = 4.72\text{ mm}$ ($+0.25\text{ mm}$ material under shelf for positive switch engagement) projecting **$+1.75\text{ mm}$ radially outward at center** (`CLIP_HOOK_DEPTH = 1.75`), trimmed **$0.10\text{ mm}$ off the face** to lower insertion force and cantilever flex strain while maintaining robust positive latch retention in the mating enclosure windows.
-  - **Top-Down Subtle Continuous Crown Arc (`CLIP_CROWN_EASE = 0.20`)**: Looking top-down in the XY plane, the hook edge follows a smooth parabolic/cosine crown arc tapering from $1.75\text{ mm}$ at the center to $1.55\text{ mm}$ at lateral edges. This eliminates sharp $90^\circ$ biting corners that previously gouged the circular receptacle bore during insertion.
+- **Top-Down Crowned Retention Hook Overhang ($1.80\text{ mm}$ Depth, $0.20\text{ mm}$ Crown Ease)**:
+  - Undercut retention shelf at $Z = 4.72\text{ mm}$ ($+0.25\text{ mm}$ material under shelf for positive switch engagement) projecting **$+1.80\text{ mm}$ radially outward at center** (`CLIP_HOOK_DEPTH = 1.80`), providing robust retention during disassembly while maintaining reasonable insertion force in the mating enclosure windows.
+  - **Top-Down Subtle Continuous Crown Arc (`CLIP_CROWN_EASE = 0.20`)**: Looking top-down in the XY plane, the hook edge follows a smooth parabolic/cosine crown arc tapering from $1.80\text{ mm}$ at the center to $1.60\text{ mm}$ at lateral edges. This eliminates sharp $90^\circ$ biting corners that previously gouged the circular receptacle bore during insertion.
   - **Prominent Vertical Squared-Off Blunt Land ($0.53\text{ mm}$ Height)**: Features an enlarged **$0.53\text{ mm}$ vertical solid blunt face** at the outer apex ($Z \in [4.72, 5.25]\text{ mm}$, `CLIP_BLUNT_HEIGHT = 0.53`), permanently eliminating knife-edge fragility and layer splitting under insertion forces.
   - Sloped lead-in ramp tapering from the blunt land ($Z = 5.25\text{ mm}$) up to the top outer wall apex at $Z = 6.77\text{ mm}$ ($1.52\text{ mm}$ vertical span, flattens lead-in angle to $49.0^\circ$ for smooth entry).
 - **Built-In Sacrificial Support Towers (Twin-Prong Breakaway Fork Supports)**:
@@ -233,7 +233,7 @@ py -3 testing/verify_shaft_supports_production.py
   - **Root Thickness in $Y$**: Thickened to **$3.80\text{ mm}$ at the shaft junction** blending into the $\varnothing 4.20\text{ mm}$ central hub barrel to eliminate bending under plug prong insertion.
   - **Tip Contact**: Smoothly tapers to a $2.00\text{ mm}$ nose diameter ($R = 1.00\text{ mm}$) at the switch contact point.
   - **Reach & Stroke**: Reaches **$\ge 6.50\text{ mm}$ below the outer bottom face of the baseplate ($Z \le -6.50\text{ mm}$)**.
-  - **Kinematics & Relief Clearance**: Rotates CCW around the $Y = 9.279\text{ mm}, Z = 12.59\text{ mm}$ pivot axis upon downward blade push, swinging the plunger into $+Y$ ($Y_{\text{rest}} = 10.48\text{ mm} \to Y_{\text{act}} = 13.12 - 13.87\text{ mm}$) to positively depress the $Y = 12.40\text{ mm}$ PCB tactile switch. The baseplate through-hole rear wall is extended $+0.67\text{ mm}$ rearward to $Y = 13.750\text{ mm}$ ($5.35 \times 5.18\text{ mm}$ window), providing guaranteed running clearance with zero floor binding.
+  - **Kinematics & Relief Clearance**: Rotates CCW around the $Y = 9.279\text{ mm}, Z = 12.590\text{ mm}$ pivot axis upon downward blade push, swinging the plunger into $+Y$ ($Y_{\text{rest}} = 10.48\text{ mm} \to Y_{\text{act}} = 13.12 - 13.87\text{ mm}$) to positively depress the $Y = 12.40\text{ mm}$ PCB tactile switch. The baseplate through-hole rear wall is extended $+0.67\text{ mm}$ rearward to $Y = 13.750\text{ mm}$ ($5.35 \times 5.18\text{ mm}$ window), providing guaranteed running clearance with zero floor binding.
 - **High-Sensitivity Direct Belly Cam (Calibrated for 10.5mm Plug Blade Reach)**:
   - $2.70\text{ mm}$ wide full-strength input cam tab operating inside the OEM brass pinching contact gap, centered at $X = 6.28\text{ mm}$.
   - **Calibrated for $10.5\text{ mm}$ Plug Penetration**: Eliminates `DZ_CAM = 0.90` (which had mistakenly lowered the cam out of reach of the blade). Elevates the active cam ramp with a direct blend from the hub down to $(5.00, 10.00)$ and an active contact tip at $(1.50, 7.40)$.
@@ -419,11 +419,11 @@ py -3 testing/verify_shaft_supports_production.py
 ### Version 9.8 (v9.8) - Top-Down Subtle Crown Snap Clips & Prominent Squared-Off Blunt Face
 - **Top-Down Continuous Crown Arc (`CLIP_CROWN_EASE = 0.20`)**:
   - Replaced the sharp $90^\circ$ biting corners in top-down view with a continuous subtle circular crown arc.
-  - Tapers smoothly from $1.75\text{ mm}$ radial overhang at the center to $1.55\text{ mm}$ at the lateral corners ($0.20\text{ mm}$ corner relief).
+  - Tapers smoothly from $1.80\text{ mm}$ radial overhang at the center to $1.60\text{ mm}$ at the lateral corners ($0.20\text{ mm}$ corner relief).
   - Eliminates corner scraping, gouging, and stress concentration against the circular receptacle bore during insertion.
-- **Calibrated Shelf Elevation & Prominence (`CLIP_HOOK_HEIGHT = 2.05`, `CLIP_HOOK_DEPTH = 1.75`)**:
+- **Calibrated Shelf Elevation & Prominence (`CLIP_HOOK_HEIGHT = 2.05`, `CLIP_HOOK_DEPTH = 1.80`)**:
   - Added $+0.25\text{ mm}$ of material under each clip shelf, lowering the horizontal retention shelf from $Z = 4.97\text{ mm} \to 4.72\text{ mm}$ to take up the switch actuation gap and hold the assembly securely in positive engagement.
-  - Trimmed $0.10\text{ mm}$ off the outer face ($1.85\text{ mm} \to 1.75\text{ mm}$) to ease insertion force and reduce beam bending strain.
+  - Calibrated outer face overhang to $1.80\text{ mm}$ across all 4 clips to guarantee secure retention during disassembly while maintaining manageable insertion force.
   - Flattened lead-in entry ramp angle from $55.5^\circ \to 49.0^\circ$ relative to vertical axis ($1.52\text{ mm}$ ramp height).
 - **Prominent Squared-Off Vertical Blunt Land (`CLIP_BLUNT_HEIGHT = 0.53`)**:
   - Vertical blunt face height of $0.53\text{ mm}$ ($Z \in [4.72, 5.25]\text{ mm}$).
@@ -454,8 +454,8 @@ py -3 testing/verify_shaft_supports_production.py
 
 ### Version 10 (v10) - Print-in-Place (PIP) Captive Lever & Enclosed Bridged Towers
 - **Anti-Spreading Architecture (Fully Enclosed 360° Sockets & Monolithic Rear Bridge)**:
-  - **Closed 360° Teardrop Journal Sockets**: Permanently eliminates the top open snap-fit throat. Towers are solid across the top up to $Z = 14.50\text{ mm}$ with a $\varnothing 3.30\text{ mm}$ teardrop bearing bore ($r_{\text{bore}} = 1.65\text{ mm}$), providing a calibrated **$0.25\text{ mm}$ radial clearance** around the $\varnothing 2.80\text{ mm}$ axle pins. The $45^\circ$ teardrop apex aligns with the printer's vertical axis at $45^\circ$ print tilt, completely eliminating bridging sag and thermal weld fusion.
-  - **Monolithic Rear Cross-Tie Bridge**: Spans between the Left Tower ($X = 5.40\text{ mm}$) and Right Tower ($X = 13.10\text{ mm}$) across the full $7.70\text{ mm}$ gap at $Y \in [11.60, 12.85]\text{ mm}$ ($1.25\text{ mm}$ thick) and $Z \in [12.60, 14.50]\text{ mm}$ ($1.90\text{ mm}$ tall). Rigidly boxes the two towers into an unbroken U-frame truss, making lateral tower spreading physically impossible under plug insertion loads.
+  - **Closed 360° Teardrop Journal Sockets**: Permanently eliminates the top open snap-fit throat. Towers are solid across the top up to $Z = 15.59\text{ mm}$ with a $\varnothing 3.50\text{ mm}$ teardrop bearing bore ($r_{\text{bore}} = 1.75\text{ mm}$), providing a calibrated **$0.35\text{ mm}$ radial clearance** around the $\varnothing 2.80\text{ mm}$ axle pins. The $45^\circ$ teardrop apex aligns with the printer's vertical axis at $45^\circ$ print tilt, completely eliminating bridging sag and thermal weld fusion.
+  - **Monolithic Rear Cross-Tie Bridge**: Spans between the Left Tower ($X = 5.40\text{ mm}$) and Right Tower ($X = 13.10\text{ mm}$) across the full $7.70\text{ mm}$ gap at $Y \in [11.75, 12.85]\text{ mm}$ ($1.10\text{ mm}$ thick) and $Z \in [12.60, 15.00]\text{ mm}$ ($2.40\text{ mm}$ tall). Rigidly boxes the two towers into an unbroken U-frame truss, making lateral tower spreading physically impossible under plug insertion loads.
   - **$0.25\text{ mm}$ Lateral Hub Clearances**: Adjusted `HUB_WIDTH` from $7.50\text{ mm} \to 7.20\text{ mm}$, providing a guaranteed $0.25\text{ mm}$ lateral air gap between the rotating hub ends and the static tower inner faces.
 - **Dedicated Plunger Breakaway Support Strut**:
   - Tilted at $45^\circ$, the lever's lowest point is the plunger nose at $Z' = 15.63\text{ mm}$ ($>15.0\text{ mm}$ above the print bed, completely clearing the bed pad).

@@ -54,12 +54,12 @@ CLIP_GAP_DEPTH = 3.70     # Proven 3.70mm slot depth (ends at Z=3.07mm, leaving 
 CLIP_ARM_THICK = 1.20     # Uniform 1.20mm wall beam thickness (matching outer wall)
 CLIP_ARM_WIDTH = 4.20     # 4.20mm wide snap beam (leaves 0.80mm total margin / 0.40mm per side for 5.0mm mating holes)
 CLIP_SLOT_CLEARANCE = 0.60 # 0.60mm wide flex slot (eliminates nozzle bridging, ensures clean separate perimeters)
-CLIP_HOOK_DEPTH = 1.75    # 1.75mm radial overhang (trimmed 0.10mm off face for lower insertion force)
+CLIP_HOOK_DEPTH = 1.80    # 1.80mm radial overhang (calibrated between 1.75mm and 1.85mm for positive retention during disassembly)
 CLIP_HOOK_DEPTH_BY_ANGLE = {
-    45.0: 1.75,
-    135.0: 1.75,
-    211.3: 1.75,
-    327.5: 1.75,
+    45.0: 1.80,
+    135.0: 1.80,
+    211.3: 1.80,  # Calibrated 1.80mm for reliable retention
+    327.5: 1.80,  # Calibrated 1.80mm for reliable retention
 }
 CLIP_STEM_OUTER_RECESS_BY_ANGLE = {
     45.0: 0.00,
@@ -117,6 +117,13 @@ EAR_WIDTH_Y = EAR_GAP - EAR_CLEARANCE  # 7.70mm outer width in Y (Y in [-3.85, +
 TOP_TAB_GAP = 8.33         # 8.33mm enclosure guide slot/gap
 TOP_TAB_CLEARANCE = 0.13   # 0.13mm total clearance (0.065mm per side) for smooth sliding fit
 TOP_TAB_WIDTH_X = TOP_TAB_GAP - TOP_TAB_CLEARANCE  # 8.20mm outer width in X (X in [-4.10, +4.10]mm)
+
+# Bed Adhesion Pad (45° Tilted Print Orientation)
+BED_PAD_WIDTH_X = 48.0        # 48.0mm outer width in X
+BED_PAD_LEN_Y = 33.0          # 33.0mm outer length in Y
+BED_PAD_HEIGHT_Z = 0.60       # 0.60mm monolithic base pad thickness
+BED_PAD_Y_CENTER = -2.50      # Centered at Y = -2.50mm
+BED_PAD_CORNER_RADIUS = 5.0   # 5.0mm corner fillet radius (reduces stress concentration & prevents warping/lifting in PC-FR)
 
 # ==============================================================================
 # EXACT SVG PATH PARSER
@@ -605,23 +612,34 @@ def create_backside_slit_bosses_poly():
     boss_right = slit_right_outer.difference(slit_right_hole)
     return unary_union([boss_left, boss_right])
 
-def create_center_curved_feature_poly():
+def create_center_curved_feature_poly(z=None):
     """Returns the 2D polygon of the calibrated reinforced curved feature between Brackets 3 & 4.
     - Solid D-shape cross-section: 100% solid core.
     - Width: 4.20mm (centered at X = 6.279mm -> X in [4.179, 8.379]mm).
-    - Depth in Y: 1.45mm (Base extended 0.75mm in -Y to Y = -5.05mm, Apex receded in -Y to Y = -3.60mm).
+    - Depth in Y: 1.80mm (Base extended 0.75mm in -Y to Y = -5.05mm, Apex calibrated to Y = -3.25mm).
+    - Flared Base Foot: Smooth 45° ramp on +Y face expanding from Z = 2.15mm (apex at Y = -3.25mm)
+      down to Z = 1.00mm (apex at Y = -2.45mm), eliminating root notch stress.
     - Bottom base: Flat solid wall at Y = -5.05mm (extended 0.75mm to backstop flush against brass insert).
-    - Front apex: Calibrated to Y = -3.60mm (+0.725mm clearance to nominal 6.35mm plug blade bottom at Y = -2.875mm).
-      Eliminates blade collision on insertion while acting as a reliable deflection backstop.
+    - Front apex: Calibrated to Y = -3.25mm (+0.375mm clearance to worst-case blade at Y = -2.875mm,
+      +2.025mm clearance to nominal blade at Y = -1.225mm).
     """
     cx = 6.279
     w_x = 4.20
     base_y = -4.30
-    apex_y = -3.60
+    apex_y_nom = -3.25
     extension_y = 0.75  # 0.75mm extension in -Y direction to backstop against brass insert
+    z_floor = BASE_THICK  # 1.00 mm
+    z_rib = z_floor + BRACKET_SEATING_RIB_HEIGHT  # 2.15 mm
+    ramp_dy = 0.80  # 0.80mm 45° flared foot ramp on +Y front face
     
+    if z is not None and z <= z_rib:
+        t = max(0.0, min(1.0, (z_rib - z) / (z_rib - z_floor)))
+        apex_y = apex_y_nom + ramp_dy * t
+    else:
+        apex_y = apex_y_nom
+        
     rx = w_x / 2.0
-    ry = apex_y - base_y  # 0.70 mm
+    ry = apex_y - base_y  # 1.05 mm nominal
     
     angles = np.linspace(np.pi, 0, 33)
     out_arc = [(cx + rx * np.cos(a), base_y + ry * np.sin(a)) for a in angles]
@@ -634,31 +652,51 @@ def create_center_curved_feature_poly():
 
 def build_center_curved_feature_mesh():
     """Builds the 100% watertight 3D mesh of the calibrated half moon restored to full 10.50mm height
-    (height = 9.50mm above floor -> Z = 1.00 to 10.50mm) and a smooth 15° lead-in entry chamfer on top.
+    (height = 9.50mm above floor -> Z = 1.00 to 10.50mm), featuring a 45° flared foot at the root
+    (Z = 1.00 to 2.15mm) on the +Y face and a smooth 15° lead-in entry chamfer on top.
     """
-    poly = create_center_curved_feature_poly()
-    h_moon = 10.50 - BASE_THICK            # 9.50mm (restored to original 10.50mm elevation)
-    z_top = BASE_THICK + h_moon            # 10.50mm
-    mesh = extrude_shapely_geom(poly, height=h_moon)
-    mesh.apply_translation([0, 0, BASE_THICK])
-    
-    # Smooth 15° lead-in funnel bevel on the top front face (Z = 8.50 to 10.50mm)
     cx = 6.279
     w_x = 4.20
-    apex_y = -3.60
+    apex_y_nom = -3.25
+    z_floor = BASE_THICK  # 1.00 mm
+    z_rib = z_floor + BRACKET_SEATING_RIB_HEIGHT  # 2.15 mm
+    z_top = 10.50
+    
+    # 1. Build flared base foot (Z = 1.00 to 2.15mm) using smooth vertical slices
+    n_slices = 12
+    z_vals = np.linspace(z_floor, z_rib, n_slices)
+    sub_meshes = []
+    for i in range(len(z_vals) - 1):
+        z0 = z_vals[i]
+        z1 = z_vals[i+1]
+        h = z1 - z0
+        p_mid = create_center_curved_feature_poly(z=(z0 + z1) / 2.0)
+        m = extrude_shapely_geom(p_mid, height=h)
+        m.apply_translation([0, 0, z0])
+        sub_meshes.append(m)
+        
+    # 2. Build main upper column (Z = 2.15 to 10.50mm)
+    p_col = create_center_curved_feature_poly(z=z_rib + 0.10)
+    m_col = extrude_shapely_geom(p_col, height=z_top - z_rib)
+    m_col.apply_translation([0, 0, z_rib])
+    sub_meshes.append(m_col)
+    
+    mesh_solid = trimesh.boolean.union(sub_meshes, engine='manifold')
+    
+    # 3. Smooth 15° lead-in funnel bevel on the top front face (Z = 8.50 to 10.50mm)
     chamfer_cutter = trimesh.creation.box([w_x + 2.0, 1.0, 2.5])
     rot_chamfer = trimesh.transformations.rotation_matrix(np.radians(-15.0), [1, 0, 0])
     chamfer_cutter.apply_transform(rot_chamfer)
-    chamfer_cutter.apply_translation([cx, apex_y + 0.40, z_top - 0.50])
+    chamfer_cutter.apply_translation([cx, apex_y_nom + 0.40, z_top - 0.50])
     
     try:
-        mesh_chamfered = mesh.difference(chamfer_cutter, engine='manifold')
+        mesh_chamfered = mesh_solid.difference(chamfer_cutter, engine='manifold')
         if mesh_chamfered.is_watertight and mesh_chamfered.volume > 0:
             return mesh_chamfered
     except Exception:
         pass
         
-    return mesh
+    return mesh_solid
 
 def create_shaft_support_towers_poly():
     """Returns 2D bounding boxes for the two reinforced shaft support towers and left tower buttress struts."""
@@ -686,7 +724,7 @@ def build_clean_shaft_towers_mesh():
     - Left Tower: X in [3.90, 5.40] (1.50mm thick).
     - Right Tower: X in [13.10, 14.60] (1.50mm thick).
     - Fully enclosed 360° journal sockets with a smooth rounded arch crown (Apex Z = 15.59mm, R_z = 3.00mm)
-      providing a thick 1.35mm solid roof over the bearing bore.
+      providing a thick 1.25mm solid roof over the bearing bore.
     - Bore: Ø3.50mm (1.75mm radius) teardrop profile with 45° apex in machine build direction for smooth PIP pivot.
     - Rear Monolithic Cross-Tie Bridge: Spans X in [5.40, 13.10] at Y in [11.75, 12.85], Z in [12.60, 15.00],
       rigidly boxing Left and Right towers together so they CANNOT spread under plug insertion force.
@@ -762,12 +800,12 @@ def build_clean_shaft_towers_mesh():
     y_arch = y_shaft + arch_rx * np.cos(t_vals) + 0.50
     z_arch = z_shaft + arch_rz * np.sin(t_vals)
     
-    bridge_pts_yz = [(11.75, 12.59)]
+    bridge_pts_yz = [(11.75, z_shaft)]
     for y_pt, z_pt in zip(y_arch, z_arch):
         bridge_pts_yz.append((float(y_pt), float(z_pt)))
     if abs(bridge_pts_yz[-1][0] - 11.75) > 1e-4:
         bridge_pts_yz.append((11.75, float(z_arch[-1])))
-    bridge_pts_yz.append((11.75, 12.59))
+    bridge_pts_yz.append((11.75, z_shaft))
     
     bridge_poly_yz = orient(Polygon(bridge_pts_yz))
     
@@ -795,11 +833,11 @@ def build_left_tower_struts_mesh():
     """Builds the dual triangular buttress struts on the left side of the left tower.
     - Front Strut: Starts at Y = 6.250mm (top inner wall of Bracket 3) extending to Y = 7.050mm (X: 1.90 to 3.90mm, Z: 1.00 to 10.90mm).
     - Rear Strut: Triangle at Y: 11.650 to 12.850mm (X: 1.90 to 3.90mm, Z: 1.00 to 10.90mm).
-    - Top at Z = 10.90mm leaves +0.30mm vertical clearance below the tower clamp bottom (Z = 11.20mm).
+    - Top at Z = 10.90mm leaves +0.30mm vertical clearance below the Z=11.20mm land transition so struts never interfere.
     """
     x_left_outer = 3.900
     z_base = BASE_THICK  # 1.0mm
-    z_strut_top = 10.90  # 10.90mm (+0.30mm clear below Z=11.20mm clamp bottom so clamp never hits struts!)
+    z_strut_top = 10.90  # 10.90mm (+0.30mm clear below Z=11.20mm land transition so struts never interfere!)
     
     # Triangular strut in (X, Z)
     strut_pts_xz = [
@@ -884,7 +922,7 @@ def build_exact_3d_model():
     # Chamfered 45° stress-relief ramps from one rib to the next and Rib 4 bridge fusing with half moon
     mesh_seating_ribs = build_chamfered_seating_ribs_mesh()
     
-    # 6. Shaft Support Towers & Triangular Struts (Z: 1.0 to 13.59mm)
+    # 6. Shaft Support Towers & Triangular Struts (Z: 1.0 to 15.59mm)
     mesh_towers = build_clean_shaft_towers_mesh()
     mesh_struts = build_left_tower_struts_mesh()
     mesh_towers_assembly = trimesh.util.concatenate([mesh_towers, mesh_struts])
@@ -1133,12 +1171,10 @@ def build_bottom_clip_45deg_supports_mesh(base_poly):
       preventing thermal fusion and enabling effortless, clean detachment.
     - Preserves 100% of the flat horizontal retention shelf once snapped off.
     """
-    stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT  # 4.97 mm
-    hook_depth = CLIP_HOOK_DEPTH            # 1.85 mm
+    stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT  # 4.72 mm
     half_w = CLIP_ARM_WIDTH / 2.0           # 2.10 mm
-    z_stem = stem_h - hook_depth            # 3.12 mm
     clip_release_gap = 0.28                 # 0.28mm vertical release gap under shelf (prevents thermal welding)
-    z_shelf_contact = stem_h - clip_release_gap # 4.69 mm
+    z_shelf_contact = stem_h - clip_release_gap # 4.44 mm
     
     prong_w = 1.10                          # Enlarged from 0.80mm to 1.10mm (+37.5%) for robust, reliable printing
     prong_offsets = [-1.20, 1.20]
@@ -1147,6 +1183,8 @@ def build_bottom_clip_45deg_supports_mesh(base_poly):
     support_meshes = []
     
     for angle_deg in bottom_clip_angles:
+        hook_depth = CLIP_HOOK_DEPTH_BY_ANGLE.get(angle_deg, CLIP_HOOK_DEPTH)
+        z_stem = stem_h - hook_depth
         rad = math.radians(angle_deg)
         u_r = np.array([math.cos(rad), math.sin(rad)])
         u_t = np.array([-math.sin(rad), math.cos(rad)])
@@ -1267,7 +1305,7 @@ def build_slit_insert_mesh(is_hollow=True, inner_hole_w=SLIT_W_X, inner_hole_l=S
 
 def build_cooling_tower_mesh(radius=2.0, height=20.50):
     """Builds a sacrificial cylindrical cooling / heatbreak tower (Ø4mm x 20.50mm tall) for 1-click print plate placement.
-    Forces the nozzle to travel away from the delicate shaft support towers (Z = 14.09mm) and shaft rocker (Z = 19.86mm)
+    Forces the nozzle to travel away from the delicate shaft support towers (Z = 14.19mm) and shaft rocker (Z = 19.86mm)
     on high layers, giving each layer of the delicate tips dedicated time to cool and solidify."""
     tower = trimesh.creation.cylinder(radius=radius, height=height, sections=32)
     tower.apply_translation([0, 0, height / 2.0])  # Base flat at Z = 0.00mm
@@ -1290,35 +1328,32 @@ def build_indexed_assembly_mesh(main_mesh, insert_mesh=None, shaft_mesh=None, in
     return trimesh.util.concatenate(meshes)
 
 def build_insert_backside_breakaway_supports_mesh():
-    """Builds sacrificial breakaway support struts under the back side of the integrated slit inserts.
-    - Sits on the build plate (Z = 0.00mm) inside the relief cutout area.
-    - Supports the steep 32.5° overhang of the insert back wall with an expanded 0.28mm release gap
-      preventing thermal fusion and enabling clean, effortless snap-off.
-    - Twin sturdy struts (0.90mm wide in X, enlarged +50% from 0.60mm) spaced at X = cx ± 1.05mm
-      for each insert (cx = -7.853mm, cx = +8.453mm).
-    - Preserves a clean 1.20mm center window directly under the 1.20mm slit through-hole
+    """Builds sacrificial breakaway support saddles under the integrated slit inserts.
+    - Sits firmly on the solid bed pad across Y in [-11.50, -7.50].
+    - Cradles both the 32.5° rear slope and the 45° forward overhang tip with a calibrated 0.18mm
+      release gap preventing drooping/thermal curl in PC-FR while enabling effortless snap-off.
+    - Twin contoured prongs (0.90mm wide in X) spaced at X = cx ± 1.15mm for each insert
+      (cx = -7.853mm, cx = +8.453mm).
+    - Preserves a clean 1.40mm center aperture directly under the 1.20mm slit through-hole
       so no support material enters or clogs the hole.
-    - 0.90mm solid double-perimeter wall prints reliably without sagging, while snapping off cleanly.
     """
     cx_left, cx_right = -7.853, 8.453
-    y_tip = -9.418
-    z_tip = 0.198
-    y_floor = -11.553
-    z_floor = 1.556
+    gap = 0.18  # 0.18mm calibrated release gap for PC-FR
     
-    gap_insert = 0.28  # 0.28mm vertical release gap below 32.5° sloped overhang
-    z_end_slope = z_floor - gap_insert  # 1.276mm (0.28mm below floor junction)
-    
+    # Profile points in Y-Z plane matching both rear slope and front overhang
     pts_yz = [
-        (-11.60, 0.00),         # bed anchor back
-        (-9.50,  0.00),         # bed anchor front (clears insert tip)
-        (y_floor, z_end_slope), # sloped contact top (0.28mm release gap)
-        (-11.60, z_end_slope),  # back vertical edge
+        (-11.50, 0.00),                 # bed anchor back
+        (-7.50,  0.00),                 # bed anchor front
+        (-7.50,  1.936),                # front top (Z_part 2.116 - 0.18)
+        (-9.20,  0.236),                # front bottom
+        (-9.40,  0.05),                 # trough clearance
+        (-9.60,  0.134),                # rear bottom
+        (-11.50, 1.342),                # rear top (Z_part 1.522 - 0.18)
     ]
     poly_yz = Polygon(pts_yz)
     
     strut_w = 0.90
-    offsets = [-1.05, 1.05]
+    offsets = [-1.15, 1.15]
     
     prongs = []
     for cx in [cx_left, cx_right]:
@@ -1342,9 +1377,10 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     - Dedicated Breakaway Cantilever Strut: Forked column with 0.70x0.70mm easy-snap floor neck
       branching into twin tines supporting both outer edges (X in [5.65, 6.15] and [7.05, 7.55])
       with an open 0.90mm central window and 0.28mm release gap below the lever cam tab.
-    - Dedicated Breakaway Lever Shaft Strut: Forked column with 0.70x0.70mm easy-snap floor neck
-      branching into twin tines supporting the floating cylindrical hub barrel (X in [7.85, 9.35], completely clearing Bracket 4 wall)
-      with a 0.60mm open central notch and 0.28mm release gap below the lever shaft underside.
+    - Dedicated Breakaway Lever Shaft Strut: Rising near the floor / Bracket 4 area at X_c = 8.13mm
+      with an easy-snap 0.65x0.65mm floor neck, widened 0.70x0.85mm trunk (+140% area), branching into a 0.68mm wide
+      Y-fork head with twin 0.26mm micro-chisel lands and calibrated 0.48mm release gap below the hub barrel
+      (Z'_lowest = 26.473mm, top at Z' = 25.993mm), leaving balanced >= 0.46mm clearances to plunger and cam tab.
     - Hardcoded 45° angled breakaway supports for bottom clips (211.3° & 327.5°) coming out of the stem (0.28mm release gap, 1.10mm wide).
     - Solid 0.60mm bed adhesion pad with relief openings under the in-place shroud tips.
     - Sturdy breakaway twin support struts under the back side of each integrated insert (0.90mm wide, 0.28mm release gap).
@@ -1363,164 +1399,194 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     
     fin_components = []
     
-    # 1. Monolithic Bed Adhesion Pad (48mm wide x 33mm long x 0.60mm thick on bed Z in [0, 0.60]mm)
-    pad_mesh = trimesh.creation.box([48.0, 33.0, 0.60])
-    pad_mesh.apply_translation([0.0, -2.50, 0.30])
+    # 1. Monolithic Bed Adhesion Pad with Rounded Corners
+    # 48mm W x 33mm L x 0.60mm H on bed Z in [0, 0.60]mm.
+    # Corner fillets (R = 5.0mm) eliminate sharp 90-degree corners to dramatically reduce
+    # thermal contraction stress concentration and prevent corner lifting/warping when printing PC-FR.
+    x_min, x_max = -BED_PAD_WIDTH_X / 2.0, BED_PAD_WIDTH_X / 2.0
+    y_min, y_max = BED_PAD_Y_CENTER - BED_PAD_LEN_Y / 2.0, BED_PAD_Y_CENTER + BED_PAD_LEN_Y / 2.0
+    r_corner = BED_PAD_CORNER_RADIUS
+    
+    inner_box = box(x_min + r_corner, y_min + r_corner, x_max - r_corner, y_max - r_corner)
+    pad_poly = inner_box.buffer(r_corner, resolution=16)
     
     # In-place shroud tip relief windows to prevent tip fusing into bed pad:
-    # Relief windows under the in-place slit insert shroud tips (cx = -7.853mm and +8.453mm)
-    # while preserving full, solid bed pad contact across the bottom baseplate front corner
-    # (Y = -13.11mm, X in [-10.69, +9.81]mm) for rock-solid first-layer adhesion.
+    # Relief aperture under the in-place slit insert through-holes (cx = -7.853mm and +8.453mm)
+    # preserving solid bed pad contact under the contoured support prongs across Y in [-11.50, -7.50]
+    # for rock-solid first-layer adhesion.
     cx_left, cx_right = -7.853, 8.453
-    relief_l = trimesh.creation.box([4.5, 6.0, 1.0])
-    relief_l.apply_translation([cx_left, -9.5, 0.30])
-    relief_r = trimesh.creation.box([4.5, 6.0, 1.0])
-    relief_r.apply_translation([cx_right, -9.5, 0.30])
-    try:
-        pad_mesh = pad_mesh.difference(trimesh.util.concatenate([relief_l, relief_r]), engine='manifold')
-    except Exception:
-        pass
+    relief_l = box(cx_left - 0.70, -10.5, cx_left + 0.70, -8.3)
+    relief_r = box(cx_right - 0.70, -10.5, cx_right + 0.70, -8.3)
+    pad_poly_cut = pad_poly.difference(unary_union([relief_l, relief_r]))
+    pad_mesh = trimesh.creation.extrude_polygon(pad_poly_cut, height=BED_PAD_HEIGHT_Z)
     fin_components.append(pad_mesh)
     
-    # 1b. Thin Breakaway Supports under Back Side of Integrated Slit Inserts (0.28mm release gap)
+    # 1b. Contoured Breakaway Support Saddles under Integrated Slit Inserts (0.18mm release gap)
     insert_supps = build_insert_backside_breakaway_supports_mesh()
     fin_components.append(insert_supps)
     
-    # 1c. Dedicated Breakaway Support Strut under Print-in-Place Plunger Belly (protruding from base)
-    # Rises from bed pad (Z = 0.60mm) through the baseplate through-hole up to the plunger belly
-    # Forked at the end: twin tines support both lateral edges (X in [8.484, 9.284] and [11.284, 12.084])
-    # with an open 2.00mm central window in the middle and a 0.28mm release gap below the plunger edge.
-    p_x_c = 10.284
-    p_y_c = 11.30
-    z_plunger_lowest = 2.52 - z_min  # ~15.63mm
-    gap_plunger = 0.28               # 0.28mm release gap
-    z_p_stick_top = z_plunger_lowest - gap_plunger  # ~15.35mm
-    z_bed = 0.60
+    # 1c. Dedicated Breakaway Support Cradle under Print-in-Place Plunger Blade (rising from bed pad)
+    # Rises from bed pad (Z = 0.60mm) through the floor opening, cradling the entire 45° inclined downward
+    # slope of the plunger arm across Y in [7.50, 12.10]mm with a calibrated 0.20mm release gap.
+    # Forked in X: twin sturdy tines support both lateral edges (X in [8.484, 9.284] and [11.284, 12.084])
+    # with an open 2.00mm central window for effortless, clean twist-off removal.
+    pts_plunger_tine_yz = [
+        (8.50, 0.60),           # bed anchor back
+        (12.10, 0.60),          # bed anchor front
+        (12.10, 15.80),         # front tip top
+        (11.30, 15.432),        # bottom apex
+        (10.75, 15.594),        # blend point
+        (7.50,  18.814),        # top slope end
+        (7.50,  14.00),         # back drop
+        (8.50,  14.00),         # back transition
+    ]
+    poly_plunger_tine_yz = Polygon(pts_plunger_tine_yz)
     
-    # Central trunk rising from bed pad to fork junction
-    z_p_fork_base = 13.00
-    p_trunk_h = z_p_fork_base - z_bed
-    if p_trunk_h > 1.0:
-        p_trunk = trimesh.creation.box([1.80, 1.80, p_trunk_h])
-        p_trunk.apply_translation([p_x_c, p_y_c, z_bed + p_trunk_h / 2.0])
-        fin_components.append(p_trunk)
-        
-        # Fork head: spans full 3.60mm plunger blade width (X in [8.484, 12.084])
-        # with twin 0.80mm edge tines and a 2.00mm central V-notch opening (apex at Z = 13.80mm)
-        z_p_notch = 13.80
-        pts_p_xz = [
-            (8.484, z_p_fork_base),
-            (8.484, z_p_stick_top),
-            (9.284, z_p_stick_top),
-            (p_x_c,  z_p_notch),
-            (11.284, z_p_stick_top),
-            (12.084, z_p_stick_top),
-            (12.084, z_p_fork_base),
-        ]
-        poly_p_xz = Polygon(pts_p_xz)
-        p_head_2d = trimesh.creation.extrude_polygon(poly_p_xz, height=1.00)
-        v_p = p_head_2d.vertices.copy()
-        v_p_3d = np.column_stack([v_p[:, 0], v_p[:, 2] - 0.50 + p_y_c, v_p[:, 1]])
-        p_fork_head = trimesh.Trimesh(vertices=v_p_3d, faces=p_head_2d.faces.copy(), process=True)
-        if p_fork_head.volume < 0:
-            p_fork_head.faces = np.fliplr(p_fork_head.faces)
-        fin_components.append(p_fork_head)
+    p_tine_w = 0.80
+    m_p_l = trimesh.creation.extrude_polygon(poly_plunger_tine_yz, height=p_tine_w)
+    v_pl = m_p_l.vertices.copy()
+    v_pl_3d = np.column_stack([v_pl[:, 2] + 8.484, v_pl[:, 0], v_pl[:, 1]])
+    p_tine_l = trimesh.Trimesh(vertices=v_pl_3d, faces=m_p_l.faces.copy(), process=True)
+    if p_tine_l.volume < 0:
+        p_tine_l.faces = np.fliplr(p_tine_l.faces)
+    fin_components.append(p_tine_l)
+    
+    m_p_r = trimesh.creation.extrude_polygon(poly_plunger_tine_yz, height=p_tine_w)
+    v_pr = m_p_r.vertices.copy()
+    v_pr_3d = np.column_stack([v_pr[:, 2] + 11.284, v_pr[:, 0], v_pr[:, 1]])
+    p_tine_r = trimesh.Trimesh(vertices=v_pr_3d, faces=m_p_r.faces.copy(), process=True)
+    if p_tine_r.volume < 0:
+        p_tine_r.faces = np.fliplr(p_tine_r.faces)
+    fin_components.append(p_tine_r)
+    
+    # Central support tine supporting blade apex at X = 10.284mm (eliminating central bridging overhang)
+    p_center_w = 0.70
+    x_c_start = 10.284 - p_center_w / 2.0
+    m_p_c = trimesh.creation.extrude_polygon(poly_plunger_tine_yz, height=p_center_w)
+    v_pc = m_p_c.vertices.copy()
+    v_pc_3d = np.column_stack([v_pc[:, 2] + x_c_start, v_pc[:, 0], v_pc[:, 1]])
+    p_tine_c = trimesh.Trimesh(vertices=v_pc_3d, faces=m_p_c.faces.copy(), process=True)
+    if p_tine_c.volume < 0:
+        p_tine_c.faces = np.fliplr(p_tine_c.faces)
+    fin_components.append(p_tine_c)
+    
+    # Stabilizing central web connecting plunger tines below Z = 12.0mm
+    pts_p_web_yz = [
+        (8.50, 0.60),
+        (12.10, 0.60),
+        (12.10, 12.00),
+        (8.50, 12.00)
+    ]
+    poly_p_web_yz = Polygon(pts_p_web_yz)
+    p_web_w = 11.284 - 9.284  # 2.00mm
+    m_pw = trimesh.creation.extrude_polygon(poly_p_web_yz, height=p_web_w)
+    v_pw = m_pw.vertices.copy()
+    v_pw_3d = np.column_stack([v_pw[:, 2] + 9.284, v_pw[:, 0], v_pw[:, 1]])
+    p_web_mesh = trimesh.Trimesh(vertices=v_pw_3d, faces=m_pw.faces.copy(), process=True)
+    if p_web_mesh.volume < 0:
+        p_web_mesh.faces = np.fliplr(p_web_mesh.faces)
+    fin_components.append(p_web_mesh)
     
     # 1d. Dedicated Breakaway Support Strut under Print-in-Place Cantilever (Cam Tab)
-    # Rises from baseplate floor up to 0.28mm below the cam tab lowest edge
-    # Cam lowest point in tilted coords: X in [5.65, 7.55] (center X = 6.60mm), Y' = -2.333mm, Z' = 17.988mm
-    # Forked at the end: supports both outer edges (X in [5.65, 6.15] and [7.05, 7.55]) with an open 0.90mm center window
+    # Rises from baseplate floor up to calibrated 0.20mm release gap below the full sweep of the cam tab.
+    # Cradles downward faces across Y in [-3.50, -1.20]mm with twin lateral tines (X in [5.65, 6.20] and [7.00, 7.55])
+    # and a reinforced 1.10x1.10mm floor neck to eliminate nozzle deflection.
     cam_c_x = 6.600
     cam_c_y = -2.333
-    z_cam_lowest = 17.988
-    gap_cam = 0.28                           # 0.28mm release gap below cantilever
-    z_cam_stick_top = z_cam_lowest - gap_cam # 17.708mm
-    z_floor_cam = cam_c_y + 14.523           # 12.190mm (top of baseplate floor below cam)
+    z_floor_cam = 12.190
     
-    # Slender 0.70x0.70mm neck at floor for effortless snap-off with needle-nose pliers
-    cam_neck = trimesh.creation.box([0.70, 0.70, 0.90])
-    cam_neck.apply_translation([cam_c_x, cam_c_y, z_floor_cam + 0.15])
+    cam_neck = trimesh.creation.box([1.10, 1.10, 2.00])
+    cam_neck.apply_translation([cam_c_x, cam_c_y, z_floor_cam + 1.00])
     fin_components.append(cam_neck)
     
-    # Main stabilizing trunk (1.30 x 1.20mm) rising to fork junction
-    z_trunk_base = z_floor_cam + 0.60
-    z_fork_base = 15.50
-    cam_trunk_h = z_fork_base - z_trunk_base
-    if cam_trunk_h > 0.5:
-        cam_trunk = trimesh.creation.box([1.30, 1.20, cam_trunk_h])
-        cam_trunk.apply_translation([cam_c_x, cam_c_y, z_trunk_base + cam_trunk_h / 2.0])
-        fin_components.append(cam_trunk)
-        
-        # Fork head supporting both lateral edges (X in [5.65, 6.15] and [7.05, 7.55])
-        # with an open 0.90mm central window in the middle
-        z_notch = 16.30
-        pts_xz = [
-            (5.65, z_fork_base),
-            (5.65, z_cam_stick_top),
-            (6.15, z_cam_stick_top),
-            (6.60, z_notch),
-            (7.05, z_cam_stick_top),
-            (7.55, z_cam_stick_top),
-            (7.55, z_fork_base),
-        ]
-        poly_xz = Polygon(pts_xz)
-        head_2d = trimesh.creation.extrude_polygon(poly_xz, height=0.70)
-        v = head_2d.vertices.copy()
-        v_3d = np.column_stack([v[:, 0], v[:, 2] - 0.35 + cam_c_y, v[:, 1]])
-        cam_fork_head = trimesh.Trimesh(vertices=v_3d, faces=head_2d.faces.copy(), process=True)
-        if cam_fork_head.volume < 0:
-            cam_fork_head.faces = np.fliplr(cam_fork_head.faces)
-        fin_components.append(cam_fork_head)
+    cam_trunk_h = 16.00 - 14.19
+    cam_trunk = trimesh.creation.box([1.40, 1.40, cam_trunk_h])
+    cam_trunk.apply_translation([cam_c_x, cam_c_y, 14.19 + cam_trunk_h / 2.0])
+    fin_components.append(cam_trunk)
     
-    # 1e. Dedicated Breakaway Support Strut under Print-in-Place Lever Shaft (Hub Barrel)
-    # Rises from baseplate floor / seating rib up to 0.48mm below the floating shaft barrel lowest edge.
-    # Centered at X_c = 8.16mm (X in [7.92, 8.40]mm) to ensure generous >= 0.50mm clearance to both the
-    # Plunger blade (X >= 8.484mm) and Cam tab (X <= 7.70mm), as well as 1.54mm clearance to Bracket 4 wall,
-    # completely eliminating sticking/welding during printing while enabling effortless snap-off removal.
-    # Forked at the end (slender Y-shape): twin micro-chisel lands with central V-notch and 0.48mm release gap.
-    shaft_s_x_c = 8.160
+    z_cam_fork_base = 16.00
+    pts_cam_tine_yz = [
+        (-3.50, z_cam_fork_base),
+        (-3.50, 18.585),
+        (-2.33, 17.700),
+        (-1.20, 19.003),
+        (-1.20, z_cam_fork_base),
+    ]
+    poly_cam_head_yz = Polygon(pts_cam_tine_yz)
+    cam_tine_w = 0.55
+    
+    m_cl = trimesh.creation.extrude_polygon(poly_cam_head_yz, height=cam_tine_w)
+    v_cl = m_cl.vertices.copy()
+    v_cl_3d = np.column_stack([v_cl[:, 2] + 5.65, v_cl[:, 0], v_cl[:, 1]])
+    cam_tine_l = trimesh.Trimesh(vertices=v_cl_3d, faces=m_cl.faces.copy(), process=True)
+    if cam_tine_l.volume < 0:
+        cam_tine_l.faces = np.fliplr(cam_tine_l.faces)
+    fin_components.append(cam_tine_l)
+    
+    m_cr = trimesh.creation.extrude_polygon(poly_cam_head_yz, height=cam_tine_w)
+    v_cr = m_cr.vertices.copy()
+    v_cr_3d = np.column_stack([v_cr[:, 2] + 7.00, v_cr[:, 0], v_cr[:, 1]])
+    cam_tine_r = trimesh.Trimesh(vertices=v_cr_3d, faces=m_cr.faces.copy(), process=True)
+    if cam_tine_r.volume < 0:
+        cam_tine_r.faces = np.fliplr(cam_tine_r.faces)
+    fin_components.append(cam_tine_r)
+    
+    cam_mid_web = trimesh.creation.box([0.80, 1.40, 0.80])
+    cam_mid_web.apply_translation([cam_c_x, cam_c_y, z_cam_fork_base + 0.40])
+    fin_components.append(cam_mid_web)
+    
+    # 1e. Dedicated Breakaway Lever Shaft Support Strut (Floating Barrel Support)
+    # Rises from baseplate floor / Bracket 4 area up to 0.48mm below the floating shaft barrel.
+    # Widened to 0.70mm (X) x 0.85mm (Y) trunk (+140% area) and 0.68mm wide head with 0.26mm tines,
+    # ensuring robust printability in PC-FR without deflection. Shifted right (+X) to X_c = 8.850mm
+    # (+0.50mm further right) to avoid sticking/welding to the active lever arm / cam tab (clearance >= 0.92mm),
+    # while maintaining >= 0.49mm clearance to the Plunger blade and > 1.75mm to Bracket 4 wall.
+    shaft_s_x_c = 8.850
     shaft_s_y_c = -2.341
+    gap_shaft = 0.48
     z_shaft_lowest = 26.473
-    gap_shaft = 0.48                                # 0.48mm release gap below shaft hub (prevents fusion)
     z_shaft_stick_top = z_shaft_lowest - gap_shaft  # 25.993mm
     z_floor_shaft_rib = 13.61                       # seated into seating rib / floor surface
     
-    # Slender 0.45x0.45mm neck at base for effortless snap-off with needle-nose pliers
-    shaft_neck = trimesh.creation.box([0.45, 0.45, 0.90])
+    # 0.65x0.65mm neck at base for solid floor adhesion and effortless twist snap-off
+    shaft_neck = trimesh.creation.box([0.65, 0.65, 0.90])
     shaft_neck.apply_translation([shaft_s_x_c, shaft_s_y_c, z_floor_shaft_rib + 0.45])
     fin_components.append(shaft_neck)
     
-    # Main stabilizing trunk slimmed to 0.45mm (X) x 0.55mm (Y) matching fork head,
-    # ensuring generous > 1.70mm clearance to lever along its entire mid-section
+    # Stabilizing trunk widened to 0.70mm (X) x 0.85mm (Y) for rigid deflection-free printing
     z_shaft_trunk_base = z_floor_shaft_rib + 0.90   # 14.51mm
-    z_shaft_fork_base = 21.00
+    z_shaft_fork_base = 21.50
     shaft_trunk_h = z_shaft_fork_base - z_shaft_trunk_base
     if shaft_trunk_h > 0.5:
-        shaft_trunk = trimesh.creation.box([0.45, 0.55, shaft_trunk_h])
+        shaft_trunk = trimesh.creation.box([0.70, 0.85, shaft_trunk_h])
         shaft_trunk.apply_translation([shaft_s_x_c, shaft_s_y_c, z_shaft_trunk_base + shaft_trunk_h / 2.0])
         fin_components.append(shaft_trunk)
         
-        # Slender Y Fork head supporting the floating section of the shaft barrel (X in [7.92, 8.40])
-        # completely clearing Plunger blade (X >= 8.484mm) and Cam tab (X <= 7.70mm) with >= 0.50mm clearance.
-        z_shaft_notch = z_shaft_stick_top - 0.90
+        # Widened Y-Fork head supporting floating shaft barrel (0.68mm width in X, 0.65mm depth in Y)
+        # with twin 0.26mm micro-chisel lands and central 0.35mm notch with calibrated 0.48mm release gap
+        head_w_x = 0.68
+        head_w_y = 0.65
+        tine_w = 0.26
+        z_shaft_notch = z_shaft_stick_top - 0.35
+        x_l = shaft_s_x_c - head_w_x / 2.0
+        x_r = shaft_s_x_c + head_w_x / 2.0
         pts_shaft_xz = [
-            (7.92, z_shaft_fork_base),
-            (7.92, z_shaft_stick_top),
-            (8.10, z_shaft_stick_top),
+            (x_l, z_shaft_fork_base),
+            (x_l, z_shaft_stick_top),
+            (x_l + tine_w, z_shaft_stick_top),
             (shaft_s_x_c, z_shaft_notch),
-            (8.22, z_shaft_stick_top),
-            (8.40, z_shaft_stick_top),
-            (8.40, z_shaft_fork_base),
+            (x_r - tine_w, z_shaft_stick_top),
+            (x_r, z_shaft_stick_top),
+            (x_r, z_shaft_fork_base),
         ]
         poly_shaft_xz = Polygon(pts_shaft_xz)
-        head_shaft_2d = trimesh.creation.extrude_polygon(poly_shaft_xz, height=0.55)
+        head_shaft_2d = trimesh.creation.extrude_polygon(poly_shaft_xz, height=head_w_y)
         v_s = head_shaft_2d.vertices.copy()
-        v_s_3d = np.column_stack([v_s[:, 0], v_s[:, 2] - 0.275 + shaft_s_y_c, v_s[:, 1]])
+        v_s_3d = np.column_stack([v_s[:, 0], v_s[:, 2] - head_w_y / 2.0 + shaft_s_y_c, v_s[:, 1]])
         shaft_fork_head = trimesh.Trimesh(vertices=v_s_3d, faces=head_shaft_2d.faces.copy(), process=True)
         if shaft_fork_head.volume < 0:
             shaft_fork_head.faces = np.fliplr(shaft_fork_head.faces)
         fin_components.append(shaft_fork_head)
-    
     # 2. Main Support Fins under the 45° inclined backplate
     #    Calibrated tines: 0.55mm width x 0.45mm length, 0.24mm standoff, 4.5mm pitch for clean release
     fin_thick_x = 0.80  # 2 nozzle perimeters
@@ -1723,7 +1789,7 @@ def render_plots(mesh, base_poly):
     towers_poly = create_shaft_support_towers_poly()
     for geom in (towers_poly.geoms if hasattr(towers_poly, 'geoms') else [towers_poly]):
         tx, ty = geom.exterior.xy
-        ax1.fill(tx, ty, color='#e377c2', alpha=0.85, label='Shaft Supports (12.59mm)' if tx[0] < 5 else "")
+        ax1.fill(tx, ty, color='#e377c2', alpha=0.85, label='Shaft Supports (14.19mm)' if tx[0] < 5 else "")
         ax1.plot(tx, ty, color='#c51b7d', linewidth=1.5)
         
     # Backside slit boss walls (dashed purple)
@@ -1916,14 +1982,18 @@ if __name__ == '__main__':
     print("Building separate 3D-printable shaft/rocker mechanism...")
     try:
         from build_shaft import build_shaft_rocker_mesh
-        shaft_assembled = build_shaft_rocker_mesh(in_assembly_coords=True)
+        shaft_assembled = build_shaft_rocker_mesh(in_assembly_coords=True, with_supports=False)
         shaft_assembled.export('shaft_rocker_assembled.stl')
         shaft_assembled.export('shaft_rocker_assembled.obj')
         
-        shaft_printable = build_shaft_rocker_mesh(in_assembly_coords=False)
+        shaft_printable = build_shaft_rocker_mesh(in_assembly_coords=False, with_supports=True)
         shaft_printable.export('shaft_rocker.stl')
         shaft_printable.export('shaft_rocker.obj')
-        print("Exported shaft_rocker.stl and shaft_rocker_assembled.stl successfully!")
+        
+        shaft_clean = build_shaft_rocker_mesh(in_assembly_coords=False, with_supports=False)
+        shaft_clean.export('shaft_rocker_clean.stl')
+        shaft_clean.export('shaft_rocker_clean.obj')
+        print("Exported shaft_rocker.stl, clean, and shaft_rocker_assembled.stl successfully!")
     except Exception as e:
         print(f"Warning: could not generate shaft rocker: {e}")
         shaft_printable = None

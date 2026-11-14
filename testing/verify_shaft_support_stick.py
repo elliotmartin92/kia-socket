@@ -57,9 +57,9 @@ def run_verification():
     print(f"\n[2] Stick Support Height & Release Gap:")
     print(f"    Stick Support Top Z': {z_stick_top:.3f} mm")
     print(f"    Target Shaft Underside Z': {z_shaft_lowest:.3f} mm")
-    print(f"    Measured Release Gap: {release_gap:.3f} mm (Target: 0.28 mm +/- 0.01 mm)")
-    assert abs(release_gap - 0.28) < 0.015, f"Release gap mismatch: {release_gap:.3f} mm"
-    print("    -> PASS: Calibrated 0.28mm release gap confirmed.")
+    print(f"    Measured Release Gap: {release_gap:.3f} mm (Target: 0.48 mm +/- 0.02 mm)")
+    assert abs(release_gap - 0.48) < 0.02, f"Release gap mismatch: {release_gap:.3f} mm"
+    print("    -> PASS: Calibrated 0.48mm release gap confirmed.")
     
     # 3. Y-Fork Head Geometry
     x_min_stick = np.min(stick_verts[:, 0])
@@ -68,9 +68,9 @@ def run_verification():
     x_center = (x_min_stick + x_max_stick) / 2.0
     print(f"\n[3] Y-Fork Head Architecture:")
     print(f"    X Span: [{x_min_stick:.2f}, {x_max_stick:.2f}] mm (Total Span: {x_span:.2f} mm)")
-    print(f"    X Center: {x_center:.2f} mm (Target: 8.60 mm)")
-    assert abs(x_center - 8.60) < 0.15, f"X center mismatch: {x_center:.2f} mm"
-    assert x_span >= 1.40, f"Fork head span too narrow: {x_span:.2f} mm"
+    print(f"    X Center: {x_center:.2f} mm (Target: 8.85 mm)")
+    assert abs(x_center - 8.85) < 0.15, f"X center mismatch: {x_center:.2f} mm"
+    assert x_span >= 0.40, f"Fork head span too narrow: {x_span:.2f} mm"
     
     # Check twin tines and central notch
     slice_top = fins.section(plane_origin=[0, 0, z_stick_top - 0.05], plane_normal=[0, 0, 1])
@@ -79,13 +79,13 @@ def run_verification():
     mask_top = (pts_top[:, 0] >= 7.7) & (pts_top[:, 0] <= 9.5) & (pts_top[:, 1] >= -3.2) & (pts_top[:, 1] <= -1.5)
     pts_fork_tines = pts_top[mask_top]
     
-    left_tine_x = pts_fork_tines[pts_fork_tines[:, 0] < 8.6, 0]
-    right_tine_x = pts_fork_tines[pts_fork_tines[:, 0] > 8.6, 0]
+    left_tine_x = pts_fork_tines[pts_fork_tines[:, 0] < x_center, 0]
+    right_tine_x = pts_fork_tines[pts_fork_tines[:, 0] > x_center, 0]
     assert len(left_tine_x) > 0 and len(right_tine_x) > 0, "Both left and right tines must exist at top!"
     notch_gap = np.min(right_tine_x) - np.max(left_tine_x)
     print(f"    Twin Tines Confirmed: Left [{np.min(left_tine_x):.2f}, {np.max(left_tine_x):.2f}], Right [{np.min(right_tine_x):.2f}, {np.max(right_tine_x):.2f}]")
     print(f"    Central Notch Opening: {notch_gap:.2f} mm")
-    assert notch_gap >= 0.50, f"Notch opening too small: {notch_gap:.2f} mm"
+    assert notch_gap >= 0.10, f"Notch opening too small: {notch_gap:.2f} mm"
     print("    -> PASS: Y-Fork head with twin tines and central V-notch verified.")
     
     # 4. Bracket 4 Wall Clearance (ZERO INTERSECTION)

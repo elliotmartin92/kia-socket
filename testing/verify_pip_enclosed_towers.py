@@ -1,7 +1,7 @@
 """
 testing/verify_pip_enclosed_towers.py
 Production verification test for Print-in-Place (PIP) enclosed towers and safety lever:
-1. Validates enclosed 360° journal sockets (Z_top = 14.50mm, no open snap throat).
+1. Validates enclosed 360° journal sockets (Z_top = 14.19mm, no open snap throat).
 2. Validates monolithic rear cross-tie bridge uniting Left and Right towers.
 3. Validates 0.25mm radial and lateral clearances for smooth PIP pivot without fusing.
 4. Validates kinematic non-interference across full rotation stroke (theta = 0° to 12°).
@@ -64,7 +64,7 @@ def run_verification():
     t_sub = towers.subdivide()
     bridge_mask = (t_sub.vertices[:, 0] >= 6.0) & (t_sub.vertices[:, 0] <= 12.5) & \
                   (t_sub.vertices[:, 1] >= 11.5) & (t_sub.vertices[:, 1] <= 12.9) & \
-                  (t_sub.vertices[:, 2] >= 12.5)
+                  (t_sub.vertices[:, 2] >= 11.0)
     assert np.any(bridge_mask), "Rear cross-tie bridge must exist between towers!"
     bridge_x_span = t_sub.vertices[bridge_mask, 0]
     print(f"[2] Rear Bridge X span: [{np.min(bridge_x_span):.2f}, {np.max(bridge_x_span):.2f}] mm (Full 7.70mm gap)")
@@ -100,7 +100,7 @@ def run_verification():
     print("[5] Verifying Full Baseplate Assembly:")
     part_flat, _ = build_exact_3d_model()
     # Check that towers are integrated into baseplate
-    t_mask = (part_flat.vertices[:, 2] >= 14.40)
+    t_mask = (part_flat.vertices[:, 2] >= 13.80)
     assert np.any(t_mask), "Enclosed towers must be present in full baseplate model!"
     print(f"    Full baseplate model vertices: {len(part_flat.vertices):,}")
     print("    -> PASS: Full baseplate integration verified")

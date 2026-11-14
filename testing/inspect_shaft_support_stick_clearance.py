@@ -37,12 +37,12 @@ def inspect_and_render():
         s.apply_transform(R)
         s.apply_translation([0, 0, -z_min])
 
-    # Find the shaft support stick bodies (centered near X = 8.16mm)
+    # Find the shaft support strut bodies off Bracket 4 (centered near X = 8.90mm)
     bodies = all_fins.split(only_watertight=False)
     stick_bodies = []
     for b in bodies:
         c = b.bounds.mean(axis=0)
-        if 7.8 <= c[0] <= 8.5 and -3.0 <= c[1] <= -1.5 and b.bounds[1, 2] > 14.0:
+        if 7.7 <= c[0] <= 10.0 and -3.0 <= c[1] <= 1.2 and b.bounds[1, 2] > 20.0:
             stick_bodies.append(b)
             print(f"Found stick body: bounds X=[{b.bounds[0,0]:.2f}, {b.bounds[1,0]:.2f}], Y=[{b.bounds[0,1]:.2f}, {b.bounds[1,1]:.2f}], Z=[{b.bounds[0,2]:.2f}, {b.bounds[1,2]:.2f}]")
 
