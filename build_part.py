@@ -54,12 +54,12 @@ CLIP_GAP_DEPTH = 3.70     # Proven 3.70mm slot depth (ends at Z=3.07mm, leaving 
 CLIP_ARM_THICK = 1.20     # Uniform 1.20mm wall beam thickness (matching outer wall)
 CLIP_ARM_WIDTH = 4.20     # 4.20mm wide snap beam (leaves 0.80mm total margin / 0.40mm per side for 5.0mm mating holes)
 CLIP_SLOT_CLEARANCE = 0.60 # 0.60mm wide flex slot (eliminates nozzle bridging, ensures clean separate perimeters)
-CLIP_HOOK_DEPTH = 1.80    # 1.80mm radial overhang (calibrated between 1.75mm and 1.85mm for positive retention during disassembly)
+CLIP_HOOK_DEPTH = 1.80    # 1.80mm baseline radial overhang
 CLIP_HOOK_DEPTH_BY_ANGLE = {
     45.0: 1.80,
     135.0: 1.80,
     211.3: 1.80,  # Calibrated 1.80mm for reliable retention
-    327.5: 1.80,  # Calibrated 1.80mm for reliable retention
+    327.5: 1.85,  # 1.85mm calibrated reach for positive bottom-right retention
 }
 CLIP_STEM_OUTER_RECESS_BY_ANGLE = {
     45.0: 0.00,
@@ -67,7 +67,13 @@ CLIP_STEM_OUTER_RECESS_BY_ANGLE = {
     211.3: 0.00,
     327.5: 0.00,
 }
-CLIP_HOOK_HEIGHT = 2.05   # 2.05mm total hook height (+0.25mm under shelf: shelf lowered from Z=4.97 to Z=4.72mm)
+CLIP_HOOK_HEIGHT = 2.05   # Baseline hook height
+CLIP_SHELF_Z_BY_ANGLE = {
+    45.0: 3.97,   # Top right: lowered 0.75mm (closes SIM tool gap, eliminates lost motion)
+    135.0: 3.97,  # Top left:  lowered 0.75mm (closes SIM tool gap, eliminates lost motion)
+    211.3: 4.35,  # Bottom left: lowered 0.37mm (closes half-SIM gap, positive seating)
+    327.5: 4.35,  # Bottom right: lowered 0.37mm (closes half-SIM gap, positive seating)
+}
 CLIP_BLUNT_HEIGHT = 0.53  # 0.53mm prominent vertical squared-off face at outer apex (+51% increase, eliminates knife-edge fragility)
 CLIP_CROWN_EASE = 0.20    # 0.20mm top-down continuous crown arc ease (1.75mm at center -> 1.55mm at lateral corners)
 CLIP_ROOT_RADIUS = 0.40   # 0.40mm radius (Ø0.80mm) circular stress-relief root at bottom of flex slots
@@ -944,7 +950,6 @@ def build_exact_3d_model():
     slot_cuts = []
     hook_meshes = []
     
-    stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT         # 4.97 mm
     slot_z_bot = OUTER_WALL_HEIGHT - CLIP_GAP_DEPTH # 3.07 mm (leaves 2.07mm solid hoop ring above floor)
     z_root_center = slot_z_bot + CLIP_ROOT_RADIUS   # 3.47 mm (center of radiused root)
     slot_t = CLIP_SLOT_CLEARANCE                    # 0.60mm wide flex slot for clean printing
@@ -956,6 +961,7 @@ def build_exact_3d_model():
         d_theta = CLIP_ARM_WIDTH / r_est
         slot_d_theta = slot_t / r_est
         hook_depth = CLIP_HOOK_DEPTH_BY_ANGLE.get(angle_deg, CLIP_HOOK_DEPTH)
+        stem_h = CLIP_SHELF_Z_BY_ANGLE.get(angle_deg, CLIP_HEIGHT - CLIP_HOOK_HEIGHT)
         
         # 1. Two vertical flex slots with stress-relief circular roots at slot bottom
         for th_slot in [center_rad - d_theta/2 - slot_d_theta/2, center_rad + d_theta/2 + slot_d_theta/2]:
@@ -1164,26 +1170,30 @@ def build_clip_supports_mesh(base_poly):
 def build_bottom_clip_45deg_supports_mesh(base_poly):
     """Builds robust 45° breakaway support struts under the bottom clips (211.3° and 327.5°):
     - Sprouts directly from the solid clip stem at a 45° angle to support the hook shelf and eliminate sagging.
-    - Twin sturdy struts (1.10mm wide x 0.70mm beam thickness) leaving a wide 1.30mm open center space.
+    - 3-prong anti-sag trident support (Left, Center, Right) providing complete coverage under the hook apex.
     - Root penetrates 0.25mm into the stem wall with a neck notch (0.60mm tall in Z at the stem surface)
       ensuring rock-solid print adhesion and a clean, flush snap-off when twisted with needle-nose pliers.
-    - Top chisel tip provides an expanded 0.28mm vertical release gap below the Z = 4.97mm shelf,
-      preventing thermal fusion and enabling effortless, clean detachment.
+    - Top chisel tip provides a calibrated 0.23mm vertical release gap below the shelf (Z = 4.35mm),
+      preventing thermal fusion and sagging in PC-FR while enabling effortless, clean detachment.
     - Preserves 100% of the flat horizontal retention shelf once snapped off.
     """
-    stem_h = CLIP_HEIGHT - CLIP_HOOK_HEIGHT  # 4.72 mm
     half_w = CLIP_ARM_WIDTH / 2.0           # 2.10 mm
-    clip_release_gap = 0.28                 # 0.28mm vertical release gap under shelf (prevents thermal welding)
-    z_shelf_contact = stem_h - clip_release_gap # 4.44 mm
-    
-    prong_w = 1.10                          # Enlarged from 0.80mm to 1.10mm (+37.5%) for robust, reliable printing
-    prong_offsets = [-1.20, 1.20]
+    clip_release_gap = 0.29                 # 0.29mm calibrated release gap under shelf (prevents thermal welding & PC-FR sag)
     bottom_clip_angles = [211.3, 327.5]
+    
+    # 3-prong layout: Left, Center (directly under apex), Right
+    prongs_spec = [
+        (-1.25, 0.80), # (tangential offset, width)
+        ( 0.00, 0.90), # Center prong directly under apex!
+        ( 1.25, 0.80)
+    ]
     
     support_meshes = []
     
     for angle_deg in bottom_clip_angles:
+        stem_h = CLIP_SHELF_Z_BY_ANGLE.get(angle_deg, 4.35)
         hook_depth = CLIP_HOOK_DEPTH_BY_ANGLE.get(angle_deg, CLIP_HOOK_DEPTH)
+        z_shelf_contact = stem_h - clip_release_gap
         z_stem = stem_h - hook_depth
         rad = math.radians(angle_deg)
         u_r = np.array([math.cos(rad), math.sin(rad)])
@@ -1191,21 +1201,21 @@ def build_bottom_clip_45deg_supports_mesh(base_poly):
         p, _, _ = find_boundary_point_and_normal(base_poly, angle_deg)
         
         prongs = []
-        for yo in prong_offsets:
+        for yo, pw in prongs_spec:
             eff_depth = hook_depth - CLIP_CROWN_EASE * ((abs(yo) / half_w) ** 2.0)
             pts_rz = [
                 (-0.25, z_stem - 0.35),               # root inside stem wall (0.60mm vertical neck)
                 (-0.25, z_stem + 0.25),               # root inside stem wall
                 (0.00,  z_stem + 0.25),               # stem outer face (top of neck)
-                (eff_depth - 0.55, z_shelf_contact),  # shelf contact start with 0.28mm release gap (0.55mm land)
+                (eff_depth - 0.55, z_shelf_contact),  # shelf contact start with release gap
                 (eff_depth, z_shelf_contact),         # shelf contact end (outer perimeter edge)
                 (eff_depth, z_shelf_contact - 0.25),  # outer chamfer
                 (0.00,  z_stem - 0.35),               # stem outer face (bottom of neck)
             ]
             poly_rz = Polygon(pts_rz)
-            m2d = trimesh.creation.extrude_polygon(poly_rz, height=prong_w)
+            m2d = trimesh.creation.extrude_polygon(poly_rz, height=pw)
             v = m2d.vertices.copy()
-            v_local = np.column_stack([v[:, 0], v[:, 2] - prong_w/2.0 + yo, v[:, 1]])
+            v_local = np.column_stack([v[:, 0], v[:, 2] - pw/2.0 + yo, v[:, 1]])
             m_p = trimesh.Trimesh(vertices=v_local, faces=m2d.faces.copy(), process=True)
             if m_p.volume < 0:
                 m_p.faces = np.fliplr(m_p.faces)
@@ -1338,17 +1348,17 @@ def build_insert_backside_breakaway_supports_mesh():
       so no support material enters or clogs the hole.
     """
     cx_left, cx_right = -7.853, 8.453
-    gap = 0.18  # 0.18mm calibrated release gap for PC-FR
+    gap = 0.23  # 0.23mm calibrated release gap for PC-FR (expanded from 0.18mm)
     
     # Profile points in Y-Z plane matching both rear slope and front overhang
     pts_yz = [
         (-11.50, 0.00),                 # bed anchor back
         (-7.50,  0.00),                 # bed anchor front
-        (-7.50,  1.936),                # front top (Z_part 2.116 - 0.18)
-        (-9.20,  0.236),                # front bottom
+        (-7.50,  1.886),                # front top (Z_part 2.116 - 0.23)
+        (-9.20,  0.186),                # front bottom
         (-9.40,  0.05),                 # trough clearance
-        (-9.60,  0.134),                # rear bottom
-        (-11.50, 1.342),                # rear top (Z_part 1.522 - 0.18)
+        (-9.60,  0.084),                # rear bottom
+        (-11.50, 1.292),                # rear top (Z_part 1.522 - 0.23)
     ]
     poly_yz = Polygon(pts_yz)
     
@@ -1373,23 +1383,23 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     and Print-in-Place (PIP) captive safety lever with dedicated breakaway plunger, cantilever & lever shaft support struts:
     - Tilted 45 deg about X: Re-orients layer planes so inter-layer cleavage failure on the half moon is eliminated.
     - Captive PIP Shaft Rocker: Printed in place inside the enclosed 360° bridged towers with 0.35mm radial and 0.40mm lateral clearances.
-    - Dedicated Breakaway Plunger Strut: Vertical column rising from the bed pad up to 0.28mm below the plunger belly.
+    - Dedicated Breakaway Plunger Strut: Vertical column rising from the bed pad up to 0.20mm below the plunger belly.
     - Dedicated Breakaway Cantilever Strut: Forked column with 0.70x0.70mm easy-snap floor neck
       branching into twin tines supporting both outer edges (X in [5.65, 6.15] and [7.05, 7.55])
-      with an open 0.90mm central window and 0.28mm release gap below the lever cam tab.
+      with an open 0.90mm central window and 0.25mm release gap below the lever cam tab.
     - Dedicated Breakaway Lever Shaft Strut: Rising near the floor / Bracket 4 area at X_c = 8.13mm
       with an easy-snap 0.65x0.65mm floor neck, widened 0.70x0.85mm trunk (+140% area), branching into a 0.68mm wide
       Y-fork head with twin 0.26mm micro-chisel lands and calibrated 0.48mm release gap below the hub barrel
       (Z'_lowest = 26.473mm, top at Z' = 25.993mm), leaving balanced >= 0.46mm clearances to plunger and cam tab.
-    - Hardcoded 45° angled breakaway supports for bottom clips (211.3° & 327.5°) coming out of the stem (0.28mm release gap, 1.10mm wide).
+    - Hardcoded 45° angled breakaway trident supports for bottom clips (211.3° & 327.5°) coming out of the stem (0.29mm release gap, 3 prongs with center apex support).
     - Solid 0.60mm bed adhesion pad with relief openings under the in-place shroud tips.
-    - Sturdy breakaway twin support struts under the back side of each integrated insert (0.90mm wide, 0.28mm release gap).
+    - Sturdy breakaway twin support saddles under the back side of each integrated insert (0.90mm wide, calibrated 0.23mm release gap).
     - 5 vertical fin walls under the 45 deg inclined backplate:
       * Inner pair at X = +/-8.0mm (Y: -5.80 to +14.00mm) — primary support under brackets and shaft towers.
       * Outer pair at X = +/-14.0mm (Y: -3.00 to +10.00mm) — catches outer baseplate floor overhangs.
       * Center fin at X = 0.0mm (Y: -3.00 to +14.00mm) — catches mid-plane wall/floor overhangs and supports upper backplate.
-    - 0.24mm release gap (tweaked from 0.20mm) with periodic horizontal breakaway tines (0.55mm W x 0.45mm L)
-      every 4.5mm (tweaked from 3.1mm) for effortless, clean breakaway.
+    - 0.26mm release gap (tweaked from 0.24mm for PC-FR) with periodic horizontal breakaway tines (0.55mm W x 0.45mm L)
+      every 4.5mm for effortless, clean breakaway.
     - Lateral sway braces at X = -22.20mm and X = +21.32mm stabilizing the tall tilted part.
     """
     R = trimesh.transformations.rotation_matrix(np.radians(45.0), [1, 0, 0])
@@ -1433,10 +1443,10 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     pts_plunger_tine_yz = [
         (8.50, 0.60),           # bed anchor back
         (12.10, 0.60),          # bed anchor front
-        (12.10, 15.80),         # front tip top
-        (11.30, 15.432),        # bottom apex
-        (10.75, 15.594),        # blend point
-        (7.50,  18.814),        # top slope end
+        (12.10, 15.80),         # front tip top (0.20mm release gap)
+        (11.30, 15.432),        # bottom apex (0.20mm release gap)
+        (10.75, 15.594),        # blend point (0.20mm release gap)
+        (7.50,  18.814),        # top slope end (0.20mm release gap)
         (7.50,  14.00),         # back drop
         (8.50,  14.00),         # back transition
     ]
@@ -1507,9 +1517,9 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     z_cam_fork_base = 16.00
     pts_cam_tine_yz = [
         (-3.50, z_cam_fork_base),
-        (-3.50, 18.585),
-        (-2.33, 17.700),
-        (-1.20, 19.003),
+        (-3.50, 18.535),        # 0.25mm release gap (expanded from 0.20mm)
+        (-2.33, 17.650),        # 0.25mm release gap
+        (-1.20, 18.953),        # 0.25mm release gap
         (-1.20, z_cam_fork_base),
     ]
     poly_cam_head_yz = Polygon(pts_cam_tine_yz)
@@ -1588,9 +1598,9 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
             shaft_fork_head.faces = np.fliplr(shaft_fork_head.faces)
         fin_components.append(shaft_fork_head)
     # 2. Main Support Fins under the 45° inclined backplate
-    #    Calibrated tines: 0.55mm width x 0.45mm length, 0.24mm standoff, 4.5mm pitch for clean release
+    #    Calibrated tines: 0.55mm width x 0.45mm length, 0.26mm standoff, 4.5mm pitch for clean release
     fin_thick_x = 0.80  # 2 nozzle perimeters
-    standoff = 0.24     # 0.24mm release gap (tweaked for easy peeling)
+    standoff = 0.26     # 0.26mm release gap (half measure from 0.24 to 0.28mm for PC-FR peeling)
     z_bed = 0.60
     tine_w_x = 0.55     # Slimmed from 0.80 to 0.55mm (-31% contact width)
     tine_l_y = 0.45     # Shortened from 0.60 to 0.45mm (-25% contact length)

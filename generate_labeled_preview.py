@@ -134,22 +134,22 @@ ax1.annotate('Top Tab (Centered)\n8.20mm W (fits 8.33mm gap)', xy=(0, 20.2), xyt
              fontsize=8.5, fontweight='bold', color='#1565c0', bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='#1565c0'))
 
 # Snap Clip 45°
-ax1.annotate('Snap Clip (45.0°)\nSturdy Beam (L=3.70mm)\n1.75mm Hook (Shelf Z=4.72mm)', xy=(clip_pts[45.0][0], clip_pts[45.0][1]), xytext=(19.0, 16.5),
+ax1.annotate('Snap Clip (45.0°)\nSturdy Beam (L=3.70mm)\n1.80mm Hook (Shelf Z=3.97mm)', xy=(clip_pts[45.0][0], clip_pts[45.0][1]), xytext=(19.0, 16.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 135°
-ax1.annotate('Snap Clip (135.0°)\nSturdy Beam (L=3.70mm)\n1.75mm Hook (Shelf Z=4.72mm)', xy=(clip_pts[135.0][0], clip_pts[135.0][1]), xytext=(-30.5, 16.5),
+ax1.annotate('Snap Clip (135.0°)\nSturdy Beam (L=3.70mm)\n1.80mm Hook (Shelf Z=3.97mm)', xy=(clip_pts[135.0][0], clip_pts[135.0][1]), xytext=(-30.5, 16.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 211.3°
-ax1.annotate('Snap Clip (211.3°)\nSturdy Beam (L=3.70mm)\n1.75mm Hook + 45° Stem Support', xy=(clip_pts[211.3][0], clip_pts[211.3][1]), xytext=(-31.0, -10.5),
+ax1.annotate('Snap Clip (211.3°)\nSturdy Beam (L=3.70mm)\n1.80mm Hook (Shelf Z=4.35mm)\nTrident 45° Support', xy=(clip_pts[211.3][0], clip_pts[211.3][1]), xytext=(-31.0, -10.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
 # Snap Clip 327.5°
-ax1.annotate('Snap Clip (327.5°)\nSturdy Beam (L=3.70mm)\n1.75mm Hook + 45° Stem Support', xy=(clip_pts[327.5][0], clip_pts[327.5][1]), xytext=(17.5, -10.5),
+ax1.annotate('Snap Clip (327.5°)\nSturdy Beam (L=3.70mm)\n1.85mm Hook (Shelf Z=4.35mm)\nTrident 45° Support', xy=(clip_pts[327.5][0], clip_pts[327.5][1]), xytext=(17.5, -10.5),
              arrowprops=dict(arrowstyle='->', lw=1.5, color='#00838f'),
              fontsize=8, fontweight='bold', color='#00838f', bbox=dict(boxstyle='round,pad=0.2', fc='#e0f7fa', ec='#00838f'))
 
@@ -273,15 +273,15 @@ add_3d_callout(ax2, [4.65, 10.20, 14.50], [-22.0, 22.0, 26.0], "Left Tower & Soc
 add_3d_callout(ax2, [13.85, 10.20, 14.50], [22.0, 22.0, 26.0], "Right Tower & Rear Bridge\n(Z=14.50mm, Zero Spread)", color='#ad1457', bgcolor='#fce4ec')
 add_3d_callout(ax2, [2.5, 7.67, 4.0], [-29.0, 14.0, 14.0], "Left Buttress Struts\n(0.8mm & 1.2mm)", color='#c2185b', bgcolor='#fce4ec')
 add_3d_callout(ax2, [7.05, 6.5, 8.0], [-3.0, 4.0, 20.0], "Enlarged Shaft Rocker\n(Ø2.8mm Pin, 4.4mm Plunger)", color='#e65100', bgcolor='#fff3e0')
-add_3d_callout(ax2, [clip_pts[135.0][0], clip_pts[135.0][1], 6.77], [-30.0, 16.0, 6.0], "Snap Clip 135°\n(1.75mm Crown Hook, Shelf Z=4.72mm)", color='#00838f', bgcolor='#e0f7fa')
-add_3d_callout(ax2, [clip_pts[45.0][0], clip_pts[45.0][1], 6.77], [30.0, 16.0, 6.0], "Snap Clip 45°\n(1.75mm Crown Hook, Shelf Z=4.72mm)", color='#00838f', bgcolor='#e0f7fa')
+add_3d_callout(ax2, [clip_pts[135.0][0], clip_pts[135.0][1], 6.77], [-30.0, 16.0, 6.0], "Snap Clip 135°\n(1.80mm Hook, Shelf Z=3.97mm)", color='#00838f', bgcolor='#e0f7fa')
+add_3d_callout(ax2, [clip_pts[45.0][0], clip_pts[45.0][1], 6.77], [30.0, 16.0, 6.0], "Snap Clip 45°\n(1.80mm Hook, Shelf Z=3.97mm)", color='#00838f', bgcolor='#e0f7fa')
 add_3d_callout(ax2, [-7.25, 0.0, 4.60], [-28.0, -12.0, 14.0], "Guide Brackets 1 & 2\n(4.60mm H)", color='#2e7d32', bgcolor='#e8f5e9')
 add_3d_callout(ax2, [7.25, 0.0, 4.60], [28.0, -12.0, 14.0], "Guide Brackets 3 & 4\n(4.60mm H)", color='#2e7d32', bgcolor='#e8f5e9')
 add_3d_callout(ax2, [-21.075, 0.0, 3.5], [-30.0, -2.0, -2.0], "Left Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
 add_3d_callout(ax2, [20.200, 0.0, 3.5], [30.0, -2.0, -2.0], "Right Side Ear\n(8.20mm W, fits 8.3mm gap)", color='#0288d1', bgcolor='#e1f5fe')
 add_3d_callout(ax2, [6.28, -3.25, 10.50], [16.0, 0.0, 20.0], "Center Curved Feature\n(10.50mm H Flared Foot)", color='#6a1b9a', bgcolor='#f3e5f5')
-add_3d_callout(ax2, [clip_pts[211.3][0], clip_pts[211.3][1], 5.0], [-33.0, -18.0, 4.0], "Snap Clip 211.3°\n(1.75mm Hook, 45° Support)", color='#00838f', bgcolor='#e0f7fa')
-add_3d_callout(ax2, [clip_pts[327.5][0], clip_pts[327.5][1], 5.0], [33.0, -18.0, 4.0], "Snap Clip 327.5°\n(1.75mm Hook, 45° Support)", color='#00838f', bgcolor='#e0f7fa')
+add_3d_callout(ax2, [clip_pts[211.3][0], clip_pts[211.3][1], 5.0], [-33.0, -18.0, 4.0], "Snap Clip 211.3°\n(1.80mm Hook, Shelf Z=4.35mm)", color='#00838f', bgcolor='#e0f7fa')
+add_3d_callout(ax2, [clip_pts[327.5][0], clip_pts[327.5][1], 5.0], [33.0, -18.0, 4.0], "Snap Clip 327.5°\n(1.85mm Hook, Shelf Z=4.35mm)", color='#00838f', bgcolor='#e0f7fa')
 add_3d_callout(ax2, [0, -8.7, 6.77], [0.0, -34.0, -6.0], "Bottom Central U-Arch\n(7.95mm H, 5mm Inner W)", color='#0d47a1', bgcolor='white')
 add_3d_callout(ax2, [-8.38, -13.66, 0.0], [-17.0, -28.0, -6.0], "Left Slit Detent Socket\n(Press-Fit Insert)", color='#7b1fa2', bgcolor='#f3e5f5')
 add_3d_callout(ax2, [8.38, -13.66, 0.0], [17.0, -28.0, -6.0], "Right Slit Detent Socket\n(Press-Fit Insert)", color='#7b1fa2', bgcolor='#f3e5f5')
