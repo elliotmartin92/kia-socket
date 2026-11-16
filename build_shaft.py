@@ -51,15 +51,16 @@ HOLE_Y_LEN = HOLE_Y_TOP - HOLE_Y_BOT              # 5.180 mm
 
 # Enlarged Heavy-Duty Dimensions
 TOTAL_AXLE_LEN = 11.50       # 11.50mm total length tip-to-tip
-HUB_WIDTH = 6.90             # 6.90mm structural hub (0.40mm clearance per side in 7.70mm tower gap for smooth operation)
-PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.30 mm per side
+HUB_WIDTH = 7.25             # 7.25mm structural hub (0.225mm clearance per side in 7.70mm tower gap; 0.45mm axial play)
+PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.125 mm per side
 PIN_DIAMETER = 2.80          # Ø2.80mm heavy-duty pin (fits Ø3.50mm teardrop cradle, smooth 0.35mm radial clearance)
 HUB_DIAMETER = 4.20          # Ø4.20mm central structural hub barrel
-PLUNGER_REACH_BELOW_Z = 6.50 # Reaches Z = -6.50mm below baseplate floor
+PLUNGER_REACH_BELOW_Z = 7.00 # Reaches Z = -7.00mm below baseplate floor (+0.50mm longer reach to tactile switch)
 
-# Cam & Ribs (Thinned to guarantee ample running clearance to Bracket 4)
-CAM_WIDTH_X = 1.90           # 1.90mm wide input cam tab (+0.60mm clearance to Bracket 4 X=8.00mm)
-CAM_X_CENTER = 6.28          # Aligned with hot plug prong centerline (X = 6.28 mm)
+# Cam & Ribs (Calibrated for full-width blade capture & softened high-strength hub connection)
+CAM_WIDTH_X = 2.10           # 2.10mm wide primary input cam tab (+0.40mm clearance to Bracket 4 X=8.00mm)
+CAM_X_START = 5.50           # Primary cam spans X in [5.50, 7.60]mm (+0.10mm clearance to Left Tower X=5.40mm)
+CAM_X_CENTER = 6.55          # Aligned with hot plug prong engagement zone
 RIB_FLANK_THICK = 1.00       # 1.00mm flank rib thickness
 PLUNGER_WIDTH_X = 3.60       # 3.60mm wide central plunger blade (+0.48mm clearance to Bracket 4)
 
@@ -134,8 +135,8 @@ def build_shaft_rocker_mesh(
     v_rib3 = np.column_stack([v_r3[:, 2] + (x_c + hub_w/2.0 - 0.10 - RIB_FLANK_THICK), v_r3[:, 0], v_r3[:, 1]])
     mesh_rib3 = trimesh.Trimesh(vertices=v_rib3, faces=m_rib3_raw.faces.copy(), process=True)
     
-    # Rib 2 (Center Plunger Blade): Reaching Z = -6.50mm
-    z_tip = -plunger_reach_below_z  # -6.50 mm
+    # Rib 2 (Center Plunger Blade): Reaching Z = -7.00mm (+0.50mm reach to tactile switch)
+    z_tip = -plunger_reach_below_z  # -7.00 mm
     r_tip = 1.00                    # 2.00mm tip thickness in Y
     plunger_y_center = 10.479
     
@@ -163,44 +164,41 @@ def build_shaft_rocker_mesh(
     v_plunger = np.column_stack([v_p[:, 2] + (HOLE_X_CENTER - plunger_w_x/2.0), v_p[:, 0], v_p[:, 1]])
     mesh_plunger = trimesh.Trimesh(vertices=v_plunger, faces=m_plunger_raw.faces.copy(), process=True)
     
-    # 3. Structural Web tying the 3 ribs together (X in [5.60, 12.90])
-    web_y_min = y_axle - 1.50
-    web_y_max = y_axle + 1.80  # Trimmed from +2.50 to +1.80 to ensure +0.67mm clearance to rear cross-tie bridge (Y=11.75mm)
-    web_z_min = z_axle - 3.20
-    web_z_max = z_axle + 1.00
-    web_chamfer = 1.00  # 45° lead-in chamfer eliminating sagging overhang ceiling in 45° print orientation
-    pts_web = [
-        (web_y_min, web_z_max),
-        (web_y_max, web_z_max),
-        (web_y_max, web_z_min),
-        (web_y_min + web_chamfer, web_z_min),
-        (web_y_min, web_z_min + web_chamfer)
+    # 3. High-Sensitivity Direct Belly Cam Tab with Thickened Beam & Rounded Bullnose
+    # Calibrated to provide full blade room (>=6.35mm throat clearance to Half Moon at small actuation theta <= 5.82°)
+    # Top profile:
+    # - Tangential smooth lead-in from hub apex (Y = 9.279, Z = 14.690)
+    # - Elevated upper knee at (4.80, 10.80) and mid-ramp at (3.50, 9.30)
+    # - Smooth convex transition into rounded bullnose (R ≈ 1.50mm radius)
+    # - Blunt rounded nose apex at (2.58, 7.80), eliminating knife-edge wear and guaranteeing blade fit
+    # Underside profile:
+    # - Thick, heavy-duty beam (thickness 2.50mm to 3.82mm, over 4x thicker than razor wedge)
+    # - Perfectly cradled by dedicated breakaway support strut with calibrated 0.25mm release gap
+    # - Smooth stress-relief fillets returning into the hub barrel with generous beam cross-section
+    pts_cam_soft = [
+        (y_axle, z_axle),
+        (y_axle, z_axle + r_hub),                  # (9.279, 14.690) - Top tangent
+        (7.20, 12.80),                             # Smooth tangent transition from hub
+        (4.80, 10.80),                             # Elevated upper knee (+0.80mm higher than original)
+        (3.50, 9.30),                              # Mid-ramp in throat
+        (2.73, 8.25),                              # Upper rounded bullnose blend
+        (2.58, 7.80),                              # Blunt rounded bullnose apex (calibrated for 6.35mm blade room)
+        (2.73, 7.35),                              # Lower rounded bullnose blend
+        (3.38, 6.60),                              # Thickened beam underside transition
+        (4.60, 5.90),                              # Thickened beam belly (over 4x thicker than razor wedge)
+        (6.00, 5.80),                              # Self-supporting 45° return ramp
+        (7.20, 7.80),                              # Large concave stress-relief fillet
+        (8.20, 9.80),                              # Softened return to hub
+        (y_axle, z_axle - r_hub)                   # (9.279, 10.490) - Tangential return into hub cylinder
     ]
-    web_poly = Polygon(pts_web)
-    web_span_x = (x_c + hub_w/2.0 - 0.10) - (x_c - hub_w/2.0 + 0.10)
-    m_web_raw = trimesh.creation.extrude_polygon(web_poly, height=web_span_x)
-    v_w = m_web_raw.vertices.copy()
-    v_web = np.column_stack([v_w[:, 2] + (x_c - hub_w/2.0 + 0.10), v_w[:, 0], v_w[:, 1]])
-    mesh_web = trimesh.Trimesh(vertices=v_web, faces=m_web_raw.faces.copy(), process=True)
-    
-    # 4. High-Sensitivity Direct Belly Cam Tab (calibrated for 10.5mm plug blade penetration)
-    poly_pts_cam = [
-        (y_axle, z_axle),                          # Center of hub (9.279, 12.590)
-        (y_axle, z_axle + r_hub),                  # (9.279, 14.690) - Flush tangent at hub top
-        (6.80, 12.20),                             # Smooth blend from hub down toward throat
-        (5.00, 10.00),                             # Elevated top ramp knee
-        (1.50, 7.40),                              # Active contact tip inside belly cavity
-        (1.80, 5.10),                              # Rounded nose bottom inside belly
-        (4.50, 5.30),                              # Beam underside
-        (y_axle - 1.50, z_axle - 2.50)             # (7.779, 10.090) - Smooth return into hub belly
-    ]
-    poly_cam_arm = Polygon(poly_pts_cam)
+    poly_cam_arm = Polygon(pts_cam_soft)
     poly_cam = unary_union([flank_collar, poly_cam_arm])
     
-    # Constrain cam tab in X so it stays cleanly within the central hub barrel (X in [5.50, 13.00])
-    # and leaves guaranteed 0.10mm clearance to the Left Tower (X <= 5.40).
-    x_cam_start = max(x_c - hub_w/2.0, cam_x_c - cam_w_x/2.0)
-    actual_cam_w = min(cam_w_x, (x_c + hub_w/2.0) - x_cam_start)
+    # Primary Cam Tab: X in [5.50, 7.60] (2.10mm wide)
+    # Calibrated to provide full blade capture, generous stress-relief fillets at the hub,
+    # and maintain >0.90mm clear air gap to the stationary breakaway lever support stick (X >= 8.51mm).
+    x_cam_start = CAM_X_START
+    actual_cam_w = cam_w_x
     m_cam_raw = trimesh.creation.extrude_polygon(poly_cam, height=actual_cam_w)
     v_c = m_cam_raw.vertices.copy()
     v_cam = np.column_stack([v_c[:, 2] + x_cam_start, v_c[:, 0], v_c[:, 1]])
@@ -213,7 +211,6 @@ def build_shaft_rocker_mesh(
         'rib1': mesh_rib1,
         'rib3': mesh_rib3,
         'plunger': mesh_plunger,
-        'web': mesh_web,
         'cam': mesh_cam
     }
     
@@ -343,16 +340,22 @@ x_c = {X_TOWER_CENTER};
 y_axle = {Y_AXLE};
 z_axle = {Z_AXLE};
 
-// 2D Profile: High-Sensitivity Direct Belly Cam (calibrated for 10.5mm blade penetration)
+// 2D Profile: High-Sensitivity Direct Belly Cam with Thickened Beam, Rounded Bullnose & Calibrated Blade Clearance
 poly_cam_pts = [
     [{Y_AXLE}, {Z_AXLE}],
     [{Y_AXLE}, {Z_AXLE + HUB_DIAMETER/2.0}],
-    [6.80, 12.20],
-    [5.00, 10.00],
-    [1.50, 7.40],
-    [1.80, 5.10],
-    [4.50, 5.30],
-    [{Y_AXLE - 1.50}, {Z_AXLE - 2.50}]
+    [7.20, 12.80],
+    [4.80, 10.80],
+    [3.50, 9.30],
+    [2.73, 8.25],
+    [2.58, 7.80],
+    [2.73, 7.35],
+    [3.38, 6.60],
+    [4.60, 5.90],
+    [6.00, 5.80],
+    [7.20, 7.80],
+    [8.20, 9.80],
+    [{Y_AXLE}, {Z_AXLE - HUB_DIAMETER/2.0}]
 ];
 
 module oem_shaft_rocker() {{
@@ -371,8 +374,8 @@ module oem_shaft_rocker() {{
         rotate([0, 90, 0])
             cylinder(r = hub_d/2, h = hub_w, center = true);
             
-    // Direct Straight Belly Cam Tab
-    translate([cam_x_c - cam_w/2, 0, 0])
+    // Primary Belly Cam Tab with Filleted Root
+    translate([5.50, 0, 0])
         rotate([0, -90, 0])
             rotate([0, 0, 90])
                 linear_extrude(height = cam_w)

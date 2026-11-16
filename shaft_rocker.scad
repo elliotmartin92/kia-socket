@@ -5,31 +5,37 @@ $fn = 64;
 
 // Global Parameters (mm)
 total_axle_len = 11.5;
-hub_w = 6.9;
+hub_w = 7.25;
 pin_d = 2.8;
-pin_len = 2.30;
+pin_len = 2.12;
 hub_d = 4.2;
 
-plunger_reach_below_z = 6.5;
+plunger_reach_below_z = 7.0;
 plunger_w = 3.6;
 hole_x_c = 10.284;
 
-cam_w = 1.9;
-cam_x_c = 6.28;
+cam_w = 2.1;
+cam_x_c = 6.55;
 x_c = 9.25;
 y_axle = 9.279;
 z_axle = 12.59;
 
-// 2D Profile: High-Sensitivity Direct Belly Cam (calibrated for 10.5mm blade penetration)
+// 2D Profile: High-Sensitivity Direct Belly Cam with Thickened Beam, Rounded Bullnose & Calibrated Blade Clearance
 poly_cam_pts = [
     [9.279, 12.59],
     [9.279, 14.69],
-    [6.80, 12.20],
-    [5.00, 10.00],
-    [1.50, 7.40],
-    [1.80, 5.10],
-    [4.50, 5.30],
-    [7.779, 10.09]
+    [7.20, 12.80],
+    [4.80, 10.80],
+    [3.50, 9.30],
+    [2.73, 8.25],
+    [2.58, 7.80],
+    [2.73, 7.35],
+    [3.38, 6.60],
+    [4.60, 5.90],
+    [6.00, 5.80],
+    [7.20, 7.80],
+    [8.20, 9.80],
+    [9.279, 10.49]
 ];
 
 module oem_shaft_rocker() {
@@ -48,8 +54,8 @@ module oem_shaft_rocker() {
         rotate([0, 90, 0])
             cylinder(r = hub_d/2, h = hub_w, center = true);
             
-    // Direct Straight Belly Cam Tab
-    translate([cam_x_c - cam_w/2, 0, 0])
+    // Primary Belly Cam Tab with Filleted Root
+    translate([5.50, 0, 0])
         rotate([0, -90, 0])
             rotate([0, 0, 90])
                 linear_extrude(height = cam_w)

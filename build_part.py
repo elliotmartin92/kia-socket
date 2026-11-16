@@ -1516,11 +1516,13 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     
     z_cam_fork_base = 16.00
     pts_cam_tine_yz = [
-        (-3.50, z_cam_fork_base),
-        (-3.50, 18.535),        # 0.25mm release gap (expanded from 0.20mm)
-        (-2.33, 17.650),        # 0.25mm release gap
-        (-1.20, 18.953),        # 0.25mm release gap
-        (-1.20, z_cam_fork_base),
+        (-3.60, z_cam_fork_base),
+        (-3.60, 20.123),        # 0.28mm release gap under nose curve (Z'_cam = 20.403)
+        (-3.20, 19.952),        # 0.28mm release gap under lower blend (Z'_cam = 20.232)
+        (-2.40, 19.895),        # 0.28mm release gap under underside saddle (Z'_cam = 20.175)
+        (-1.60, 20.069),        # 0.28mm release gap under mid beam (Z'_cam = 20.349)
+        (-1.00, 20.232),        # 0.28mm release gap under rear transition (Z'_cam = 20.512)
+        (-1.00, z_cam_fork_base),
     ]
     poly_cam_head_yz = Polygon(pts_cam_tine_yz)
     cam_tine_w = 0.55
@@ -1738,7 +1740,7 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     if include_pip_shaft:
         try:
             from build_shaft import build_shaft_rocker_mesh
-            shaft_mesh = build_shaft_rocker_mesh(hub_w=6.90, in_assembly_coords=True, with_supports=False)
+            shaft_mesh = build_shaft_rocker_mesh(in_assembly_coords=True, with_supports=False)
             shaft_tilted = shaft_mesh.copy().apply_transform(R)
             shaft_tilted.apply_translation([0, 0, -z_min])
             combined = trimesh.util.concatenate([combined, shaft_tilted])
