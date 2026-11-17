@@ -63,6 +63,126 @@ CAM_X_START = 5.50           # Primary cam spans X in [5.50, 7.60]mm (+0.10mm cl
 CAM_X_CENTER = 6.55          # Aligned with hot plug prong engagement zone
 RIB_FLANK_THICK = 1.00       # 1.00mm flank rib thickness
 PLUNGER_WIDTH_X = 3.60       # 3.60mm wide central plunger blade (+0.48mm clearance to Bracket 4)
+PLUNGER_Y_CENTER = 11.00     # Calibrated plunger home in Y (1.40mm pre-travel to 12.40mm switch; theta_trip = 4.11 deg)
+
+# Kinematic Variant Profiles (5-Variant Spectrum for Prototyping & Production PIP Selection)
+KINEMATIC_VARIANTS = {
+    'v1_ultra_sens': {
+        'id': 1,
+        'notches': 1,
+        'name': 'Variant 1: Ultra-Sensitive (Apex Y=1.65, Plunger Y=11.25)',
+        'plunger_y': 11.25,
+        'cam_apex': (1.65, 7.70),
+        'cam_pts': [
+            (Y_AXLE, Z_AXLE + HUB_DIAMETER/2.0),
+            (7.00, 13.00),
+            (4.20, 11.20),
+            (2.80, 9.20),
+            (1.80, 8.10),
+            (1.65, 7.70),  # Forward apex (maximum non-polar capture)
+            (1.80, 7.20),
+            (2.40, 6.40),
+            (3.80, 5.80),
+            (5.50, 5.80),
+            (7.20, 7.80),
+            (8.20, 9.80),
+            (Y_AXLE, Z_AXLE - HUB_DIAMETER/2.0)
+        ]
+    },
+    'v2_high_sens': {
+        'id': 2,
+        'notches': 2,
+        'name': 'Variant 2: High Sensitivity (Apex Y=1.85, Plunger Y=11.10)',
+        'plunger_y': 11.10,
+        'cam_apex': (1.85, 7.65),
+        'cam_pts': [
+            (Y_AXLE, Z_AXLE + HUB_DIAMETER/2.0),
+            (7.00, 13.00),
+            (4.50, 11.00),
+            (3.10, 9.20),
+            (2.00, 8.00),
+            (1.85, 7.65),  # Early-engagement non-polar champion
+            (2.00, 7.10),
+            (2.60, 6.30),
+            (4.00, 5.80),
+            (5.60, 5.80),
+            (7.20, 7.80),
+            (8.20, 9.80),
+            (Y_AXLE, Z_AXLE - HUB_DIAMETER/2.0)
+        ]
+    },
+    'v3_nominal': {
+        'id': 3,
+        'notches': 3,
+        'name': 'Variant 3: Balanced Nominal (Apex Y=2.10, Plunger Y=10.95)',
+        'plunger_y': 10.95,
+        'cam_apex': (2.10, 7.60),
+        'cam_pts': [
+            (Y_AXLE, Z_AXLE + HUB_DIAMETER/2.0),
+            (7.20, 13.00),
+            (4.80, 11.00),
+            (3.30, 9.30),
+            (2.25, 8.10),
+            (2.10, 7.60),  # Balanced design point
+            (2.25, 7.10),
+            (2.80, 6.40),
+            (4.20, 5.80),
+            (5.80, 5.80),
+            (7.20, 7.80),
+            (8.20, 9.80),
+            (Y_AXLE, Z_AXLE - HUB_DIAMETER/2.0)
+        ]
+    },
+    'v4_smooth': {
+        'id': 4,
+        'notches': 4,
+        'name': 'Variant 4: Smooth Progressive (Apex Y=2.30, Plunger Y=10.80)',
+        'plunger_y': 10.80,
+        'cam_apex': (2.30, 7.50),
+        'cam_pts': [
+            (Y_AXLE, Z_AXLE + HUB_DIAMETER/2.0),
+            (7.20, 13.00),
+            (5.00, 11.00),
+            (3.50, 9.20),
+            (2.45, 8.00),
+            (2.30, 7.50),  # Low insertion resistance curve
+            (2.45, 7.00),
+            (3.00, 6.30),
+            (4.20, 5.80),
+            (5.80, 5.80),
+            (7.20, 7.80),
+            (8.20, 9.80),
+            (Y_AXLE, Z_AXLE - HUB_DIAMETER/2.0)
+        ]
+    },
+    'v5_wide_throat': {
+        'id': 5,
+        'notches': 5,
+        'name': 'Variant 5: OEM-Like Wide Throat (Apex Y=2.50, Plunger Y=10.65)',
+        'plunger_y': 10.65,
+        'cam_apex': (2.50, 7.40),
+        'cam_pts': [
+            (Y_AXLE, Z_AXLE + HUB_DIAMETER/2.0),
+            (7.20, 13.00),
+            (5.20, 11.00),
+            (3.70, 9.20),
+            (2.65, 8.00),
+            (2.50, 7.40),  # Baseline OEM proportioned wide throat
+            (2.65, 6.90),
+            (3.20, 6.30),
+            (4.40, 5.80),
+            (5.80, 5.80),
+            (7.20, 7.80),
+            (8.20, 9.80),
+            (Y_AXLE, Z_AXLE - HUB_DIAMETER/2.0)
+        ]
+    }
+}
+
+CAM_PROFILES = {k: v['cam_pts'] for k, v in KINEMATIC_VARIANTS.items()}
+CAM_PROFILES['v1_nominal'] = KINEMATIC_VARIANTS['v3_nominal']['cam_pts']  # Alias
+ACTIVE_VARIANT = 'v3_nominal'
+ACTIVE_CAM_PROFILE = ACTIVE_VARIANT
 
 def build_shaft_rocker_mesh(
     axle_len=TOTAL_AXLE_LEN,
@@ -70,13 +190,19 @@ def build_shaft_rocker_mesh(
     pin_d=PIN_DIAMETER,
     hub_d=HUB_DIAMETER,
     plunger_reach_below_z=PLUNGER_REACH_BELOW_Z,
+    plunger_y_center=None,
     plunger_w_x=PLUNGER_WIDTH_X,
     cam_w_x=CAM_WIDTH_X,
     cam_x_c=CAM_X_CENTER,
+    cam_pts=None,
     in_assembly_coords=True,
     with_supports=True,
     return_subparts=False
 ):
+    if plunger_y_center is None:
+        plunger_y_center = KINEMATIC_VARIANTS[ACTIVE_VARIANT]['plunger_y']
+    if cam_pts is None:
+        cam_pts = KINEMATIC_VARIANTS[ACTIVE_VARIANT]['cam_pts']
     """
     Builds the enlarged heavy-duty 3-rib 3D mesh of the shaft/rocker mechanism.
     
@@ -138,7 +264,6 @@ def build_shaft_rocker_mesh(
     # Rib 2 (Center Plunger Blade): Reaching Z = -7.00mm (+0.50mm reach to tactile switch)
     z_tip = -plunger_reach_below_z  # -7.00 mm
     r_tip = 1.00                    # 2.00mm tip thickness in Y
-    plunger_y_center = 10.479
     
     N = 25
     t = np.linspace(0, 1, N)
@@ -164,34 +289,10 @@ def build_shaft_rocker_mesh(
     v_plunger = np.column_stack([v_p[:, 2] + (HOLE_X_CENTER - plunger_w_x/2.0), v_p[:, 0], v_p[:, 1]])
     mesh_plunger = trimesh.Trimesh(vertices=v_plunger, faces=m_plunger_raw.faces.copy(), process=True)
     
-    # 3. High-Sensitivity Direct Belly Cam Tab with Thickened Beam & Rounded Bullnose
-    # Calibrated to provide full blade room (>=6.35mm throat clearance to Half Moon at small actuation theta <= 5.82°)
-    # Top profile:
-    # - Tangential smooth lead-in from hub apex (Y = 9.279, Z = 14.690)
-    # - Elevated upper knee at (4.80, 10.80) and mid-ramp at (3.50, 9.30)
-    # - Smooth convex transition into rounded bullnose (R ≈ 1.50mm radius)
-    # - Blunt rounded nose apex at (2.58, 7.80), eliminating knife-edge wear and guaranteeing blade fit
-    # Underside profile:
-    # - Thick, heavy-duty beam (thickness 2.50mm to 3.82mm, over 4x thicker than razor wedge)
-    # - Perfectly cradled by dedicated breakaway support strut with calibrated 0.25mm release gap
-    # - Smooth stress-relief fillets returning into the hub barrel with generous beam cross-section
-    pts_cam_soft = [
-        (y_axle, z_axle),
-        (y_axle, z_axle + r_hub),                  # (9.279, 14.690) - Top tangent
-        (7.20, 12.80),                             # Smooth tangent transition from hub
-        (4.80, 10.80),                             # Elevated upper knee (+0.80mm higher than original)
-        (3.50, 9.30),                              # Mid-ramp in throat
-        (2.73, 8.25),                              # Upper rounded bullnose blend
-        (2.58, 7.80),                              # Blunt rounded bullnose apex (calibrated for 6.35mm blade room)
-        (2.73, 7.35),                              # Lower rounded bullnose blend
-        (3.38, 6.60),                              # Thickened beam underside transition
-        (4.60, 5.90),                              # Thickened beam belly (over 4x thicker than razor wedge)
-        (6.00, 5.80),                              # Self-supporting 45° return ramp
-        (7.20, 7.80),                              # Large concave stress-relief fillet
-        (8.20, 9.80),                              # Softened return to hub
-        (y_axle, z_axle - r_hub)                   # (9.279, 10.490) - Tangential return into hub cylinder
-    ]
-    poly_cam_arm = Polygon(pts_cam_soft)
+    # 3. High-Sensitivity Direct Belly Cam Tab
+    if cam_pts is None:
+        cam_pts = CAM_PROFILES[ACTIVE_CAM_PROFILE]
+    poly_cam_arm = Polygon(cam_pts)
     poly_cam = unary_union([flank_collar, poly_cam_arm])
     
     # Primary Cam Tab: X in [5.50, 7.60] (2.10mm wide)
