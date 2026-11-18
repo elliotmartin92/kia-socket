@@ -1,8 +1,8 @@
 """
 testing/build_prototype_levers.py
 Generates rapid-prototype shaft/rocker variants for drop-in retrofit testing:
-- Includes exact geometry from commit [1372a2d] (OEM 3-prong fork architecture).
-- Includes commit [1372a2d] scaled by +0.55% (S = 1.0055) to compensate for the higher
+- Includes exact geometry from commit [b4877a99273a053050683e6d446b3c83a785f496] (OEM 3-rib architecture).
+- Includes commit [b4877a9] scaled by +0.55% (S = 1.0055) to compensate for the higher
   shrinkage of PC-FR (0.85%) vs PCTG (0.35%).
 - Includes newly upgraded kinematic variants (Ultra-Sensitive, Balanced Nominal, Progressive Smooth).
 - Printed at the EXACT +45° PIP angle matching production Print-in-Place layer orientation!
@@ -16,7 +16,7 @@ import os
 import sys
 import numpy as np
 import trimesh
-from shapely.geometry import Polygon, Point, box
+from shapely.geometry import Polygon, Point, box, LineString
 from shapely.ops import unary_union
 import matplotlib.pyplot as plt
 
@@ -35,176 +35,29 @@ DZ_BASEPLATE_SHIFT = 13.109052303519203  # Offset from build_part.py to lower le
 BED_PAD_H = 0.60                         # 3 layers at 0.20mm layer height
 LEVER_PITCH_X = 18.00                    # Pitch between adjacent levers on test plate
 
-# Shrinkage differential: PC-FR (0.85%) vs PCTG (0.35%)
-# Scale Factor = (1 - 0.0035) / (1 - 0.0085) = 1.00504 ~ 1.0055 (+0.55%)
-SHRINKAGE_SCALE_PCTG_TO_PCFR = 1.0055
+# Cam profile for b4877a9 Tuned (Apex elevated to Z=7.75mm at Y=1.50mm)
+B4877A9_TUNED_CAM_PTS = [
+    (Y_AXLE, Z_AXLE),
+    (Y_AXLE, Z_AXLE + 2.10),
+    (6.80, 12.20),
+    (5.00, 10.20),
+    (1.50, 7.75),
+    (1.80, 5.10),
+    (4.50, 5.30),
+    (Y_AXLE - 1.50, Z_AXLE - 2.50)
+]
 
 # ==============================================================================
-# COMMIT [1372a2d] EXACT GEOMETRY GENERATOR
+# COMMIT [b4877a9] GEOMETRY GENERATOR
 # ==============================================================================
-def build_1372a2d_rocker_mesh(axle_len=PROTO_AXLE_LEN, scale_factor=1.0):
+def build_b4877a9_rocker_mesh(axle_len=PROTO_AXLE_LEN, plunger_y=10.479, cam_pts=None):
     """
-    Recreates the exact OEM 3-prong fork architecture from commit [1372a2d].
-    If scale_factor != 1.0, scales all features relative to the pivot axle center
-    (accounting for PCTG vs PC-FR thermal shrinkage difference).
+    Recreates the OEM 3-rib architecture from commit [b4877a9].
+    Supports custom plunger_y and cam_pts for the tuned variant.
     """
-    y_axle = 7.666
-    z_axle = 12.590
-    x_c = 9.250  # X_TOWER_CENTER
-    
-    hub_w = 7.60
-    pin_d = 1.90
-    hub_d = 3.30
-    plunger_reach_below_z = 6.50
-    prong_side_w = 0.85
-    prong_center_w = 2.00
-    cam_w = 2.60
-    cam_x_c = 6.80
-    
-    r_pin = pin_d / 2.0
-    x_min = x_c - axle_len / 2.0
-    x_max = x_c + axle_len / 2.0
-    pin_len = (axle_len - hub_w) / 2.0
-    
-    rot_x = trimesh.transformations.rotation_matrix(np.pi/2, [0, 1, 0])
-    
-    # Left & Right Pivot Pins
-    pin_l = trimesh.creation.cylinder(radius=r_pin, height=pin_len + 0.10, sections=32)
-    pin_l.apply_transform(rot_x)
-    pin_l.apply_translation([x_min + pin_len/2.0, y_axle, z_axle])
-    
-    pin_r = trimesh.creation.cylinder(radius=r_pin, height=pin_len + 0.10, sections=32)
-    pin_r.apply_transform(rot_x)
-    pin_r.apply_translation([x_max - pin_len/2.0, y_axle, z_axle])
-    
-    # Central Hub Barrel
-    hub_mesh = trimesh.creation.cylinder(radius=hub_d/2.0, height=hub_w, sections=32)
-    hub_mesh.apply_transform(rot_x)
-    hub_mesh.apply_translation([x_c, y_axle, z_axle])
-    
-    # Outer Flank Prongs (Ribs 1 & 3)
-    flank_collar = Point(y_axle, z_axle).buffer(hub_d / 2.0)
-    flank_pts = [
-        (y_axle - 1.20, z_axle + 0.40),
-        (y_axle + 2.50, z_axle - 1.20),
-        (y_axle + 2.10, z_axle - 3.80),
-        (y_axle + 0.50, z_axle - 3.60),
-        (y_axle - 1.30, z_axle - 0.80)
-    ]
-    poly_flank = unary_union([flank_collar, Polygon(flank_pts)])
-    
-    # Prong 1 (Left Flank)
-    m_p1_raw = trimesh.creation.extrude_polygon(poly_flank, height=prong_side_w)
-    v_p1 = m_p1_raw.vertices.copy()
-    v_prong1 = np.column_stack([v_p1[:, 2] + (x_c - hub_w/2.0 + 0.15), v_p1[:, 0], v_p1[:, 1]])
-    mesh_prong1 = trimesh.Trimesh(vertices=v_prong1, faces=m_p1_raw.faces.copy(), process=True)
-    
-    # Prong 3 (Right Flank)
-    m_p3_raw = trimesh.creation.extrude_polygon(poly_flank, height=prong_side_w)
-    v_p3 = m_p3_raw.vertices.copy()
-    v_prong3 = np.column_stack([v_p3[:, 2] + (x_c + hub_w/2.0 - 0.15 - prong_side_w), v_p3[:, 0], v_p3[:, 1]])
-    mesh_prong3 = trimesh.Trimesh(vertices=v_prong3, faces=m_p3_raw.faces.copy(), process=True)
-    
-    # Center Extended Plunger Prong (Rib 2)
-    z_tip = -plunger_reach_below_z  # -6.50mm
-    r_tip = 0.90                    # 1.80mm nose thickness in Y
-    plunger_y_center = 11.40
-    
-    N = 25
-    t = np.linspace(0, 1, N)
-    spine_y = (1-t)**2 * (y_axle + hub_d/2.0) + 2*(1-t)*t * (y_axle + 3.80) + t**2 * (plunger_y_center + r_tip)
-    spine_z = (1-t)**2 * (z_axle - 0.20) + 2*(1-t)*t * 7.50 + t**2 * 3.50
-    
-    tip_angles = np.linspace(0, np.pi, 33)
-    tip_pts = [(plunger_y_center + r_tip * np.cos(a), z_tip + r_tip * (1 - np.sin(a))) for a in tip_angles]
-    
-    belly_y = (1-t)**2 * (y_axle - hub_d/2.0) + 2*(1-t)*t * (y_axle + 1.20) + t**2 * (plunger_y_center - r_tip)
-    belly_z = (1-t)**2 * (z_axle - 0.50) + 2*(1-t)*t * 7.80 + t**2 * 3.50
-    
-    pts_plunger = (
-        list(zip(spine_y, spine_z)) +
-        [(plunger_y_center + r_tip, z_tip + r_tip)] +
-        tip_pts +
-        [(plunger_y_center - r_tip, z_tip + r_tip)] +
-        list(reversed(list(zip(belly_y, belly_z))))
-    )
-    poly_plunger = unary_union([flank_collar, Polygon(pts_plunger)])
-    m_plunger_raw = trimesh.creation.extrude_polygon(poly_plunger, height=prong_center_w)
-    v_p2 = m_plunger_raw.vertices.copy()
-    v_plunger = np.column_stack([v_p2[:, 2] + (HOLE_X_CENTER - prong_center_w/2.0), v_p2[:, 0], v_p2[:, 1]])
-    mesh_prong2 = trimesh.Trimesh(vertices=v_plunger, faces=m_plunger_raw.faces.copy(), process=True)
-    
-    # Input Cam Tab
-    y_cam_tip = y_axle - 4.20  # Reaches Y = 3.466mm
-    z_cam_tip = z_axle - 5.80  # Drops to Z = 6.790mm
-    cam_collar = Point(y_axle, z_axle).buffer(hub_d / 2.0)
-    cam_pts = [
-        (y_axle + 1.20, z_axle + 1.20),
-        (y_cam_tip, z_cam_tip + 2.20),
-        (y_cam_tip, z_cam_tip),
-        (y_cam_tip + 2.60, z_cam_tip),
-        (y_axle + 0.20, z_axle - 2.20)
-    ]
-    poly_cam = unary_union([cam_collar, Polygon(cam_pts)])
-    m_cam_raw = trimesh.creation.extrude_polygon(poly_cam, height=cam_w)
-    v_c = m_cam_raw.vertices.copy()
-    v_cam = np.column_stack([v_c[:, 2] + (cam_x_c - cam_w/2.0), v_c[:, 0], v_c[:, 1]])
-    mesh_cam = trimesh.Trimesh(vertices=v_cam, faces=m_cam_raw.faces.copy(), process=True)
-    
-    shaft_mesh = trimesh.util.concatenate([
-        pin_l, pin_r, hub_mesh,
-        mesh_prong1, mesh_prong2, mesh_prong3,
-        mesh_cam
-    ])
-    
-    if scale_factor != 1.0:
-        p_axle = np.array([x_c, y_axle, z_axle])
-        v_orig = shaft_mesh.vertices
-        v_scaled = p_axle + scale_factor * (v_orig - p_axle)
-        shaft_mesh = trimesh.Trimesh(vertices=v_scaled, faces=shaft_mesh.faces.copy(), process=True)
-        
-    return shaft_mesh
+    from testing.build_shaft_b4877a9 import build_shaft_rocker_mesh as sb_mesh
+    return sb_mesh(axle_len=axle_len, plunger_y_center=plunger_y, cam_pts=cam_pts, in_assembly_coords=True)
 
-def build_1372a2d_supports_45deg(mesh_45):
-    """Generates breakaway supports matching 1372a2d rotated geometry."""
-    v = mesh_45.vertices
-    supp_components = []
-    
-    # 1. Plunger support under curved plunger tip
-    pts_p = [
-        (10.50, BED_PAD_H),
-        (12.50, BED_PAD_H),
-        (12.50, 3.15),
-        (12.00, 3.00),
-        (10.50, 3.07),
-    ]
-    poly_p = Polygon(pts_p)
-    m_p2d = trimesh.creation.extrude_polygon(poly_p, height=1.40)
-    vp = m_p2d.vertices
-    p_supp = trimesh.Trimesh(vertices=np.column_stack([vp[:, 2] + 9.584, vp[:, 0], vp[:, 1]]), faces=m_p2d.faces)
-    if p_supp.volume < 0:
-        p_supp.faces = np.fliplr(p_supp.faces)
-    supp_components.append(p_supp)
-    
-    # 2. Hub support under axle barrel (Z ~ 7.25, 0.48mm gap -> 6.77mm top)
-    h_top = 6.77
-    h_h = h_top - BED_PAD_H
-    hub_supp = trimesh.creation.box([1.40, 1.40, h_h])
-    hub_supp.apply_translation([9.25, -3.48, BED_PAD_H + h_h / 2.0])
-    supp_components.append(hub_supp)
-    
-    # 3. Cam support under input cam tab (Z ~ 12.67, 0.28mm gap -> 12.39mm top)
-    c_top = 12.39
-    c_h = c_top - BED_PAD_H
-    cam_supp = trimesh.creation.box([1.20, 1.20, c_h])
-    cam_supp.apply_translation([6.80, -3.40, BED_PAD_H + c_h / 2.0])
-    supp_components.append(cam_supp)
-    
-    return trimesh.util.concatenate(supp_components)
-
-# ==============================================================================
-# NEW KINEMATIC VARIANTS (from build_shaft.py)
-# ==============================================================================
 def build_variant_lever_45deg(cfg, axle_len=PROTO_AXLE_LEN):
     """Builds a single clean variant lever rotated +45°."""
     mesh_raw = build_shaft_rocker_mesh(
@@ -224,32 +77,63 @@ def build_variant_lever_45deg(cfg, axle_len=PROTO_AXLE_LEN):
     mesh_45 = mesh_raw.copy().apply_transform(R_PIP_45)
     return mesh_45
 
-def build_variant_supports_45deg(cfg):
-    """Builds the exact breakaway support structure from build_part.py, 'just shorter'."""
-    dz = DZ_BASEPLATE_SHIFT
+# ==============================================================================
+# UNIFIED CONFORMAL BREAKAWAY SUPPORTS (Exact Alignment Across All 5 Tests)
+# ==============================================================================
+def build_variant_supports_45deg(test):
+    """
+    Builds exact, mathematically conformal breakaway support structures for each
+    individual prototype lever variant rotated at +45°:
+      1. Conformal Plunger Cradle (3 tines: Left, Right, Center + solid bed web)
+         - Follows the analytical 45° incline and curved tip with calibrated 0.22mm release gap.
+         - Roots solidly into the bed adhesion pad at Z = BED_PAD_H (0.60mm).
+      2. Conformal Cam Fork (2 tines + central trunk + lateral web)
+         - Dynamically traces each variant's downward-facing cam overhang profile.
+         - Exact 0.22mm release gap, eliminating mid-air gaps and sag.
+      3. Shaft Barrel Support Strut (2-tine micro-chisel fork on trunk)
+         - Precision 0.48mm release gap under the central hub barrel at Z' = 13.364mm.
+    """
+    r2 = np.sqrt(2) / 2.0
     supp_components = []
     
-    # 1. Plunger Breakaway Support Cradle (0.20mm release gap)
-    dy = cfg['plunger_y'] - 10.95
-    cos45 = np.cos(np.radians(45.0))
-    sin45 = np.sin(np.radians(45.0))
-    dy_p = dy * cos45
-    dz_p = dy * sin45
+    is_b4877a9 = test.get('is_b4877a9', False)
+    py = test.get('plunger_y') if is_b4877a9 else test['cfg']['plunger_y']
+    reach = test.get('plunger_reach', 6.50) if is_b4877a9 else test['cfg'].get('plunger_reach', 7.00)
     
-    pts_plunger_tine_yz = [
-        (8.50 + dy_p, BED_PAD_H),
-        (12.10 + dy_p, BED_PAD_H),
-        (12.10 + dy_p, 15.80 - dz + dz_p),
-        (11.30 + dy_p, 15.432 - dz + dz_p),
-        (10.75 + dy_p, 15.594 - dz + dz_p),
-        (7.50 + dy_p,  18.814 - dz + dz_p),
-        (7.50 + dy_p,  1.40),
-        (8.50 + dy_p,  1.40),
-    ]
-    poly_p = Polygon(pts_plunger_tine_yz)
+    # -------------------------------------------------------------------------
+    # 1. EXACT CONFORMAL PLUNGER CRADLE (3 Tines + Bed Web)
+    # -------------------------------------------------------------------------
+    r_tip = 1.00
+    gap_p = 0.22  # Calibrated 0.22mm vertical release gap
     
-    # Left, Right, Center tines
+    # 1a. Slope portion from Y'=8.50 to Y'_knee
+    y_knee = (py - r_tip) * r2 - (-reach + r_tip) * r2
+    z_knee = (py - r_tip) * r2 + (-reach + r_tip) * r2
+    
+    # 1b. Circular tip profile (downward-facing curve from knee a=pi to chin a=pi/2)
+    alphas = np.linspace(np.pi, np.pi * 0.50, 20)
+    tip_y = py + r_tip * np.cos(alphas)
+    tip_z = -reach + r_tip * (1.0 - np.sin(alphas))
+    tip_y45 = tip_y * r2 - tip_z * r2
+    tip_z45 = tip_y * r2 + tip_z * r2
+    
+    y_start = 8.50
+    y_slope = np.linspace(y_start, y_knee, 10)
+    z_slope = z_knee + (y_knee - y_slope)  # 45° slope is identically -1.0 in Y'-Z'
+    
+    y_pts = np.concatenate([y_slope, tip_y45[1:]])
+    z_pts = np.concatenate([z_slope, tip_z45[1:]]) - gap_p
+    y_end = y_pts[-1]
+    
+    pts_plunger_tine = [(y_start, BED_PAD_H)]
+    for y_v, z_v in zip(y_pts, z_pts):
+        pts_plunger_tine.append((y_v, max(BED_PAD_H + 0.20, z_v)))
+    pts_plunger_tine.append((y_end, BED_PAD_H))
+    
+    poly_p = Polygon(pts_plunger_tine)
     p_tine_w = 0.80
+    
+    # Left tine
     m_pl_2d = trimesh.creation.extrude_polygon(poly_p, height=p_tine_w)
     vl = m_pl_2d.vertices
     p_tine_l = trimesh.Trimesh(vertices=np.column_stack([vl[:, 2] + 8.484, vl[:, 0], vl[:, 1]]), faces=m_pl_2d.faces)
@@ -257,6 +141,7 @@ def build_variant_supports_45deg(cfg):
         p_tine_l.faces = np.fliplr(p_tine_l.faces)
     supp_components.append(p_tine_l)
     
+    # Right tine
     m_pr_2d = trimesh.creation.extrude_polygon(poly_p, height=p_tine_w)
     vr = m_pr_2d.vertices
     p_tine_r = trimesh.Trimesh(vertices=np.column_stack([vr[:, 2] + 11.284, vr[:, 0], vr[:, 1]]), faces=m_pr_2d.faces)
@@ -264,6 +149,7 @@ def build_variant_supports_45deg(cfg):
         p_tine_r.faces = np.fliplr(p_tine_r.faces)
     supp_components.append(p_tine_r)
     
+    # Center tine
     p_center_w = 0.70
     x_c_start = 10.284 - p_center_w / 2.0
     m_pc_2d = trimesh.creation.extrude_polygon(poly_p, height=p_center_w)
@@ -273,12 +159,12 @@ def build_variant_supports_45deg(cfg):
         p_tine_c.faces = np.fliplr(p_tine_c.faces)
     supp_components.append(p_tine_c)
     
-    # Base stabilizing web
+    # Stabilizing web connecting tines from bed pad up to Z = 1.40mm
     poly_p_web = Polygon([
-        (8.50 + dy_p, BED_PAD_H),
-        (12.10 + dy_p, BED_PAD_H),
-        (12.10 + dy_p, 1.40),
-        (8.50 + dy_p, 1.40)
+        (8.50, BED_PAD_H),
+        (y_end - 0.40, BED_PAD_H),
+        (y_end - 0.40, 1.40),
+        (8.50, 1.40)
     ])
     m_pw_2d = trimesh.creation.extrude_polygon(poly_p_web, height=2.00)
     vw = m_pw_2d.vertices
@@ -287,52 +173,112 @@ def build_variant_supports_45deg(cfg):
         p_web.faces = np.fliplr(p_web.faces)
     supp_components.append(p_web)
     
-    # 2. Cam Breakaway Support Strut (0.28mm release gap)
-    cam_c_x = 6.600
-    cam_c_y = -2.333
-    z_cam_fork_base = 16.00 - dz  # 2.891mm
+    # -------------------------------------------------------------------------
+    # 2. EXACT CONFORMAL CAM SUPPORT FORK (2 Tines + Trunk + Web)
+    # -------------------------------------------------------------------------
+    gap_cam = 0.22  # Calibrated 0.22mm vertical release gap
     
-    cam_trunk_h = z_cam_fork_base - BED_PAD_H
-    if cam_trunk_h > 0.2:
-        cam_trunk = trimesh.creation.box([1.40, 1.40, cam_trunk_h])
-        cam_trunk.apply_translation([cam_c_x, cam_c_y, BED_PAD_H + cam_trunk_h / 2.0])
-        supp_components.append(cam_trunk)
+    if is_b4877a9:
+        if test.get('is_tuned', False):
+            c_pts = np.array(B4877A9_TUNED_CAM_PTS)
+        else:
+            c_pts = np.array([
+                (Y_AXLE, Z_AXLE),
+                (Y_AXLE, Z_AXLE + 2.10),
+                (6.80, 12.20),
+                (5.00, 10.00),
+                (1.50, 7.40),
+                (1.80, 5.10),
+                (4.50, 5.30),
+                (Y_AXLE - 1.50, Z_AXLE - 2.50)
+            ])
+        cam_x_min = 5.80
+        cam_x_max = 7.70
+        cam_tine_w = 0.50
+    else:
+        c_pts = np.array(test['cfg']['cam_pts'])
+        cam_x_min = 5.50
+        cam_x_max = 7.60
+        cam_tine_w = 0.55
         
-    pts_cam_tine_yz = [
-        (-3.60, z_cam_fork_base),
-        (-3.60, 20.123 - dz),
-        (-3.20, 19.952 - dz),
-        (-2.40, 19.895 - dz),
-        (-1.60, 20.069 - dz),
-        (-1.00, 20.232 - dz),
-        (-1.00, z_cam_fork_base),
-    ]
-    poly_cam_head_yz = Polygon(pts_cam_tine_yz)
-    cam_tine_w = 0.55
+    cam_w = cam_x_max - cam_x_min
+    cam_x_c = (cam_x_min + cam_x_max) / 2.0
     
-    m_cl = trimesh.creation.extrude_polygon(poly_cam_head_yz, height=cam_tine_w)
-    v_cl = m_cl.vertices.copy()
-    cam_tine_l = trimesh.Trimesh(vertices=np.column_stack([v_cl[:, 2] + 5.65, v_cl[:, 0], v_cl[:, 1]]), faces=m_cl.faces.copy())
+    # Rotate cam polygon to 45 deg
+    c_y45 = c_pts[:, 0] * r2 - c_pts[:, 1] * r2
+    c_z45 = c_pts[:, 0] * r2 + c_pts[:, 1] * r2
+    poly_cam = Polygon(np.column_stack([c_y45, c_z45]))
+    
+    idx_min_z = np.argmin(c_z45)
+    z_min_cam = c_z45[idx_min_z]
+    y_min_z = c_y45[idx_min_z]
+    
+    if is_b4877a9:
+        y_cam_start = -3.70
+        y_cam_end = min(-0.90, y_min_z + 1.50)
+    else:
+        y_cam_start = max(np.min(c_y45) + 0.15, y_min_z - 1.40)
+        y_cam_end = min(-0.80, y_min_z + 1.40)
+        
+    y_cam_eval = np.linspace(y_cam_start, y_cam_end, 25)
+    
+    cam_eval_pts = []
+    for y_v in y_cam_eval:
+        line = LineString([(y_v, -10), (y_v, 30)])
+        inter = poly_cam.intersection(line)
+        if not inter.is_empty:
+            if inter.geom_type == 'LineString':
+                z_bot = min(inter.coords[0][1], inter.coords[1][1])
+            elif inter.geom_type == 'MultiLineString':
+                z_bot = min(min(g.coords[0][1], g.coords[1][1]) for g in inter.geoms)
+            else:
+                z_bot = inter.bounds[1]
+            cam_eval_pts.append((y_v, z_bot - gap_cam))
+            
+    z_fork_base = max(BED_PAD_H + 0.60, z_min_cam - gap_cam - 1.40)
+    pts_cam_tines = [(cam_eval_pts[0][0], z_fork_base)]
+    for pt in cam_eval_pts:
+        pts_cam_tines.append(pt)
+    pts_cam_tines.append((cam_eval_pts[-1][0], z_fork_base))
+    
+    poly_cam_head = Polygon(pts_cam_tines)
+    
+    x_tine_l = cam_x_min + 0.15
+    x_tine_r = cam_x_max - 0.15 - cam_tine_w
+    
+    m_cl = trimesh.creation.extrude_polygon(poly_cam_head, height=cam_tine_w)
+    vl = m_cl.vertices
+    cam_tine_l = trimesh.Trimesh(vertices=np.column_stack([vl[:, 2] + x_tine_l, vl[:, 0], vl[:, 1]]), faces=m_cl.faces)
     if cam_tine_l.volume < 0:
         cam_tine_l.faces = np.fliplr(cam_tine_l.faces)
     supp_components.append(cam_tine_l)
     
-    m_cr = trimesh.creation.extrude_polygon(poly_cam_head_yz, height=cam_tine_w)
-    v_cr = m_cr.vertices.copy()
-    cam_tine_r = trimesh.Trimesh(vertices=np.column_stack([v_cr[:, 2] + 7.00, v_cr[:, 0], v_cr[:, 1]]), faces=m_cr.faces.copy())
+    m_cr = trimesh.creation.extrude_polygon(poly_cam_head, height=cam_tine_w)
+    vr = m_cr.vertices
+    cam_tine_r = trimesh.Trimesh(vertices=np.column_stack([vr[:, 2] + x_tine_r, vr[:, 0], vr[:, 1]]), faces=m_cr.faces)
     if cam_tine_r.volume < 0:
         cam_tine_r.faces = np.fliplr(cam_tine_r.faces)
     supp_components.append(cam_tine_r)
     
-    cam_mid_web = trimesh.creation.box([0.80, 1.40, 0.80])
-    cam_mid_web.apply_translation([cam_c_x, cam_c_y, z_cam_fork_base + 0.40])
-    supp_components.append(cam_mid_web)
+    # Cam trunk: rises from bed pad to z_fork_base
+    trunk_h = z_fork_base - BED_PAD_H
+    trunk_y_w = min(1.60, (y_cam_end - y_cam_start) * 0.75)
+    cam_trunk = trimesh.creation.box([1.40, trunk_y_w, trunk_h])
+    cam_trunk.apply_translation([cam_x_c, y_min_z, BED_PAD_H + trunk_h / 2.0])
+    supp_components.append(cam_trunk)
     
-    # 3. Floating Shaft Barrel Support Strut (0.48mm release gap)
+    # Stabilizing mid-web between tines:
+    mid_web = trimesh.creation.box([cam_w - 0.30, trunk_y_w, 0.70])
+    mid_web.apply_translation([cam_x_c, y_min_z, z_fork_base + 0.35])
+    supp_components.append(mid_web)
+    
+    # -------------------------------------------------------------------------
+    # 3. FLOATING SHAFT BARREL SUPPORT STRUT (2-Tine Fork Under Hub)
+    # -------------------------------------------------------------------------
     shaft_s_x_c = 8.850
     shaft_s_y_c = -2.341
-    z_shaft_stick_top = 25.993 - dz  # 12.884mm
-    z_shaft_fork_base = 21.50 - dz   # 8.391mm
+    z_shaft_stick_top = 12.884   # 0.48mm release gap below hub bottom at Z'=13.364mm
+    z_shaft_fork_base = 8.50
     
     shaft_trunk_h = z_shaft_fork_base - BED_PAD_H
     shaft_trunk = trimesh.creation.box([0.70, 0.85, shaft_trunk_h])
@@ -374,8 +320,8 @@ def build_bed_pad_with_notches(test_suite, pitch_x=LEVER_PITCH_X):
     """
     Builds a monolithic bed pad raft with rounded corners and embossed
     identification notch bars on the front lip for each test:
-      Test 1: I bar    (1372a2d Exact)
-      Test 2: II bars  (1372a2d Scaled for PC-FR)
+      Test 1: I bar    (b4877a9 Exact)
+      Test 2: II bars  (b4877a9 Scaled for PC-FR)
       Test 3: III bars (V1 Ultra-Sensitive)
       Test 4: IIII bars (V3 Balanced Nominal)
       Test 5: IIIII bars (V4 Smooth Progressive)
@@ -418,32 +364,38 @@ def build_bed_pad_with_notches(test_suite, pitch_x=LEVER_PITCH_X):
 # MAIN TEST SUITE & EXPORTS
 # ==============================================================================
 def get_test_suite():
-    """Defines the 5-test suite including commit [1372a2d] exact and scaled."""
+    """Defines the 5-test suite including commit [b4877a9] exact and tuned."""
     suite = [
         {
-            'id': 'v_1372a2d_exact',
+            'id': 'v_b4877a9_exact',
             'bars': 1,
-            'name': 'Test 1: Commit [1372a2d] Exact Geometry (PCTG Baseline)',
-            'short_name': '1372a2d Exact',
-            'is_1372': True,
-            'scale': 1.0,
-            'desc': 'Exact bit-for-bit geometry of commit [1372a2d] (OEM 3-prong fork architecture).'
+            'name': 'Test 1: Commit [b4877a9] Exact Geometry (Baseline)',
+            'short_name': 'b4877a9 Exact',
+            'is_b4877a9': True,
+            'is_tuned': False,
+            'plunger_y': 10.479,
+            'cam_pts': None,
+            'cam_apex': (1.50, 7.40),
+            'desc': 'Exact bit-for-bit geometry of commit [b4877a9] (OEM 3-rib architecture, Apex Z=7.40, Plunger Y=10.48).'
         },
         {
-            'id': 'v_1372a2d_scaled',
+            'id': 'v_b4877a9_tuned',
             'bars': 2,
-            'name': 'Test 2: Commit [1372a2d] Scaled for PC-FR (+0.55% Shrinkage Compensation)',
-            'short_name': '1372a2d Scaled (+0.55%)',
-            'is_1372': True,
-            'scale': SHRINKAGE_SCALE_PCTG_TO_PCFR,
-            'desc': 'Commit [1372a2d] scaled by +0.55% to match physical PCTG dimensions in PC-FR.'
+            'name': 'Test 2: Commit [b4877a9] Tuned Pre-Travel & Elevated Ramp',
+            'short_name': 'b4877a9 Tuned',
+            'is_b4877a9': True,
+            'is_tuned': True,
+            'plunger_y': 11.15,
+            'cam_pts': B4877A9_TUNED_CAM_PTS,
+            'cam_apex': (1.50, 7.75),
+            'desc': 'Commit [b4877a9] with plunger advanced to Y=11.15mm and cam apex elevated to Z=7.75mm for consistent actuation in PC-FR.'
         },
         {
             'id': 'v1_ultra_sens',
             'bars': 3,
             'name': 'Test 3: V1 Ultra-Sensitive (Apex Y=1.65, Plunger Y=11.25)',
             'short_name': 'V1 Ultra-Sens',
-            'is_1372': False,
+            'is_b4877a9': False,
             'cfg': KINEMATIC_VARIANTS['v1_ultra_sens'],
             'desc': 'Maximum non-polar capture: early trip on shallow blade penetration (+0.47mm OT).'
         },
@@ -452,7 +404,7 @@ def get_test_suite():
             'bars': 4,
             'name': 'Test 4: V3 Balanced Nominal (Apex Y=2.10, Plunger Y=10.95)',
             'short_name': 'V3 Nominal',
-            'is_1372': False,
+            'is_b4877a9': False,
             'cfg': KINEMATIC_VARIANTS['v3_nominal'],
             'desc': 'The golden mean: reliable trip on both polar and forward non-polar plugs.'
         },
@@ -461,7 +413,7 @@ def get_test_suite():
             'bars': 5,
             'name': 'Test 5: V4 Smooth Progressive (Apex Y=2.30, Plunger Y=10.80)',
             'short_name': 'V4 Smooth',
-            'is_1372': False,
+            'is_b4877a9': False,
             'cfg': KINEMATIC_VARIANTS['v4_smooth'],
             'desc': 'Crowned rolling lead-in: low insertion force for polar plugs (+0.15mm OT).'
         }
@@ -475,7 +427,8 @@ def build_5pack_plate(export_dir="testing"):
     
     pad_mesh, x_offsets = build_bed_pad_with_notches(test_suite, pitch_x=LEVER_PITCH_X)
     
-    supported_parts = [pad_mesh]
+    supp_list = [pad_mesh]
+    lever_list = []
     clean_parts = []
     
     print(f"Building 5-Test Rapid-Prototype Levers (Pitch: {LEVER_PITCH_X:.1f}mm)...")
@@ -483,35 +436,40 @@ def build_5pack_plate(export_dir="testing"):
         cx = x_offsets[i]
         x_lever_center = 9.25
         
-        if test['is_1372']:
-            m_raw = build_1372a2d_rocker_mesh(axle_len=PROTO_AXLE_LEN, scale_factor=test['scale'])
+        if test['is_b4877a9']:
+            p_y = test['plunger_y']
+            c_pts = test['cam_pts']
+            m_raw = build_b4877a9_rocker_mesh(axle_len=PROTO_AXLE_LEN, plunger_y=p_y, cam_pts=c_pts)
             m_lever = m_raw.apply_transform(R_PIP_45)
-            m_supp = build_1372a2d_supports_45deg(m_lever)
             
             # Also export unshortened 11.50mm axle version for reference
-            m_raw_11_5 = build_1372a2d_rocker_mesh(axle_len=11.50, scale_factor=test['scale'])
+            m_raw_11_5 = build_b4877a9_rocker_mesh(axle_len=11.50, plunger_y=p_y, cam_pts=c_pts)
             path_11_5 = os.path.join(export_dir, f"prototype_lever_{test['id']}_full_axle_11.5mm.stl")
             m_raw_11_5.export(path_11_5)
         else:
             cfg = test['cfg']
             m_lever = build_variant_lever_45deg(cfg, axle_len=PROTO_AXLE_LEN)
-            m_supp = build_variant_supports_45deg(cfg)
+            
+        m_supp = build_variant_supports_45deg(test)
             
         m_lever.apply_translation([-x_lever_center + cx, 0, 0])
         m_supp.apply_translation([-x_lever_center + cx, 0, 0])
         
-        supported_parts.extend([m_supp, m_lever])
+        supp_list.append(m_supp)
+        lever_list.append(m_lever)
         clean_parts.append(m_lever)
         
         # Individual single-lever STL exports
         single_pad, _ = build_bed_pad_with_notches([test], pitch_x=LEVER_PITCH_X)
-        if test['is_1372']:
-            s_raw = build_1372a2d_rocker_mesh(axle_len=PROTO_AXLE_LEN, scale_factor=test['scale'])
+        if test['is_b4877a9']:
+            p_y = test['plunger_y']
+            c_pts = test['cam_pts']
+            s_raw = build_b4877a9_rocker_mesh(axle_len=PROTO_AXLE_LEN, plunger_y=p_y, cam_pts=c_pts)
             s_lever = s_raw.apply_transform(R_PIP_45)
-            s_supp = build_1372a2d_supports_45deg(s_lever)
         else:
             s_lever = build_variant_lever_45deg(test['cfg'], axle_len=PROTO_AXLE_LEN)
-            s_supp = build_variant_supports_45deg(test['cfg'])
+            
+        s_supp = build_variant_supports_45deg(test)
             
         s_lever.apply_translation([-x_lever_center, 0, 0])
         s_supp.apply_translation([-x_lever_center, 0, 0])
@@ -523,7 +481,12 @@ def build_5pack_plate(export_dir="testing"):
         s_lever.export(path_indiv_bare)
         print(f"  [{i+1}/5] {test['name']} -> {path_indiv_supp}")
         
-    plate_supported = trimesh.util.concatenate(supported_parts)
+    try:
+        base_foundation = trimesh.boolean.union(supp_list, engine='manifold')
+    except Exception:
+        base_foundation = trimesh.util.concatenate(supp_list)
+
+    plate_supported = trimesh.util.concatenate([base_foundation] + lever_list)
     plate_clean = trimesh.util.concatenate(clean_parts)
     
     path_supp_stl = os.path.join(export_dir, "prototype_levers_5pack_supported_45deg.stl")
@@ -544,6 +507,43 @@ def build_5pack_plate(export_dir="testing"):
           f"{plate_supported.bounds[1,2]-plate_supported.bounds[0,2]:.1f} mm")
     return plate_supported
 
+def build_combined_assembly_with_5levers(export_dir="testing"):
+    """
+    Builds an all-in-one build plate combining:
+      - The complete production assembly (baseplate, slit inserts, cooling column)
+      - The 5-test prototype lever plate
+    arranged side-by-side on a single print plate.
+    """
+    os.makedirs(export_dir, exist_ok=True)
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    assembly_path = os.path.join(root_dir, 'complete_assembly.stl')
+    if not os.path.exists(assembly_path):
+        print(f"Warning: {assembly_path} not found, skipping combined master plate.")
+        return None
+        
+    m_assem = trimesh.load(assembly_path)
+    proto_path = os.path.join(export_dir, 'prototype_levers_5pack_supported_45deg.stl')
+    m_proto = trimesh.load(proto_path)
+    
+    # Place assembly toward back (Y=+25), 5-pack plate toward front (Y=-25)
+    m_assem_placed = m_assem.copy().apply_translation([0, 25.0, 0])
+    m_proto_placed = m_proto.copy().apply_translation([0, -25.0, 0])
+    
+    combined_plate = trimesh.util.concatenate([m_assem_placed, m_proto_placed])
+    path_comb_stl = os.path.join(export_dir, "complete_assembly_plus_5levers_plate.stl")
+    path_comb_3mf = os.path.join(export_dir, "complete_assembly_plus_5levers_plate.3mf")
+    
+    combined_plate.export(path_comb_stl)
+    combined_plate.export(path_comb_3mf)
+    print(f"\nSuccessfully exported Combined Master Plate (Assembly + 5 Levers):")
+    print(f"  -> Combined Master Plate (STL): {path_comb_stl}")
+    print(f"  -> Combined Master Plate (3MF): {path_comb_3mf}")
+    print(f"  -> Bounding Box (X x Y x Z): "
+          f"{combined_plate.bounds[1,0]-combined_plate.bounds[0,0]:.1f} x "
+          f"{combined_plate.bounds[1,1]-combined_plate.bounds[0,1]:.1f} x "
+          f"{combined_plate.bounds[1,2]-combined_plate.bounds[0,2]:.1f} mm")
+    return combined_plate
+
 def generate_preview_5variants(preview_path=None):
     """Generates the dimensioned comparison blueprint across the 5 test subjects."""
     if preview_path is None:
@@ -563,27 +563,32 @@ def generate_preview_5variants(preview_path=None):
     
     # 1. Overlay of 2D Cam Profiles
     ax1.set_title("1. Cam Profiles & Contact Apex across Test Suite (Y-Z Plane)", color='#f8fafc', fontsize=13, fontweight='bold', pad=12)
-    ax1.plot([9.279], [12.590], 'o', color='#f8fafc', markersize=8, label='Current Axle (Y=9.28, Z=12.59)')
-    ax1.plot([7.666], [12.590], 's', color='#94a3b8', markersize=8, label='1372a2d Axle (Y=7.67, Z=12.59)')
+    ax1.plot([9.279], [12.590], 'o', color='#f8fafc', markersize=8, label='Pivot Axle (Y=9.28, Z=12.59)')
     ax1.axvline(3.10, color='#ef4444', linestyle=':', lw=1.8, label='Non-Polar Blade Rear (Touching Moon)')
     ax1.axvline(3.48, color='#facc15', linestyle='--', lw=1.8, label='Nominal Blade Rear (Pinch Throat Center)')
     
     for i, test in enumerate(test_suite):
-        if test['is_1372']:
-            y_ax = 7.666
+        if test['is_b4877a9']:
+            y_ax = 9.279
             z_ax = 12.590
-            s = test['scale']
-            y_tip = y_ax - 4.20 * s
-            z_tip = z_ax - 5.80 * s
-            pts = np.array([
-                [y_ax + 1.20 * s, z_ax + 1.20 * s],
-                [y_tip, z_tip + 2.20 * s],
-                [y_tip, z_tip],
-                [y_tip + 2.60 * s, z_tip],
-                [y_ax + 0.20 * s, z_ax - 2.20 * s]
-            ])
+            if test.get('is_tuned', False):
+                pts = np.array(B4877A9_TUNED_CAM_PTS)
+                apex_y, apex_z = test['cam_apex']
+            else:
+                pts = np.array([
+                    (y_ax, z_ax),
+                    (y_ax, z_ax + 2.10),
+                    (6.80, 12.20),
+                    (5.00, 10.00),
+                    (1.50, 7.40),
+                    (1.80, 5.10),
+                    (4.50, 5.30),
+                    (y_ax - 1.50, z_ax - 2.50)
+                ])
+                apex_y, apex_z = test['cam_apex']
             ax1.plot(pts[:, 0], pts[:, 1], '-s', color=palette[i], lw=2.2, markersize=4,
-                     label=f"[{test['bars']}] {test['short_name']} (Apex: Y={y_tip:.2f}, Z={z_tip:.2f})")
+                     label=f"[{test['bars']}] {test['short_name']} (Apex: Y={apex_y:.2f}, Z={apex_z:.2f})")
+            ax1.plot([apex_y], [apex_z], '*', color='white', markersize=8)
         else:
             cfg = test['cfg']
             pts = np.array(cfg['cam_pts'])
@@ -605,9 +610,9 @@ def generate_preview_5variants(preview_path=None):
     ax2.axvline(8.57, color='#ef4444', linestyle=':', lw=1.5, label='Through-Hole Front Wall (Y = 8.57mm)')
     
     for i, test in enumerate(test_suite):
-        if test['is_1372']:
-            yp = 11.40 * test['scale']
-            z_reach = -6.50 * test['scale']
+        if test['is_b4877a9']:
+            yp = test['plunger_y']
+            z_reach = -6.50
             pre_t = 12.40 - yp
             ax2.plot([yp, yp], [z_reach, 1.0], color=palette[i], lw=3.0, linestyle='--',
                      label=f"[{test['bars']}] {test['short_name']}: Home Y={yp:.2f}mm (Pre-travel: {pre_t:.2f}mm)")
@@ -632,19 +637,22 @@ def generate_preview_5variants(preview_path=None):
     z_tips = np.linspace(8.0, 6.8, 30)
     
     for i, test in enumerate(test_suite):
-        if test['is_1372']:
-            y_ax = 7.666
+        if test['is_b4877a9']:
+            y_ax = 9.279
             z_ax = 12.590
-            s = test['scale']
-            y_tip = y_ax - 4.20 * s
-            z_tip_pt = z_ax - 5.80 * s
-            pts = np.array([
-                [y_ax + 1.20 * s, z_ax + 1.20 * s],
-                [y_tip, z_tip_pt + 2.20 * s],
-                [y_tip, z_tip_pt],
-                [y_tip + 2.60 * s, z_tip_pt],
-                [y_ax + 0.20 * s, z_ax - 2.20 * s]
-            ])
+            if test.get('is_tuned', False):
+                pts = np.array(B4877A9_TUNED_CAM_PTS)
+            else:
+                pts = np.array([
+                    (y_ax, z_ax),
+                    (y_ax, z_ax + 2.10),
+                    (6.80, 12.20),
+                    (5.00, 10.00),
+                    (1.50, 7.40),
+                    (1.80, 5.10),
+                    (4.50, 5.30),
+                    (y_ax - 1.50, z_ax - 2.50)
+                ])
             thetas = [solve_theta_quick(pts, 3.48, zt, y_ax, z_ax) for zt in z_tips]
             ax3.plot(z_tips, thetas, color=palette[i], lw=2.2, linestyle='--', label=f"[{test['bars']}] {test['short_name']}")
         else:
@@ -662,7 +670,7 @@ def generate_preview_5variants(preview_path=None):
     # 4. Identification & Testing Guide
     ax4.axis('off')
     guide = (
-        "5-TEST PROTOTYPE SPECTRUM: COMMIT [1372a2d] & UPGRADED KINEMATICS\n"
+        "5-TEST PROTOTYPE SPECTRUM: COMMIT [b4877a9] & UPGRADED KINEMATICS\n"
         "===================================================================\n\n"
         "• Print Specifications:\n"
         "  - Orientation: 100% MATCH WITH PIP (+45° tilted around X axis).\n"
@@ -671,17 +679,18 @@ def generate_preview_5variants(preview_path=None):
         f"  - Total Axle Length: {PROTO_AXLE_LEN:.2f} mm (Shortened for drop-in retrofit).\n"
         "  - Plate Dimensions: ~87 x 23 x 17.6 mm (~16 min total print time!).\n\n"
         "• Identification Notches Embossed on Front Lip of Bed Pad:\n"
-        "  [I]     1 BAR  = Test 1: Commit [1372a2d] Exact Geometry\n"
-        "                  OEM 3-prong fork baseline as printed in PCTG.\n\n"
-        "  [II]    2 BARS = Test 2: Commit [1372a2d] Scaled for PC-FR (+0.55%)\n"
-        "                  Shrinkage-compensated: Plunger reaches 0.10mm deeper (Z=-6.60mm)\n"
-        "                  and cam reaches 0.02mm further to match PCTG physical size.\n\n"
+        "  [I]     1 BAR  = Test 1: Commit [b4877a9] Exact Geometry\n"
+        "                  OEM 3-rib baseline (Cam apex Y=1.50, Z=7.40, Plunger Y=10.48mm).\n"
+        "                  Dead pre-travel 1.92mm; required heavy thumb force to actuate in PCTG.\n\n"
+        "  [II]    2 BARS = Test 2: Commit [b4877a9] Tuned Pre-Travel & Elevated Ramp\n"
+        "                  OEM 3-rib architecture with plunger advanced to Y=11.15mm (pre-travel 1.25mm)\n"
+        "                  and cam apex elevated to Z=7.75mm (+0.17mm over-travel at nominal Z=7.2mm).\n\n"
         "  [III]   3 BARS = Test 3: V1 Ultra-Sensitive (Apex Y=1.65, P_Y=11.25)\n"
-        "                  Maximum non-polar capture: early trip on shallow penetration.\n\n"
+        "                  Maximum non-polar capture: early trip on shallow penetration (+0.47mm OT).\n\n"
         "  [IV]    4 BARS = Test 4: V3 Balanced Nominal (Apex Y=2.10, P_Y=10.95)\n"
-        "                  Golden mean: reliable trip on polar & non-polar plugs.\n\n"
+        "                  Golden mean: reliable trip on polar & non-polar plugs (+0.28mm OT).\n\n"
         "  [V]     5 BARS = Test 5: V4 Smooth Progressive (Apex Y=2.30, P_Y=10.80)\n"
-        "                  Crowned rolling lead-in for low polar insertion force."
+        "                  Crowned rolling lead-in for lowest polar insertion force (+0.15mm OT)."
     )
     ax4.text(0.02, 0.98, guide, color='#f8fafc', fontsize=9.2, family='monospace', va='top')
     
@@ -712,6 +721,7 @@ if __name__ == '__main__':
     print("5-TEST RAPID PROTOTYPE LEVER GENERATOR")
     print("=" * 70)
     plate_mesh = build_5pack_plate("testing")
+    combined_master = build_combined_assembly_with_5levers("testing")
     preview_png = os.path.join("testing", "prototype_5levers_preview.png")
     generate_preview_5variants(preview_png)
     print("Done!")
