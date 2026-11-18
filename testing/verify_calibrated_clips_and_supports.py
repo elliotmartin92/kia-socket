@@ -29,17 +29,17 @@ def run_verification():
     
     # 1. Verify Configuration Constants
     print("\n[1] Verifying Clip Constants in build_part.py:")
-    assert bp.CLIP_SHELF_Z_BY_ANGLE[45.0] == 3.97, f"Expected 3.97, got {bp.CLIP_SHELF_Z_BY_ANGLE[45.0]}"
-    assert bp.CLIP_SHELF_Z_BY_ANGLE[135.0] == 3.97, f"Expected 3.97, got {bp.CLIP_SHELF_Z_BY_ANGLE[135.0]}"
-    assert bp.CLIP_SHELF_Z_BY_ANGLE[211.3] == 4.35, f"Expected 4.35, got {bp.CLIP_SHELF_Z_BY_ANGLE[211.3]}"
-    assert bp.CLIP_SHELF_Z_BY_ANGLE[327.5] == 4.35, f"Expected 4.35, got {bp.CLIP_SHELF_Z_BY_ANGLE[327.5]}"
-    print("    -> PASS: Top clips shelf Z = 3.97mm, Bottom clips shelf Z = 4.35mm.")
+    assert bp.CLIP_SHELF_Z_BY_ANGLE[45.0] == 4.72, f"Expected 4.72, got {bp.CLIP_SHELF_Z_BY_ANGLE[45.0]}"
+    assert bp.CLIP_SHELF_Z_BY_ANGLE[135.0] == 4.72, f"Expected 4.72, got {bp.CLIP_SHELF_Z_BY_ANGLE[135.0]}"
+    assert bp.CLIP_SHELF_Z_BY_ANGLE[211.3] == 4.72, f"Expected 4.72, got {bp.CLIP_SHELF_Z_BY_ANGLE[211.3]}"
+    assert bp.CLIP_SHELF_Z_BY_ANGLE[327.5] == 4.72, f"Expected 4.72, got {bp.CLIP_SHELF_Z_BY_ANGLE[327.5]}"
+    print("    -> PASS: All clips restored to Z = 4.72mm baseline shelf elevation.")
     
     assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[45.0] == 1.80
     assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[135.0] == 1.80
     assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[211.3] == 1.80
-    assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[327.5] == 1.85
-    print("    -> PASS: Bottom-right clip (327.5°) hook depth = 1.85mm, other clips = 1.80mm.")
+    assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[327.5] == 1.80
+    print("    -> PASS: All clips radial hook depth = 1.80mm.")
     
     # 2. Verify Bottom Clip Supports
     print("\n[2] Verifying Bottom Clip 45° Supports Geometry:")
@@ -53,8 +53,8 @@ def run_verification():
     # Check top Z of all prongs
     for i, c in enumerate(comps):
         z_top = c.bounds[1, 2]
-        assert abs(z_top - 4.06) < 0.01, f"Prong {i} top Z expected 4.06mm (4.35 - 0.29), got {z_top:.3f}mm"
-    print("    -> PASS: All prongs maintain calibrated 0.29mm release gap under Z=4.35mm shelf.")
+        assert abs(z_top - 4.43) < 0.01, f"Prong {i} top Z expected 4.43mm (4.72 - 0.29), got {z_top:.3f}mm"
+    print("    -> PASS: All prongs maintain calibrated 0.29mm release gap under Z=4.72mm shelf.")
     
     # Check apex support prongs (center prongs)
     prongs_327 = [c for c in comps if (np.degrees(np.arctan2(c.centroid[1], c.centroid[0])) + 360) % 360 > 300]

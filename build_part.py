@@ -59,7 +59,7 @@ CLIP_HOOK_DEPTH_BY_ANGLE = {
     45.0: 1.80,
     135.0: 1.80,
     211.3: 1.80,  # Calibrated 1.80mm for reliable retention
-    327.5: 1.85,  # 1.85mm calibrated reach for positive bottom-right retention
+    327.5: 1.80,  # Calibrated 1.80mm for reliable retention
 }
 CLIP_STEM_OUTER_RECESS_BY_ANGLE = {
     45.0: 0.00,
@@ -67,12 +67,12 @@ CLIP_STEM_OUTER_RECESS_BY_ANGLE = {
     211.3: 0.00,
     327.5: 0.00,
 }
-CLIP_HOOK_HEIGHT = 2.05   # Baseline hook height
+CLIP_HOOK_HEIGHT = 2.05   # Baseline hook height (Z: 4.72 to 6.77mm)
 CLIP_SHELF_Z_BY_ANGLE = {
-    45.0: 3.97,   # Top right: lowered 0.75mm (closes SIM tool gap, eliminates lost motion)
-    135.0: 3.97,  # Top left:  lowered 0.75mm (closes SIM tool gap, eliminates lost motion)
-    211.3: 4.35,  # Bottom left: lowered 0.37mm (closes half-SIM gap, positive seating)
-    327.5: 4.35,  # Bottom right: lowered 0.37mm (closes half-SIM gap, positive seating)
+    45.0: 4.72,   # Restored to proven 4.72mm baseline (preserves exact PCB seating & switch reach)
+    135.0: 4.72,  # Restored to proven 4.72mm baseline
+    211.3: 4.72,  # Restored to proven 4.72mm baseline
+    327.5: 4.72,  # Restored to proven 4.72mm baseline
 }
 CLIP_BLUNT_HEIGHT = 0.53  # 0.53mm prominent vertical squared-off face at outer apex (+51% increase, eliminates knife-edge fragility)
 CLIP_CROWN_EASE = 0.20    # 0.20mm top-down continuous crown arc ease (1.75mm at center -> 1.55mm at lateral corners)
@@ -1173,7 +1173,7 @@ def build_bottom_clip_45deg_supports_mesh(base_poly):
     - 3-prong anti-sag trident support (Left, Center, Right) providing complete coverage under the hook apex.
     - Root penetrates 0.25mm into the stem wall with a neck notch (0.60mm tall in Z at the stem surface)
       ensuring rock-solid print adhesion and a clean, flush snap-off when twisted with needle-nose pliers.
-    - Top chisel tip provides a calibrated 0.23mm vertical release gap below the shelf (Z = 4.35mm),
+    - Top chisel tip provides a calibrated 0.29mm vertical release gap below the shelf (Z = 4.72mm),
       preventing thermal fusion and sagging in PC-FR while enabling effortless, clean detachment.
     - Preserves 100% of the flat horizontal retention shelf once snapped off.
     """
@@ -1191,7 +1191,7 @@ def build_bottom_clip_45deg_supports_mesh(base_poly):
     support_meshes = []
     
     for angle_deg in bottom_clip_angles:
-        stem_h = CLIP_SHELF_Z_BY_ANGLE.get(angle_deg, 4.35)
+        stem_h = CLIP_SHELF_Z_BY_ANGLE.get(angle_deg, 4.72)
         hook_depth = CLIP_HOOK_DEPTH_BY_ANGLE.get(angle_deg, CLIP_HOOK_DEPTH)
         z_shelf_contact = stem_h - clip_release_gap
         z_stem = stem_h - hook_depth
@@ -1382,11 +1382,11 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     """Generates the 45-degree tilted main part with in-place slit shrouds, baked-in breakaway Support Fins,
     and Print-in-Place (PIP) captive safety lever with dedicated breakaway plunger, cantilever & lever shaft support struts:
     - Tilted 45 deg about X: Re-orients layer planes so inter-layer cleavage failure on the half moon is eliminated.
-    - Captive PIP Shaft Rocker: Printed in place inside the enclosed 360° bridged towers with 0.35mm radial and 0.40mm lateral clearances.
-    - Dedicated Breakaway Plunger Strut: Vertical column rising from the bed pad up to 0.20mm below the plunger belly.
-    - Dedicated Breakaway Cantilever Strut: Forked column with 0.70x0.70mm easy-snap floor neck
-      branching into twin tines supporting both outer edges (X in [5.65, 6.15] and [7.05, 7.55])
-      with an open 0.90mm central window and 0.25mm release gap below the lever cam tab.
+    - Captive PIP Shaft Rocker: Printed in place inside the enclosed 360° bridged towers with 0.35mm radial and 0.40mm lateral clearances (Test 4 / V3 Balanced Nominal kinematics).
+    - Dedicated Breakaway Plunger Strut: Vertical column rising from the bed pad with a calibrated 0.28mm release gap below the plunger belly and low-elevation base web (Z <= 2.0mm) for clean, low-force breakaway.
+    - Dedicated Breakaway Cantilever Strut: Forked column with 1.10x1.10mm floor neck
+      branching into twin tines supporting both outer edges (X in [5.65, 6.20] and [7.00, 7.55])
+      with calibrated 0.28mm release gap below the Test 4 / V3 Balanced lever cam tab.
     - Dedicated Breakaway Lever Shaft Strut: Rising near the floor / Bracket 4 area at X_c = 8.13mm
       with an easy-snap 0.65x0.65mm floor neck, widened 0.70x0.85mm trunk (+140% area), branching into a 0.68mm wide
       Y-fork head with twin 0.26mm micro-chisel lands and calibrated 0.48mm release gap below the hub barrel
@@ -1437,19 +1437,36 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     
     # 1c. Dedicated Breakaway Support Cradle under Print-in-Place Plunger Blade (rising from bed pad)
     # Rises from bed pad (Z = 0.60mm) through the floor opening, cradling the entire 45° inclined downward
-    # slope of the plunger arm across Y in [7.50, 12.10]mm with a calibrated 0.20mm release gap.
-    # Forked in X: twin sturdy tines support both lateral edges (X in [8.484, 9.284] and [11.284, 12.084])
-    # with an open 2.00mm central window for effortless, clean twist-off removal.
-    pts_plunger_tine_yz = [
-        (8.50, 0.60),           # bed anchor back
-        (12.10, 0.60),          # bed anchor front
-        (12.10, 15.80),         # front tip top (0.20mm release gap)
-        (11.30, 15.432),        # bottom apex (0.20mm release gap)
-        (10.75, 15.594),        # blend point (0.20mm release gap)
-        (7.50,  18.814),        # top slope end (0.20mm release gap)
-        (7.50,  14.00),         # back drop
-        (8.50,  14.00),         # back transition
-    ]
+    # slope of the plunger arm for Test 4 / V3 Balanced (plunger_y = 10.95mm) with a calibrated 0.28mm release gap
+    # and lower stabilizing web (Z <= 2.0mm) allowing effortless, twist-free manual release in PC-FR.
+    r2 = np.sqrt(2) / 2.0
+    py = 10.95
+    reach = 7.00
+    r_tip = 1.00
+    gap_p = 0.28  # calibrated 0.28mm vertical release gap (upgraded from 0.20mm for clean PC-FR breakaway)
+    dz_shift = -z_min
+    
+    y_knee = (py - r_tip) * r2 - (-reach + r_tip) * r2
+    z_knee = (py - r_tip) * r2 + (-reach + r_tip) * r2
+    
+    alphas = np.linspace(np.pi, np.pi * 0.50, 16)
+    tip_y = py + r_tip * np.cos(alphas)
+    tip_z = -reach + r_tip * (1.0 - np.sin(alphas))
+    tip_y45 = tip_y * r2 - tip_z * r2
+    tip_z45 = tip_y * r2 + tip_z * r2
+    
+    y_start = 8.00
+    y_slope = np.linspace(y_start, y_knee, 10)
+    z_slope = z_knee + (y_knee - y_slope)
+    
+    y_pts = np.concatenate([y_slope, tip_y45[1:]])
+    z_pts = np.concatenate([z_slope, tip_z45[1:]]) + dz_shift - gap_p
+    y_end = y_pts[-1]
+    
+    pts_plunger_tine_yz = [(y_start, 0.60)]
+    for y_v, z_v in zip(y_pts, z_pts):
+        pts_plunger_tine_yz.append((y_v, max(0.80, z_v)))
+    pts_plunger_tine_yz.append((y_end, 0.60))
     poly_plunger_tine_yz = Polygon(pts_plunger_tine_yz)
     
     p_tine_w = 0.80
@@ -1480,12 +1497,13 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
         p_tine_c.faces = np.fliplr(p_tine_c.faces)
     fin_components.append(p_tine_c)
     
-    # Stabilizing central web connecting plunger tines below Z = 12.0mm
+    # Low stabilizing bed web connecting plunger tines near the bed pad (Z <= 2.0mm)
+    # Keeping tines independent above Z = 2.0mm prevents rigid clamping and allows effortless breakaway
     pts_p_web_yz = [
-        (8.50, 0.60),
-        (12.10, 0.60),
-        (12.10, 12.00),
-        (8.50, 12.00)
+        (y_start + 0.50, 0.60),
+        (y_end - 0.50, 0.60),
+        (y_end - 0.50, 2.00),
+        (y_start + 0.50, 2.00)
     ]
     poly_p_web_yz = Polygon(pts_p_web_yz)
     p_web_w = 11.284 - 9.284  # 2.00mm
@@ -1498,31 +1516,41 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     fin_components.append(p_web_mesh)
     
     # 1d. Dedicated Breakaway Support Strut under Print-in-Place Cantilever (Cam Tab)
-    # Rises from baseplate floor up to calibrated 0.20mm release gap below the full sweep of the cam tab.
-    # Cradles downward faces across Y in [-3.50, -1.20]mm with twin lateral tines (X in [5.65, 6.20] and [7.00, 7.55])
+    # Rises from baseplate floor up to calibrated 0.28mm release gap below the full sweep of the Test 4 / V3 Balanced cam tab.
+    # Cradles downward faces across Y in [-3.95, -1.15]mm with twin lateral tines (X in [5.65, 6.20] and [7.00, 7.55])
     # and a reinforced 1.10x1.10mm floor neck to eliminate nozzle deflection.
     cam_c_x = 6.600
-    cam_c_y = -2.333
-    z_floor_cam = 12.190
+    cam_c_y = -2.550
+    z_floor_cam = 12.110
     
     cam_neck = trimesh.creation.box([1.10, 1.10, 2.00])
     cam_neck.apply_translation([cam_c_x, cam_c_y, z_floor_cam + 1.00])
     fin_components.append(cam_neck)
     
-    cam_trunk_h = 16.00 - 14.19
+    cam_trunk_h = 16.00 - (z_floor_cam + 2.00)
     cam_trunk = trimesh.creation.box([1.40, 1.40, cam_trunk_h])
-    cam_trunk.apply_translation([cam_c_x, cam_c_y, 14.19 + cam_trunk_h / 2.0])
+    cam_trunk.apply_translation([cam_c_x, cam_c_y, (z_floor_cam + 2.00) + cam_trunk_h / 2.0])
     fin_components.append(cam_trunk)
     
     z_cam_fork_base = 16.00
     pts_cam_tine_yz = [
-        (-3.60, z_cam_fork_base),
-        (-3.60, 20.123),        # 0.28mm release gap under nose curve (Z'_cam = 20.403)
-        (-3.20, 19.952),        # 0.28mm release gap under lower blend (Z'_cam = 20.232)
-        (-2.40, 19.895),        # 0.28mm release gap under underside saddle (Z'_cam = 20.175)
-        (-1.60, 20.069),        # 0.28mm release gap under mid beam (Z'_cam = 20.349)
-        (-1.00, 20.232),        # 0.28mm release gap under rear transition (Z'_cam = 20.512)
-        (-1.00, z_cam_fork_base),
+        (-3.95, z_cam_fork_base),
+        (-3.95, 19.793),        # calibrated 0.28mm release gap under forward nose
+        (-3.75, 19.611),
+        (-3.55, 19.503),
+        (-3.35, 19.430),
+        (-3.15, 19.406),
+        (-2.95, 19.382),
+        (-2.75, 19.358),
+        (-2.55, 19.334),        # lowest saddle point
+        (-2.35, 19.414),
+        (-2.15, 19.494),
+        (-1.95, 19.574),
+        (-1.75, 19.654),
+        (-1.55, 19.734),
+        (-1.35, 19.814),
+        (-1.15, 19.894),        # rear blend
+        (-1.15, z_cam_fork_base),
     ]
     poly_cam_head_yz = Polygon(pts_cam_tine_yz)
     cam_tine_w = 0.55
