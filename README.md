@@ -290,23 +290,23 @@ The part prints at a 45° angle with all supports built directly into the model 
 
 ---
 
-### Step 4: Install into the Front Bezel
-Mating the sub-housing to the front bezel takes noticeable force because the brass terminal blades fit very tightly into their receiver contacts. Even small misalignments can make them hang up.
+### Step 4: Install into the Front Housing
+Mating the sub-housing to the front housing/faceplate takes noticeable force because the brass terminal blades fit very tightly into their receiver contacts. Even small misalignments can make them hang up.
 
 You have two options:
 
 - **Option A: Direct Push**:
-  - Line up the 4 outer snap clips with the windows in the bezel.
-  - Push the whole plate straight in until all 4 clips snap home.
+  - Line up the 4 outer snap clips with their matching **clip slots** in the front housing wall.
+  - Push the whole plate straight in until all 4 clips snap home into the slots.
   - *Caution*: If the brass blades hit high resistance or are slightly crooked, pushing directly on the plastic plate can flex or snap the clips.
 
 - **Option B: Screwdriver-Assisted Seating (Recommended)**:
   - Small misalignments can prevent this interface from mating properly, so pushing each blade directly into its receiver is good practice.
   - **How to do it**:
-    1. Position the plate against the bezel so both brass blades start into their receiver slots.
+    1. Position the plate against the front housing so both brass blades start into their receiver slots.
     2. Take a flathead screwdriver and place the tip firmly against the solid shoulder/bridge of each brass blade.
     3. Push each blade directly into its receiver until it seats all the way in. This puts the heavy insertion force straight onto the metal blades rather than the printed plastic.
-    4. Once both blades are fully seated, press the plate the rest of the way in until the 4 perimeter clips click flush into their windows.
+    4. Once both blades are fully seated, press the plate the rest of the way in until the 4 perimeter clips click flush into their **clip slots**.
 
 ---
 
