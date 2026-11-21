@@ -249,7 +249,7 @@ A straightforward, practical guide for cleaning up supports, freeing the captive
 ### Tools Needed
 - **Flush cutters / snips**: For trimming support nubs and clearing tight spots.
 - **Needle-nose pliers**: For pulling support struts and gripping the shaft if it needs a little help breaking free.
-- **Medium flathead screwdriver**: For seating the tight brass terminal blades in Step 5.
+- **Medium flathead screwdriver**: For seating the tight brass terminal blades in Step 4.
 
 ---
 
@@ -262,7 +262,7 @@ The part prints at a 45° angle with all supports built directly into the model 
    - Snap off the twin-tine strut under the cam tab.
    - Snap off the small support stick under the center shaft barrel.
    - Snip or snap off the support trees under the two bottom snap clips so the clip shelves are clean.
-   - If you printed the version with built-in backside slit chimneys, snap off the small support saddles underneath them.
+   - Snap off the small support saddles underneath the backside slit chimneys.
    - Clear out any loose support fragments so the lever has full room to travel.
 5. **Free the lever**:
    - Gently wiggle the back lever back and forth like a loose tooth until it breaks free from the tower sockets.
@@ -275,29 +275,22 @@ The part prints at a 45° angle with all supports built directly into the model 
 1. **Left (Neutral) Contact**:
    - Drop the contact into Brackets 1 & 2.
    - Push it down until it sits flat against the floor ribs and catches under the bracket lips.
-   - Make sure the terminal blade pokes straight down through the left floor slit.
+   - Make sure the terminal blade pokes straight down through the left floor slit chimney.
 2. **Right (Hot) Contact**:
    - Drop the contact into Brackets 3 & 4.
    - The cam tab on the lever should sit centered in the gap of the brass throat.
-   - Push the contact down onto its seating ribs, and make sure its terminal blade pokes through the right floor slit.
+   - Push the contact down onto its seating ribs, and make sure its terminal blade pokes through the right floor slit chimney.
 
 ---
 
-### Step 3: Slit Inserts (Modular Version Only)
-*(If you printed the version with built-in chimneys, skip this step.)*
-1. Line up the chamfered corner on each insert with the matching notch on the bottom of the baseplate.
-2. Slide each insert up over the protruding brass blade and press it in until it sits flush against the bottom plate.
-
----
-
-### Step 4: Quick Motion Check
+### Step 3: Quick Motion Check
 1. Push down on the cam ramp with a plug blade or small tool (simulating a plug being inserted).
 2. Make sure the lever swings freely without binding or rubbing hard against Bracket 4 or the tower walls.
 3. Check underneath: the plunger arm should swing through the floor cutout far enough to positively press the PCB tactile button.
 
 ---
 
-### Step 5: Install into the Front Bezel
+### Step 4: Install into the Front Bezel
 Mating the sub-housing to the front bezel takes noticeable force because the brass terminal blades fit very tightly into their receiver contacts. Even small misalignments can make them hang up.
 
 You have two options:
