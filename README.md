@@ -254,20 +254,20 @@ A straightforward, practical guide for cleaning up supports, freeing the captive
 ---
 
 ### Step 1: Remove Supports & Free the PIP Lever
-The part prints at a 45° angle with all supports built directly into the model (slicer supports should be turned off):
-1. **Peel the bed pad and back fins**: Pull the print off the bed and peel off the bottom pad. The support fins running up the angled back of the plate should peel away along with it.
-2. **Clear the clip supports**: The two bottom snap clips have small support trees under their overhang shelves. Snip or snap those off so the clip edges are clean.
-3. **Remove all lever support struts first**: 
-   - Before trying to move the lever, clear out all the support material around it.
-   - Snap off the strut under the plunger arm (reaching up through the floor hole).
+The part prints at a 45° angle with all supports built directly into the model (slicer supports should be turned off). Follow this exact removal order to avoid putting unwanted stress on the captive lever:
+1. **Break the back fins**: Break the vertical support fins running along the angled backside of the plate away from the part body.
+2. **Break the strut holding the lever**: Reach in and snap the support strut that holds the plunger arm (reaching up from the bottom pad through the floor hole).
+3. **Peel off the bottom plate**: With the back fins and the lever strut disconnected, the bottom bed plate can now be peeled away cleanly in one piece without tugging on the lever.
+4. **Remove the rest of the supports**:
    - Snap off the twin-tine strut under the cam tab.
-   - Snap off the support stick under the center shaft barrel.
-   - Clear away any loose support bits so the lever has full room to swing.
-4. **Free the lever**:
+   - Snap off the small support stick under the center shaft barrel.
+   - Snip or snap off the support trees under the two bottom snap clips so the clip shelves are clean.
+   - If you printed the version with built-in backside slit chimneys, snap off the small support saddles underneath them.
+   - Clear out any loose support fragments so the lever has full room to travel.
+5. **Free the lever**:
    - Gently wiggle the back lever back and forth like a loose tooth until it breaks free from the tower sockets.
    - If it feels very stuck, take a pair of needle-nose pliers, grip the center shaft barrel directly, and wiggle that to pop it loose.
    - Once it breaks free, swing it back and forth a few times. It should pivot smoothly with a little bit of side-to-side play.
-5. **Backside insert supports**: If you printed the version with built-in backside slit chimneys, snap off the small support saddles underneath them.
 
 ---
 
