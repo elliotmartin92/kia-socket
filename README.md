@@ -246,6 +246,8 @@ py -3 testing/verify_shaft_supports_production.py
 
 A straightforward, practical guide for cleaning up supports, freeing the captive print-in-place (PIP) safety lever, and assembling the outlet housing.
 
+![Final Sub-Housing Assembly](testing/final_assembly_diagram.png)
+
 ### Tools Needed
 - **Flush cutters / snips**: For trimming support nubs and clearing tight spots.
 - **Needle-nose pliers**: For pulling support struts and gripping the shaft if it needs a little help breaking free.
@@ -255,6 +257,8 @@ A straightforward, practical guide for cleaning up supports, freeing the captive
 
 ### Step 1: Remove Supports & Free the PIP Lever
 The part prints at a 45° angle with all supports built directly into the model (slicer supports should be turned off). Follow this exact removal order to avoid putting unwanted stress on the captive lever:
+
+![Support Removal Sequence](testing/support_removal_guide.png)
 1. **Break the back fins**: Break the vertical support fins running along the angled backside of the plate away from the part body.
 2. **Break the strut holding the lever**: Reach in and snap the support strut that holds the plunger arm (reaching up from the bottom pad through the floor hole).
 3. **Peel off the bottom plate**: With the back fins and the lever strut disconnected, the bottom bed plate can now be peeled away cleanly in one piece without tugging on the lever.
