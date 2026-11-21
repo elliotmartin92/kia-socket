@@ -242,7 +242,71 @@ py -3 testing/verify_shaft_supports_production.py
 
 ---
 
-## 4. Key Scripts & Code Architecture
+## 4. Post-Processing, Support Cleaning & Assembly Guide
+
+Comprehensive step-by-step instructions for preparing, assembling, and installing the 3D-printed sub-housing and Print-in-Place (PIP) safety interlock rocker.
+
+### Recommended Tools
+- **Small Flush Cutters / Sprue Cutters**: For trimming any minute breakaway support burrs.
+- **Needle-Nose Pliers or Tweezers**: For grabbing breakaway support struts and fin tines.
+- **Medium Flathead Screwdriver (Rigid Metal)**: Used in **Step 5 Option B** to push the stiff brass terminal blades directly into their receivers without straining the plastic clips.
+
+---
+
+### Step 1: Support Cleaning & Freeing the Print-in-Place (PIP) Lever
+With the 45° tilted Print-in-Place (PIP) architecture, all production models feature integrated breakaway supports (slicer supports disabled):
+1. **Remove Bed Pad & Backplate Fins**: Detach the print from the build plate and peel off the monolithic $0.60\text{ mm}$ bed adhesion pad. The 5 vertical backplate support fins ($0.26\text{ mm}$ release gap) detach cleanly along their serrated breakaway tines.
+2. **Clear Perimeter Snap Clip Supports**: Locate the bottom two clips at $211.3^\circ$ and $327.5^\circ$. Snap off the 3-prong anti-sag trident supports beneath the undercut retention shelves ($0.29\text{ mm}$ release gap) so the hook shelf sits flat at $Z = 4.72\text{ mm}$.
+3. **Free the Captive PIP Safety Rocker**:
+   - The rocker is printed captive inside the enclosed $360^\circ$ teardrop journals of the bridged towers.
+   - **Plunger Strut**: Grip the vertical column supporting the plunger blade through the floor through-hole, twist slightly to break the low-elevation base web ($Z \le 2.00\text{ mm}$), and remove it.
+   - **Cantilever (Cam Tab) Strut**: Snap off the twin-tine support strut positioned beneath the bulked cam tab ($X_c = 6.25\text{ mm}$, $0.28\text{ mm}$ release gap).
+   - **Hub Barrel Strut**: Snap the narrow $0.65 \times 0.65\text{ mm}$ floor neck of the hub barrel support column ($X_c = 8.85\text{ mm}$, $0.48\text{ mm}$ release gap) to free the floating $\varnothing 4.20\text{ mm}$ barrel.
+   - **Pivot Break-In**: Gently wiggle the safety rocker back and forth around its axle. A faint click indicates that any minor layer micro-bonding on the $\varnothing 2.80\text{ mm}$ pivot pins has released, establishing smooth, low-friction rotation with $0.70\text{ mm}$ total axial float.
+4. **Slit Insert Backside Saddles**: If using the integrated slit chimneys, peel away the contoured support saddles under the $32.5^\circ$ rear overhanging walls ($0.23\text{ mm}$ release gap).
+
+---
+
+### Step 2: Seat OEM Brass Conductive Contacts
+1. **Neutral Contact (Left / Wide Blade)**: Slide down into **Brackets 1 & 2** until firmly seated against the $1.15\text{ mm}$ floor seating ribs and latched under the bracket lips. Stamped spade blade plunges through the left floor slit into $-Z$.
+2. **Hot Contact (Right / Narrow Blade)**: Slide down into **Brackets 3 & 4**. The canonical bulked cam tab ($X \in [5.35, 7.15]\text{ mm}$) rests dead center within the brass throat gap ($X_c = 6.250\text{ mm}$) with $+0.35\text{ mm}$ air gap to the seated brass throat flare. Stamped terminal blade plunges through the right floor slit into $-Z$.
+
+---
+
+### Step 3: Press-Fit Backside Slit Inserts (If Utilizing Separate Modular Inserts)
+*(Skip if printed with monolithic integrated slit chimneys)*
+1. Match the $45^\circ$ chamfered polarization key on each insert to the corresponding floor detent socket.
+2. Slide each insert upward over the protruding brass terminal blades and press firmly until the flanges seat completely flush against the $Z = 0.00\text{ mm}$ outer floor surface.
+
+---
+
+### Step 4: Kinematic & Interlock Motion Check
+1. Verify effortless, bind-free pivoting of the shaft rocker inside the bridged towers.
+2. Depress the bulked cam ramp (simulating plug blade insertion to $Z_{\text{tip}} \approx 7.00\text{ mm}$). Verify that the extended plunger blade swings smoothly through the floor through-hole, reaching $Z \le -7.00\text{ mm}$ to fully depress the PCB momentary tactile switch with zero floor interference.
+
+---
+
+### Step 5: Final Enclosure / Front Bezel Mating
+When pressing the assembled sub-housing into the front outlet bezel, there is **significant mechanical resistance** as the stiff OEM brass terminal blades enter their female mating receivers. Two assembly approaches are available:
+
+- **Option A: Direct Faceplate Push**:
+  - Align the 4 perimeter snap clips ($45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$) with the outer bezel mating windows.
+  - Apply strong, even hand pressure directly over the sub-housing body to drive the assembly into the front housing until all 4 clips latch into their windows.
+  - *Caution*: If the brass blades encounter high friction or are slightly misaligned, excessive pushing directly on the plastic plate can stress or buckle the snap clips.
+
+- **Option B: Assisted Terminal Blade Seating (Recommended / Good Practice)**:
+  - Because even minor angular or lateral misalignment between the stamped brass blades and receiver terminals can impede proper seating, pre-driving the blades directly is strongly recommended.
+  - **Procedure**:
+    1. Position the sub-housing against the front bezel so both brass blades enter their receiver slots.
+    2. Take a **rigid metal tool, such as a medium flathead screwdriver**.
+    3. Place the screwdriver tip against the solid shoulder/bridge of each brass terminal blade.
+    4. Firmly push each brass blade directly into its receiver until fully bottomed.
+    5. Once both blades are fully seated, apply gentle thumb pressure to the printed baseplate so the 4 perimeter clips snap cleanly and flush into their respective retention windows.
+  - This isolates the insertion force entirely onto the rugged brass stampings, eliminating stress, bending, or risk of breakage on the 3D-printed snap clips.
+
+---
+
+## 5. Key Scripts & Code Architecture
 
 - **`build_part.py`**:
   - `get_exact_base_polygon()`: Parses SVG path, aligns bottom notch, and creates through-holes.
@@ -262,14 +326,14 @@ py -3 testing/verify_shaft_supports_production.py
 
 ---
 
-## 5. Development & Testing Guidelines
+## 6. Development & Testing Guidelines
 
 - **Testing Files Location**: All new test scripts, verification scripts, geometric inspection scripts, and one-off diagnostic visualization scripts/renders **must be created inside the `testing/` directory**.
 - **Root Directory Cleanliness**: The project root directory is strictly reserved for core build pipeline generators (`build_part.py`, `build_shaft.py`, `generate_labeled_preview.py`), source geometry inputs (`part.svg`), final CAD exports (`.stl`, `.obj`, `.scad`), final documentation previews (`part_preview.png`, `labeled_part_preview.png`), and documentation (`README.md`).
 
 ---
 
-## 6. Print Iteration History & Notes
+## 7. Print Iteration History & Notes
 
 ### Version 6 (v6)
 - **Tower Clip Snapping Fix**:
@@ -469,7 +533,7 @@ py -3 testing/verify_shaft_supports_production.py
 
 ---
 
-## 7. Future Optimization & Tweak Candidates
+## 8. Future Optimization & Tweak Candidates
 
 ### 7.1. Center Curved Feature Active Guide Funnel
 - **Current Geometry**: The $10.50\text{ mm}$ tall Center Curved Feature (Option 1A, Apex at $Y = -2.45\text{ mm}$) has a **$+2.16\text{ mm}$ clear air gap** from the inserted hot plug blade ($Y \in [-0.29, +6.07]\text{ mm}$), acting as a low-friction dielectric barrier and fail-safe backstop at $>7.5^\circ$ tilt without causing insertion drag or 3-point kinematic binding.
@@ -486,7 +550,7 @@ py -3 testing/verify_shaft_supports_production.py
 
 ---
 
-## 8. Data Sources & OEM Teardown References
+## 9. Data Sources & OEM Teardown References
 
 The reverse-engineering, geometric reconstruction, and reinforcement redesign in this repository are based on physical teardowns and community diagnostic data from the Kia EV6 in-cabin 120V AC (V2L) power outlet assembly:
 
