@@ -244,65 +244,76 @@ py -3 testing/verify_shaft_supports_production.py
 
 ## 4. Post-Processing, Support Cleaning & Assembly Guide
 
-Comprehensive step-by-step instructions for preparing, assembling, and installing the 3D-printed sub-housing and Print-in-Place (PIP) safety interlock rocker.
+A straightforward, practical guide for cleaning up supports, freeing the captive print-in-place (PIP) safety lever, and assembling the outlet housing.
 
-### Recommended Tools
-- **Small Flush Cutters / Sprue Cutters**: For trimming any minute breakaway support burrs.
-- **Needle-Nose Pliers or Tweezers**: For grabbing breakaway support struts and fin tines.
-- **Medium Flathead Screwdriver (Rigid Metal)**: Used in **Step 5 Option B** to push the stiff brass terminal blades directly into their receivers without straining the plastic clips.
-
----
-
-### Step 1: Support Cleaning & Freeing the Print-in-Place (PIP) Lever
-With the 45° tilted Print-in-Place (PIP) architecture, all production models feature integrated breakaway supports (slicer supports disabled):
-1. **Remove Bed Pad & Backplate Fins**: Detach the print from the build plate and peel off the monolithic $0.60\text{ mm}$ bed adhesion pad. The 5 vertical backplate support fins ($0.26\text{ mm}$ release gap) detach cleanly along their serrated breakaway tines.
-2. **Clear Perimeter Snap Clip Supports**: Locate the bottom two clips at $211.3^\circ$ and $327.5^\circ$. Snap off the 3-prong anti-sag trident supports beneath the undercut retention shelves ($0.29\text{ mm}$ release gap) so the hook shelf sits flat at $Z = 4.72\text{ mm}$.
-3. **Free the Captive PIP Safety Rocker**:
-   - The rocker is printed captive inside the enclosed $360^\circ$ teardrop journals of the bridged towers.
-   - **Plunger Strut**: Grip the vertical column supporting the plunger blade through the floor through-hole, twist slightly to break the low-elevation base web ($Z \le 2.00\text{ mm}$), and remove it.
-   - **Cantilever (Cam Tab) Strut**: Snap off the twin-tine support strut positioned beneath the bulked cam tab ($X_c = 6.25\text{ mm}$, $0.28\text{ mm}$ release gap).
-   - **Hub Barrel Strut**: Snap the narrow $0.65 \times 0.65\text{ mm}$ floor neck of the hub barrel support column ($X_c = 8.85\text{ mm}$, $0.48\text{ mm}$ release gap) to free the floating $\varnothing 4.20\text{ mm}$ barrel.
-   - **Pivot Break-In**: Gently wiggle the safety rocker back and forth around its axle. A faint click indicates that any minor layer micro-bonding on the $\varnothing 2.80\text{ mm}$ pivot pins has released, establishing smooth, low-friction rotation with $0.70\text{ mm}$ total axial float.
-4. **Slit Insert Backside Saddles**: If using the integrated slit chimneys, peel away the contoured support saddles under the $32.5^\circ$ rear overhanging walls ($0.23\text{ mm}$ release gap).
+### Tools Needed
+- **Flush cutters / snips**: For trimming support nubs and clearing tight spots.
+- **Needle-nose pliers**: For pulling support struts and gripping the shaft if it needs a little help breaking free.
+- **Medium flathead screwdriver**: For seating the tight brass terminal blades in Step 5.
 
 ---
 
-### Step 2: Seat OEM Brass Conductive Contacts
-1. **Neutral Contact (Left / Wide Blade)**: Slide down into **Brackets 1 & 2** until firmly seated against the $1.15\text{ mm}$ floor seating ribs and latched under the bracket lips. Stamped spade blade plunges through the left floor slit into $-Z$.
-2. **Hot Contact (Right / Narrow Blade)**: Slide down into **Brackets 3 & 4**. The canonical bulked cam tab ($X \in [5.35, 7.15]\text{ mm}$) rests dead center within the brass throat gap ($X_c = 6.250\text{ mm}$) with $+0.35\text{ mm}$ air gap to the seated brass throat flare. Stamped terminal blade plunges through the right floor slit into $-Z$.
+### Step 1: Remove Supports & Free the PIP Lever
+The part prints at a 45° angle with all supports built directly into the model (slicer supports should be turned off):
+1. **Peel the bed pad and back fins**: Pull the print off the bed and peel off the bottom pad. The support fins running up the angled back of the plate should peel away along with it.
+2. **Clear the clip supports**: The two bottom snap clips have small support trees under their overhang shelves. Snip or snap those off so the clip edges are clean.
+3. **Remove all lever support struts first**: 
+   - Before trying to move the lever, clear out all the support material around it.
+   - Snap off the strut under the plunger arm (reaching up through the floor hole).
+   - Snap off the twin-tine strut under the cam tab.
+   - Snap off the support stick under the center shaft barrel.
+   - Clear away any loose support bits so the lever has full room to swing.
+4. **Free the lever**:
+   - Gently wiggle the back lever back and forth like a loose tooth until it breaks free from the tower sockets.
+   - If it feels very stuck, take a pair of needle-nose pliers, grip the center shaft barrel directly, and wiggle that to pop it loose.
+   - Once it breaks free, swing it back and forth a few times. It should pivot smoothly with a little bit of side-to-side play.
+5. **Backside insert supports**: If you printed the version with built-in backside slit chimneys, snap off the small support saddles underneath them.
 
 ---
 
-### Step 3: Press-Fit Backside Slit Inserts (If Utilizing Separate Modular Inserts)
-*(Skip if printed with monolithic integrated slit chimneys)*
-1. Match the $45^\circ$ chamfered polarization key on each insert to the corresponding floor detent socket.
-2. Slide each insert upward over the protruding brass terminal blades and press firmly until the flanges seat completely flush against the $Z = 0.00\text{ mm}$ outer floor surface.
+### Step 2: Seat the Brass Contacts
+1. **Left (Neutral) Contact**:
+   - Drop the contact into Brackets 1 & 2.
+   - Push it down until it sits flat against the floor ribs and catches under the bracket lips.
+   - Make sure the terminal blade pokes straight down through the left floor slit.
+2. **Right (Hot) Contact**:
+   - Drop the contact into Brackets 3 & 4.
+   - The cam tab on the lever should sit centered in the gap of the brass throat.
+   - Push the contact down onto its seating ribs, and make sure its terminal blade pokes through the right floor slit.
 
 ---
 
-### Step 4: Kinematic & Interlock Motion Check
-1. Verify effortless, bind-free pivoting of the shaft rocker inside the bridged towers.
-2. Depress the bulked cam ramp (simulating plug blade insertion to $Z_{\text{tip}} \approx 7.00\text{ mm}$). Verify that the extended plunger blade swings smoothly through the floor through-hole, reaching $Z \le -7.00\text{ mm}$ to fully depress the PCB momentary tactile switch with zero floor interference.
+### Step 3: Slit Inserts (Modular Version Only)
+*(If you printed the version with built-in chimneys, skip this step.)*
+1. Line up the chamfered corner on each insert with the matching notch on the bottom of the baseplate.
+2. Slide each insert up over the protruding brass blade and press it in until it sits flush against the bottom plate.
 
 ---
 
-### Step 5: Final Enclosure / Front Bezel Mating
-When pressing the assembled sub-housing into the front outlet bezel, there is **significant mechanical resistance** as the stiff OEM brass terminal blades enter their female mating receivers. Two assembly approaches are available:
+### Step 4: Quick Motion Check
+1. Push down on the cam ramp with a plug blade or small tool (simulating a plug being inserted).
+2. Make sure the lever swings freely without binding or rubbing hard against Bracket 4 or the tower walls.
+3. Check underneath: the plunger arm should swing through the floor cutout far enough to positively press the PCB tactile button.
 
-- **Option A: Direct Faceplate Push**:
-  - Align the 4 perimeter snap clips ($45^\circ, 135^\circ, 211.3^\circ, 327.5^\circ$) with the outer bezel mating windows.
-  - Apply strong, even hand pressure directly over the sub-housing body to drive the assembly into the front housing until all 4 clips latch into their windows.
-  - *Caution*: If the brass blades encounter high friction or are slightly misaligned, excessive pushing directly on the plastic plate can stress or buckle the snap clips.
+---
 
-- **Option B: Assisted Terminal Blade Seating (Recommended / Good Practice)**:
-  - Because even minor angular or lateral misalignment between the stamped brass blades and receiver terminals can impede proper seating, pre-driving the blades directly is strongly recommended.
-  - **Procedure**:
-    1. Position the sub-housing against the front bezel so both brass blades enter their receiver slots.
-    2. Take a **rigid metal tool, such as a medium flathead screwdriver**.
-    3. Place the screwdriver tip against the solid shoulder/bridge of each brass terminal blade.
-    4. Firmly push each brass blade directly into its receiver until fully bottomed.
-    5. Once both blades are fully seated, apply gentle thumb pressure to the printed baseplate so the 4 perimeter clips snap cleanly and flush into their respective retention windows.
-  - This isolates the insertion force entirely onto the rugged brass stampings, eliminating stress, bending, or risk of breakage on the 3D-printed snap clips.
+### Step 5: Install into the Front Bezel
+Mating the sub-housing to the front bezel takes noticeable force because the brass terminal blades fit very tightly into their receiver contacts. Even small misalignments can make them hang up.
+
+You have two options:
+
+- **Option A: Direct Push**:
+  - Line up the 4 outer snap clips with the windows in the bezel.
+  - Push the whole plate straight in until all 4 clips snap home.
+  - *Caution*: If the brass blades hit high resistance or are slightly crooked, pushing directly on the plastic plate can flex or snap the clips.
+
+- **Option B: Screwdriver-Assisted Seating (Recommended)**:
+  - Small misalignments can prevent this interface from mating properly, so pushing each blade directly into its receiver is good practice.
+  - **How to do it**:
+    1. Position the plate against the bezel so both brass blades start into their receiver slots.
+    2. Take a flathead screwdriver and place the tip firmly against the solid shoulder/bridge of each brass blade.
+    3. Push each blade directly into its receiver until it seats all the way in. This puts the heavy insertion force straight onto the metal blades rather than the printed plastic.
+    4. Once both blades are fully seated, press the plate the rest of the way in until the 4 perimeter clips click flush into their windows.
 
 ---
 
