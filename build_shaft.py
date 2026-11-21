@@ -35,11 +35,11 @@ Y_AXLE = 9.279
 Z_AXLE = 12.590
 
 # Tower X bounds (1.50mm reinforced towers)
-X_LEFT_TOWER_OUTER = 3.900
-X_LEFT_TOWER_INNER = 5.400
+X_LEFT_TOWER_OUTER = 3.450
+X_LEFT_TOWER_INNER = 4.950
 X_RIGHT_TOWER_INNER = 13.100
 X_RIGHT_TOWER_OUTER = 14.600
-X_TOWER_CENTER = (X_LEFT_TOWER_INNER + X_RIGHT_TOWER_INNER) / 2.0  # 9.25 mm
+X_TOWER_CENTER = (X_LEFT_TOWER_INNER + X_RIGHT_TOWER_INNER) / 2.0  # 9.025 mm
 
 # Through-Hole bounds: X in [7.608, 12.960], Y in [8.570, 13.750], Z in [0.00, 1.00]
 HOLE_X_CENTER = 10.284
@@ -50,20 +50,20 @@ HOLE_Y_CENTER = (HOLE_Y_BOT + HOLE_Y_TOP) / 2.0  # 11.160 mm
 HOLE_Y_LEN = HOLE_Y_TOP - HOLE_Y_BOT              # 5.180 mm
 
 # Enlarged Heavy-Duty Dimensions
-TOTAL_AXLE_LEN = 11.50       # 11.50mm total length tip-to-tip
-HUB_WIDTH = 7.25             # 7.25mm structural hub (0.225mm clearance per side in 7.70mm tower gap; 0.45mm axial play)
-PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.125 mm per side
+TOTAL_AXLE_LEN = 11.95       # 11.95mm total length tip-to-tip
+HUB_WIDTH = 7.45             # 7.45mm structural hub (0.350mm clearance per side in 8.15mm tower gap; 0.70mm axial play for effortless PIP release)
+PIN_LEN = (TOTAL_AXLE_LEN - HUB_WIDTH) / 2.0  # 2.250 mm per side
 PIN_DIAMETER = 2.80          # Ø2.80mm heavy-duty pin (fits Ø3.50mm teardrop cradle, smooth 0.35mm radial clearance)
 HUB_DIAMETER = 4.20          # Ø4.20mm central structural hub barrel
 PLUNGER_REACH_BELOW_Z = 7.00 # Reaches Z = -7.00mm below baseplate floor (+0.50mm longer reach to tactile switch)
 
 # Cam & Ribs (Calibrated for full-width blade capture & softened high-strength hub connection)
-CAM_WIDTH_X = 2.10           # 2.10mm wide primary input cam tab (+0.40mm clearance to Bracket 4 X=8.00mm)
-CAM_X_START = 5.50           # Primary cam spans X in [5.50, 7.60]mm (+0.10mm clearance to Left Tower X=5.40mm)
-CAM_X_CENTER = 6.55          # Aligned with hot plug prong engagement zone
+CAM_WIDTH_X = 1.80           # 1.80mm wide primary input cam tab (+0.85mm clearance to Bracket 4 X=8.00mm)
+CAM_X_START = 5.35           # Primary cam spans X in [5.35, 7.15]mm (+0.40mm clearance to Left Tower X=4.95mm for easy PIP detachment)
+CAM_X_CENTER = 6.250         # Dead center in brass throat (X = 6.250mm) and under hot plug blade!
 RIB_FLANK_THICK = 1.00       # 1.00mm flank rib thickness
 PLUNGER_WIDTH_X = 3.60       # 3.60mm wide central plunger blade (+0.48mm clearance to Bracket 4)
-PLUNGER_Y_CENTER = 10.95     # Calibrated plunger home in Y for Test 4 / V3 Balanced (1.45mm pre-travel to 12.40mm switch; theta_trip = 4.25 deg)
+PLUNGER_Y_CENTER = 10.95     # Restored to 10.95mm to guarantee clean clearance during Z-axis assembly into 3.5mm rear housing aperture
 
 # Kinematic Variant Profiles (5-Variant Spectrum for Prototyping & Production PIP Selection)
 KINEMATIC_VARIANTS = {
@@ -114,18 +114,18 @@ KINEMATIC_VARIANTS = {
     'v3_nominal': {
         'id': 3,
         'notches': 3,
-        'name': 'Variant 3: Balanced Nominal (Apex Y=2.10, Plunger Y=10.95)',
+        'name': 'Variant 3: Balanced Nominal (Apex Y=2.45, Plunger Y=10.95)',
         'plunger_y': 10.95,
-        'cam_apex': (2.10, 7.60),
+        'cam_apex': (2.45, 7.55),
         'cam_pts': [
             (Y_AXLE, Z_AXLE + HUB_DIAMETER/2.0),
             (7.20, 13.00),
             (4.80, 11.00),
             (3.30, 9.30),
-            (2.25, 8.10),
-            (2.10, 7.60),  # Balanced design point
-            (2.25, 7.10),
-            (2.80, 6.40),
+            (2.95, 8.10),  # Eased upper nose (+0.37mm extra clearance to brass throat flare)
+            (2.45, 7.55),  # Calibrated nose (+0.35mm air gap to seated brass throat flare)
+            (2.58, 7.05),
+            (3.00, 6.40),
             (4.20, 5.80),
             (5.80, 5.80),
             (7.20, 7.80),
@@ -385,8 +385,8 @@ def build_shaft_support_cradle_mesh(release_gap=0.12, bed_thickness=0.35):
        - 45° chamfered outer corners and 0.80mm rear prying lip for effortless release.
     """
     # 1. Build the frame polygon in 2D
-    outer_box = box(-6.40, -2.60, 6.40, 3.80)
-    inner_window = box(-3.85, -0.80, 3.85, 2.80)
+    outer_box = box(-6.60, -2.60, 6.60, 3.80)
+    inner_window = box(-3.95, -0.80, 3.95, 2.80)
     
     # Add a small rear prying tab: X in [-2.0, 2.0], Y in [-3.30, -2.60]
     pry_tab = box(-2.00, -3.30, 2.00, -2.60)
@@ -394,22 +394,22 @@ def build_shaft_support_cradle_mesh(release_gap=0.12, bed_thickness=0.35):
     
     frame_mesh = trimesh.creation.extrude_polygon(frame_poly, height=bed_thickness)
     
-    # 2. Saddles under pins
+    # 2. Saddles under pins (Pin extends ±3.725 to ±5.975mm, center ±4.85mm)
     z_saddle_top = 0.70 - release_gap
     h_saddle = z_saddle_top - bed_thickness
     
     saddle_l = trimesh.creation.box([1.70, 0.90, h_saddle])
-    saddle_l.apply_translation([-4.75, 1.05, bed_thickness + h_saddle / 2.0])
+    saddle_l.apply_translation([-4.85, 1.05, bed_thickness + h_saddle / 2.0])
     
     saddle_r = trimesh.creation.box([1.70, 0.90, h_saddle])
-    saddle_r.apply_translation([4.75, 1.05, bed_thickness + h_saddle / 2.0])
+    saddle_r.apply_translation([4.85, 1.05, bed_thickness + h_saddle / 2.0])
     
-    # 3. Micro-breakaway anchor tabs (spanning 0.40mm gap between hub shoulder at ±3.45mm and frame window at ±3.85mm)
-    tab_l = trimesh.creation.box([0.50, 0.50, 0.20])
-    tab_l.apply_translation([-3.65, 1.05, 0.10])
+    # 3. Micro-breakaway anchor tabs (spanning gap between hub shoulder at ±3.725mm and frame window at ±3.95mm)
+    tab_l = trimesh.creation.box([0.45, 0.50, 0.20])
+    tab_l.apply_translation([-3.80, 1.05, 0.10])
     
-    tab_r = trimesh.creation.box([0.50, 0.50, 0.20])
-    tab_r.apply_translation([3.65, 1.05, 0.10])
+    tab_r = trimesh.creation.box([0.45, 0.50, 0.20])
+    tab_r.apply_translation([3.80, 1.05, 0.10])
     
     try:
         cradle_mesh = trimesh.boolean.union([frame_mesh, saddle_l, saddle_r, tab_l, tab_r], engine='manifold')
@@ -467,7 +467,7 @@ module oem_shaft_rocker() {{
             cylinder(r = hub_d/2, h = hub_w, center = true);
             
     // Primary Belly Cam Tab with Filleted Root
-    translate([5.50, 0, 0])
+    translate([{CAM_X_START}, 0, 0])
         rotate([0, -90, 0])
             rotate([0, 0, 90])
                 linear_extrude(height = cam_w)

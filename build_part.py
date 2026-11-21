@@ -58,8 +58,8 @@ CLIP_HOOK_DEPTH = 1.80    # 1.80mm baseline radial overhang
 CLIP_HOOK_DEPTH_BY_ANGLE = {
     45.0: 1.80,
     135.0: 1.80,
-    211.3: 1.80,  # Calibrated 1.80mm for reliable retention
-    327.5: 1.80,  # Calibrated 1.80mm for reliable retention
+    211.3: 2.35,  # +0.55mm equalized reach to eliminate measured window recess
+    327.5: 2.45,  # +0.65mm equalized reach to eliminate measured window recess
 }
 CLIP_STEM_OUTER_RECESS_BY_ANGLE = {
     45.0: 0.00,
@@ -108,7 +108,7 @@ TOWER_ARCH_RY = 2.85         # 2.85mm arch radius in Y
 TOWER_ARCH_RZ = 3.00         # 3.00mm arch radius in Z (Apex at Z = 12.59 + 3.00 = 15.59mm, solid 1.25mm roof over bore)
 TOWER_HEIGHT = 14.59         # 14.59mm protrusion above face (Total Z_apex = 15.59mm, cradle center Z = 12.59mm)
 TOWER_Y_BASE_LEN = 6.60      # 6.60mm flared base in Y (Y in [6.250, 12.850]mm, exactly aligned with Bracket 3 top inner wall)
-TOWER_INTERNAL_GAP = 7.70    # 7.70mm internal gap between reinforced tower inner faces (X: 5.40 to 13.10mm)
+TOWER_INTERNAL_GAP = 8.15    # 8.15mm internal gap between reinforced tower inner faces (X: 4.95 to 13.10mm)
 TOWER_WALL_THICK = 1.50      # 1.50mm heavy-duty wall thickness in X (+50% column strength)
 TOWER_BORE_RADIUS = 1.75     # Ø3.50mm teardrop bore for Ø2.80mm shaft pin (0.35mm radial clearance for smooth operation)
 TOWER_BRIDGE_THICK_Y = 1.10  # 1.10mm thick monolithic rear cross-tie bridge (Y in [11.75, 12.85]mm, 0.37mm clearance to hub)
@@ -709,8 +709,8 @@ def create_shaft_support_towers_poly():
     y_min = 6.250
     y_max = 12.850
     
-    x_left_outer = 3.900
-    x_left_inner = 5.400
+    x_left_outer = 3.450
+    x_left_inner = 4.950
     
     x_right_inner = 13.100
     x_right_outer = 14.600
@@ -718,16 +718,16 @@ def create_shaft_support_towers_poly():
     left_box = box(x_left_outer, y_min, x_left_inner, y_max)
     right_box = box(x_right_inner, y_min, x_right_outer, y_max)
     
-    # Front strut (starts at top inner wall of Bracket 3 at Y = 6.250mm, X: 1.90 to 3.90mm)
+    # Front strut (starts at top inner wall of Bracket 3 at Y = 6.250mm, X: 1.90 to 3.45mm)
     strut_front = box(1.90, 6.250, x_left_outer, 7.050)
-    # Rear strut (full height, X: 1.90 to 3.90mm, Y: 11.650 to 12.850mm)
+    # Rear strut (full height, X: 1.90 to 3.45mm, Y: 11.650 to 12.850mm)
     strut_rear = box(1.90, 11.650, x_left_outer, 12.850)
     
     return unary_union([left_box, right_box, strut_front, strut_rear])
 
 def build_clean_shaft_towers_mesh():
     """Builds the heavy-duty shaft support towers and rear cross-tie bridge for Print-in-Place (PIP):
-    - Left Tower: X in [3.90, 5.40] (1.50mm thick).
+    - Left Tower: X in [3.45, 4.95] (1.50mm thick).
     - Right Tower: X in [13.10, 14.60] (1.50mm thick).
     - Fully enclosed 360° journal sockets with a smooth rounded arch crown (Apex Z = 15.59mm, R_z = 3.00mm)
       providing a thick 1.25mm solid roof over the bearing bore.
@@ -780,8 +780,8 @@ def build_clean_shaft_towers_mesh():
     m_raw = trimesh.creation.extrude_polygon(poly_yz, height=TOWER_WALL_THICK)
     verts = m_raw.vertices.copy()
     
-    # Left tower mesh: X in [3.90, 5.40]
-    verts_left = np.column_stack([verts[:, 2] + 3.900, verts[:, 0], verts[:, 1]])
+    # Left tower mesh: X in [3.45, 4.95]
+    verts_left = np.column_stack([verts[:, 2] + 3.450, verts[:, 0], verts[:, 1]])
     mesh_left = trimesh.Trimesh(vertices=verts_left, faces=m_raw.faces.copy(), process=True)
     if mesh_left.volume < 0:
         mesh_left.faces = np.fliplr(mesh_left.faces)
@@ -798,7 +798,7 @@ def build_clean_shaft_towers_mesh():
     # In 45° machine build coords, the vertical front face prints at an exact 45° self-supporting slope,
     # and the rear shifted arch faces upward at 136°-161° without any downward ceilings or droop.
     # Height reaches apex at Z = 14.76mm where Y = 11.75 meets the shifted arch.
-    # Spans X in [3.90, 14.60] (width 10.70mm, penetrating 100% through both 1.50mm tower walls).
+    # Spans X in [3.45, 14.60] (width 11.15mm, penetrating 100% through both 1.50mm tower walls).
     from shapely.geometry.polygon import orient
     
     t_max = np.arccos(max(-1.0, min(1.0, (11.75 - 0.50 - y_shaft) / arch_rx)))
@@ -815,7 +815,7 @@ def build_clean_shaft_towers_mesh():
     
     bridge_poly_yz = orient(Polygon(bridge_pts_yz))
     
-    x_bridge_left = 3.900
+    x_bridge_left = 3.450
     x_bridge_right = 14.600
     bridge_span_x = x_bridge_right - x_bridge_left
     
@@ -837,11 +837,11 @@ def build_clean_shaft_towers_mesh():
 
 def build_left_tower_struts_mesh():
     """Builds the dual triangular buttress struts on the left side of the left tower.
-    - Front Strut: Starts at Y = 6.250mm (top inner wall of Bracket 3) extending to Y = 7.050mm (X: 1.90 to 3.90mm, Z: 1.00 to 10.90mm).
-    - Rear Strut: Triangle at Y: 11.650 to 12.850mm (X: 1.90 to 3.90mm, Z: 1.00 to 10.90mm).
+    - Front Strut: Starts at Y = 6.250mm (top inner wall of Bracket 3) extending to Y = 7.050mm (X: 1.90 to 3.45mm, Z: 1.00 to 10.90mm).
+    - Rear Strut: Triangle at Y: 11.650 to 12.850mm (X: 1.90 to 3.45mm, Z: 1.00 to 10.90mm).
     - Top at Z = 10.90mm leaves +0.30mm vertical clearance below the Z=11.20mm land transition so struts never interfere.
     """
-    x_left_outer = 3.900
+    x_left_outer = 3.450
     z_base = BASE_THICK  # 1.0mm
     z_strut_top = 10.90  # 10.90mm (+0.30mm clear below Z=11.20mm land transition so struts never interfere!)
     
@@ -1517,9 +1517,9 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     
     # 1d. Dedicated Breakaway Support Strut under Print-in-Place Cantilever (Cam Tab)
     # Rises from baseplate floor up to calibrated 0.28mm release gap below the full sweep of the Test 4 / V3 Balanced cam tab.
-    # Cradles downward faces across Y in [-3.95, -1.15]mm with twin lateral tines (X in [5.65, 6.20] and [7.00, 7.55])
+    # Cradles downward faces across Y in [-3.95, -1.15]mm with twin lateral tines (X in [5.40, 5.90] and [6.60, 7.10])
     # and a reinforced 1.10x1.10mm floor neck to eliminate nozzle deflection.
-    cam_c_x = 6.600
+    cam_c_x = 6.250
     cam_c_y = -2.550
     z_floor_cam = 12.110
     
@@ -1553,11 +1553,11 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
         (-1.15, z_cam_fork_base),
     ]
     poly_cam_head_yz = Polygon(pts_cam_tine_yz)
-    cam_tine_w = 0.55
+    cam_tine_w = 0.50
     
     m_cl = trimesh.creation.extrude_polygon(poly_cam_head_yz, height=cam_tine_w)
     v_cl = m_cl.vertices.copy()
-    v_cl_3d = np.column_stack([v_cl[:, 2] + 5.65, v_cl[:, 0], v_cl[:, 1]])
+    v_cl_3d = np.column_stack([v_cl[:, 2] + 5.40, v_cl[:, 0], v_cl[:, 1]])
     cam_tine_l = trimesh.Trimesh(vertices=v_cl_3d, faces=m_cl.faces.copy(), process=True)
     if cam_tine_l.volume < 0:
         cam_tine_l.faces = np.fliplr(cam_tine_l.faces)
@@ -1565,13 +1565,13 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
     
     m_cr = trimesh.creation.extrude_polygon(poly_cam_head_yz, height=cam_tine_w)
     v_cr = m_cr.vertices.copy()
-    v_cr_3d = np.column_stack([v_cr[:, 2] + 7.00, v_cr[:, 0], v_cr[:, 1]])
+    v_cr_3d = np.column_stack([v_cr[:, 2] + 6.60, v_cr[:, 0], v_cr[:, 1]])
     cam_tine_r = trimesh.Trimesh(vertices=v_cr_3d, faces=m_cr.faces.copy(), process=True)
     if cam_tine_r.volume < 0:
         cam_tine_r.faces = np.fliplr(cam_tine_r.faces)
     fin_components.append(cam_tine_r)
     
-    cam_mid_web = trimesh.creation.box([0.80, 1.40, 0.80])
+    cam_mid_web = trimesh.creation.box([0.70, 1.40, 0.80])
     cam_mid_web.apply_translation([cam_c_x, cam_c_y, z_cam_fork_base + 0.40])
     fin_components.append(cam_mid_web)
     

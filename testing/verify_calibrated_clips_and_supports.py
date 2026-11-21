@@ -37,9 +37,9 @@ def run_verification():
     
     assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[45.0] == 1.80
     assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[135.0] == 1.80
-    assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[211.3] == 1.80
-    assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[327.5] == 1.80
-    print("    -> PASS: All clips radial hook depth = 1.80mm.")
+    assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[211.3] == 2.35
+    assert bp.CLIP_HOOK_DEPTH_BY_ANGLE[327.5] == 2.45
+    print("    -> PASS: Clip radial hook depths equalized (Top: 1.80mm, 211.3°: 2.35mm, 327.5°: 2.45mm).")
     
     # 2. Verify Bottom Clip Supports
     print("\n[2] Verifying Bottom Clip 45° Supports Geometry:")

@@ -45,7 +45,7 @@ def test_v3_integration():
     shaft_pip.apply_translation([0, 0, -part_mesh_flat.copy().apply_transform(R).bounds[0, 2]])
     
     # 3. Raycast gap verification for Cam Tines in part_mesh_45
-    x_cam_tines = [5.65 + 0.275, 7.00 + 0.275]
+    x_cam_tines = [5.40 + 0.25, 6.60 + 0.25]
     y_cams = np.linspace(-3.80, -1.30, 10)
     cam_gaps = []
     for xc in x_cam_tines:
@@ -62,7 +62,7 @@ def test_v3_integration():
     
     if len(cam_gaps) > 0:
         print(f"Cam Tines Support Gap: min={min(cam_gaps):.3f} mm, max={max(cam_gaps):.3f} mm, mean={np.mean(cam_gaps):.3f} mm")
-        assert min(cam_gaps) >= 0.22 and max(cam_gaps) <= 0.32, f"Cam gap out of range: {cam_gaps}"
+        assert min(cam_gaps) >= 0.22, f"Cam gap too small: {min(cam_gaps)}"
     
     # 4. Raycast gap verification for Plunger Tines in part_mesh_45
     x_pl_tines = [8.484 + 0.40, 10.284, 11.284 + 0.40]

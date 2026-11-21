@@ -23,25 +23,35 @@ shaft_tilted.apply_translation([0, 0, -z_min])
 # Build cam support tines exactly as in build_part.py
 z_cam_fork_base = 16.00
 pts_cam_tine_yz = [
-    (-3.60, z_cam_fork_base),
-    (-3.60, 20.123),        # 0.28mm release gap under nose curve (Z'_cam = 20.403)
-    (-3.20, 19.952),        # 0.28mm release gap under lower blend (Z'_cam = 20.232)
-    (-2.40, 19.895),        # 0.28mm release gap under underside saddle (Z'_cam = 20.175)
-    (-1.60, 20.069),        # 0.28mm release gap under mid beam (Z'_cam = 20.349)
-    (-1.00, 20.232),        # 0.28mm release gap under rear transition (Z'_cam = 20.512)
-    (-1.00, z_cam_fork_base),
+    (-3.95, z_cam_fork_base),
+    (-3.95, 19.793),        # calibrated 0.28mm release gap under forward nose
+    (-3.75, 19.611),
+    (-3.55, 19.503),
+    (-3.35, 19.430),
+    (-3.15, 19.406),
+    (-2.95, 19.382),
+    (-2.75, 19.358),
+    (-2.55, 19.334),        # lowest saddle point
+    (-2.35, 19.414),
+    (-2.15, 19.494),
+    (-1.95, 19.574),
+    (-1.75, 19.654),
+    (-1.55, 19.734),
+    (-1.35, 19.814),
+    (-1.15, 19.894),        # rear blend
+    (-1.15, z_cam_fork_base),
 ]
 poly_cam_head_yz = Polygon(pts_cam_tine_yz)
-cam_tine_w = 0.55
+cam_tine_w = 0.50
 
 m_cl = trimesh.creation.extrude_polygon(poly_cam_head_yz, height=cam_tine_w)
 v_cl = m_cl.vertices.copy()
-v_cl_3d = np.column_stack([v_cl[:, 2] + 5.65, v_cl[:, 0], v_cl[:, 1]])
+v_cl_3d = np.column_stack([v_cl[:, 2] + 5.40, v_cl[:, 0], v_cl[:, 1]])
 cam_tine_l = trimesh.Trimesh(vertices=v_cl_3d, faces=m_cl.faces.copy(), process=True)
 
 m_cr = trimesh.creation.extrude_polygon(poly_cam_head_yz, height=cam_tine_w)
 v_cr = m_cr.vertices.copy()
-v_cr_3d = np.column_stack([v_cr[:, 2] + 7.00, v_cr[:, 0], v_cr[:, 1]])
+v_cr_3d = np.column_stack([v_cr[:, 2] + 6.60, v_cr[:, 0], v_cr[:, 1]])
 cam_tine_r = trimesh.Trimesh(vertices=v_cr_3d, faces=m_cr.faces.copy(), process=True)
 
 cam_support = trimesh.util.concatenate([cam_tine_l, cam_tine_r])
