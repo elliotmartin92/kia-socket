@@ -1378,7 +1378,7 @@ def build_insert_backside_breakaway_supports_mesh():
             
     return trimesh.util.concatenate(prongs)
 
-def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft=True):
+def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft=True, shaft_mesh=None):
     """Generates the 45-degree tilted main part with in-place slit shrouds, baked-in breakaway Support Fins,
     and Print-in-Place (PIP) captive safety lever with dedicated breakaway plunger, cantilever & lever shaft support struts:
     - Tilted 45 deg about X: Re-orients layer planes so inter-layer cleavage failure on the half moon is eliminated.
@@ -1767,8 +1767,9 @@ def build_45deg_supported_part_mesh(base_mesh, base_poly=None, include_pip_shaft
         
     if include_pip_shaft:
         try:
-            from build_shaft import build_shaft_rocker_mesh
-            shaft_mesh = build_shaft_rocker_mesh(in_assembly_coords=True, with_supports=False)
+            if shaft_mesh is None:
+                from build_shaft import build_shaft_rocker_mesh
+                shaft_mesh = build_shaft_rocker_mesh(in_assembly_coords=True, with_supports=False)
             shaft_tilted = shaft_mesh.copy().apply_transform(R)
             shaft_tilted.apply_translation([0, 0, -z_min])
             combined = trimesh.util.concatenate([combined, shaft_tilted])

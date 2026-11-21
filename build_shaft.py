@@ -176,12 +176,36 @@ KINEMATIC_VARIANTS = {
             (8.20, 9.80),
             (Y_AXLE, Z_AXLE - HUB_DIAMETER/2.0)
         ]
+    },
+    'v6_bulked_cam': {
+        'id': 6,
+        'notches': 6,
+        'name': 'Variant 6: Bulked Upper Cam Ramp (Canonical Production Profile - Pt 4 Anchored at Y=2.95, Z=8.10)',
+        'plunger_y': 10.95,
+        'cam_apex': (2.45, 7.55),
+        'cam_pts': [
+            (Y_AXLE, Z_AXLE + HUB_DIAMETER/2.0),
+            (6.75, 13.50),
+            (4.40, 11.80),
+            (3.60, 10.40),
+            (3.15, 9.40),
+            (2.95, 8.10),  # Anchored: Zero added material at or below brass throat clearance
+            (2.45, 7.55),  # Calibrated nose apex (+0.35mm air gap to seated brass throat flare)
+            (2.58, 7.05),
+            (3.00, 6.40),
+            (4.20, 5.80),
+            (5.80, 5.80),
+            (7.20, 7.80),
+            (8.20, 9.80),
+            (Y_AXLE, Z_AXLE - HUB_DIAMETER/2.0)
+        ]
     }
 }
 
 CAM_PROFILES = {k: v['cam_pts'] for k, v in KINEMATIC_VARIANTS.items()}
-CAM_PROFILES['v1_nominal'] = KINEMATIC_VARIANTS['v3_nominal']['cam_pts']  # Alias
-ACTIVE_VARIANT = 'v3_nominal'
+CAM_PROFILES['v1_nominal'] = KINEMATIC_VARIANTS['v6_bulked_cam']['cam_pts']  # Alias
+CAM_PROFILES['canonical'] = KINEMATIC_VARIANTS['v6_bulked_cam']['cam_pts']
+ACTIVE_VARIANT = 'v6_bulked_cam'
 ACTIVE_CAM_PROFILE = ACTIVE_VARIANT
 
 def build_shaft_rocker_mesh(
@@ -195,14 +219,16 @@ def build_shaft_rocker_mesh(
     cam_w_x=CAM_WIDTH_X,
     cam_x_c=CAM_X_CENTER,
     cam_pts=None,
+    variant=None,
     in_assembly_coords=True,
     with_supports=True,
     return_subparts=False
 ):
+    sel_var = variant or ACTIVE_VARIANT
     if plunger_y_center is None:
-        plunger_y_center = KINEMATIC_VARIANTS[ACTIVE_VARIANT]['plunger_y']
+        plunger_y_center = KINEMATIC_VARIANTS[sel_var]['plunger_y']
     if cam_pts is None:
-        cam_pts = KINEMATIC_VARIANTS[ACTIVE_VARIANT]['cam_pts']
+        cam_pts = KINEMATIC_VARIANTS[sel_var]['cam_pts']
     """
     Builds the enlarged heavy-duty 3-rib 3D mesh of the shaft/rocker mechanism.
     
@@ -445,7 +471,7 @@ x_c = {X_TOWER_CENTER};
 y_axle = {Y_AXLE};
 z_axle = {Z_AXLE};
 
-// 2D Profile: High-Sensitivity Direct Belly Cam (Test 4: V3 Balanced Nominal - WINNER)
+// 2D Profile: Bulked Upper Cam Ramp (Canonical Production Profile - Pt 4 Anchored at Y=2.95, Z=8.10)
 poly_cam_pts = [
     {pts_str}
 ];
