@@ -310,6 +310,17 @@ You have two options:
 
 ---
 
+### Step 5: Functional Testing
+Once fully assembled with the PCB:
+1. **Insert a Plug**: Push an AC plug into the receptacle. You should hear a clear, audible click as the button actuates.
+2. **Test Multiple Times**: Test insertion several times, ideally with both a **polarized** and a **non-polarized plug**. The click should be audible on every single insertion.
+3. **Troubleshooting (No Click Heard)**:
+   If the switch is not clicking on plug insertion, check these two common culprits:
+   - **Brass terminal blades are not fully inserted into their receivers**: If the blades aren't driven all the way in, the sub-housing won't sit at the right depth relative to the PCB switch. Use a flathead screwdriver to firmly push each blade home (Step 4 Option B).
+   - **Brass contacts are not flush on the floor of the plate**: Check that both brass contact stampings are pushed all the way down onto the $1.15\text{ mm}$ floor ribs and locked under the bracket retaining lips. If a contact is riding high, the plug blade won't push the cam ramp far enough to trip the switch.
+
+---
+
 ## 5. Key Scripts & Code Architecture
 
 - **`build_part.py`**:
